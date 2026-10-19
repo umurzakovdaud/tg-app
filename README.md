@@ -2,7 +2,7 @@
 
 Персонализированный конструктор недельного рациона и точной корзины покупок под заданный бюджет, размер семьи, аллергии и цели питания. 
 
-Проект разработан в формате **Telegram Mini App (TMA)** + **Веб-сайт**, полностью готов к бесплатному развертыванию на **Vercel** и подключению Telegram-бота.
+Проект разработан в формате **Telegram Mini App (TMA)** + **Веб-сайт** и оптимизирован для бесплатного размещения на **Render.com**.
 
 ---
 
@@ -33,77 +33,73 @@
 ## 📁 Структура проекта
 
 ```text
-├── api/
-│   └── index.py            # Vercel Serverless Function (Webhook & API)
+├── main.py                 # Основной сервер (Flask + встроенный бот для Render)
+├── render.yaml             # Blueprint конфигурация для Render.com
+├── requirements.txt        # Flask, Gunicorn
 ├── data/
 │   └── recipes.json        # База сбалансированных быстрых рецептов (<30 мин)
 ├── public/
 │   ├── index.html          # Главная страница Web App / Telegram Mini App
 │   ├── app.js              # Реактивная логика, генератор меню, умная корзина
 │   ├── style.css           # Адаптивные стили и тема Telegram
-│   └── recipes.json        # Статический каталог рецептов для хостинга
-├── bot_local.py            # Локальный запуск бота через Polling (для тестирования)
-├── vercel.json             # Конфигурация деплоя Vercel (маршрутизация и функции)
-├── requirements.txt        # Python зависимости для Vercel
+│   └── recipes.json        # Статический каталог рецептов
+├── bot_local.py            # Локальный запуск бота для тестов
 ├── .env.example            # Пример переменных окружения
 └── README.md
 ```
 
 ---
 
-## 🚀 Быстрый запуск и локальное тестирование
+## 🚀 Пошаговый деплой на Render.com (2 минуты)
 
-### 1. Просмотр веб-приложения / Mini App в браузере
-Запустите локальный сервер из папки проекта:
+### Шаг 1: Загрузите код на GitHub
+В терминале вашей папки проекта выполните:
 ```bash
-python3 -m http.server 3000 --directory public
+git init
+git add .
+git commit -m "Deploy Smart Meal Planner to Render"
+git branch -M main
+git remote add origin https://github.com/ВАШ_АККАУНТ/ВАШ_РЕПОЗИТОРИЙ.git
+git push -u origin main
 ```
-Откройте в браузере: **`http://localhost:3000`**
 
 ---
 
-### 2. Локальный запуск Telegram-бота (через Polling)
-1. Создайте файл `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Откройте `.env` и укажите ваш токен от `@BotFather`:
-   ```env
-   TELEGRAM_BOT_TOKEN=123456789:AA...
-   WEBAPP_URL=http://localhost:3000   # Либо URL после деплоя на Vercel
-   ```
-3. Запустите бота:
-   ```bash
-   python3 bot_local.py
-   ```
-Напишите боту `/start` в Telegram!
+### Шаг 2: Создайте Web Service на Render
+1. Перейдите на [dashboard.render.com](https://dashboard.render.com) и войдите (через GitHub).
+2. Нажмите синюю кнопку **«New +»** в правом верхнем углу ➔ выберите **«Web Service»**.
+3. Выберите ваш репозиторий из списка.
+4. Заполните настройки (большинство определится автоматически благодаря `render.yaml`):
+   - **Name**: `smart-meal-planner` (или любое имя)
+   - **Language**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn --workers 1 --threads 4 --timeout 60 main:app`
+   - **Instance Type**: `Free`
+5. В блоке **Environment Variables** добавьте:
+   - `TELEGRAM_BOT_TOKEN` = токен вашего бота от `@BotFather`
+   *(Параметр `WEBAPP_URL` указывать необязательно — Render сам автоматически передаст свой домен через `RENDER_EXTERNAL_URL`)*
+6. Нажмите **«Deploy Web Service»**.
+
+Через ~1 минуту ваш сервис запустится:
+- Сайт будет доступен по адресу: `https://smart-meal-planner.onrender.com`
+- Telegram-бот начнет отвечать на `/start` и присылать кнопку открытия Mini App!
 
 ---
 
-## ☁️ Развертывание на Vercel (Пошаговая инструкция)
-
-### Способ 1: Через GitHub (Самый простой)
-1. Создайте репозиторий на [GitHub](https://github.com) и отправьте код:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: Smart Meal Planner"
-   git remote add origin https://github.com/ВАШ_АККАУНТ/ВАШ_РЕПОЗИТОРИЙ.git
-   git branch -M main
-   git push -u origin main
-   ```
-2. Зайдите на [vercel.com](https://vercel.com) и нажмите **«Add New...» -> «Project»**.
-3. Выберите ваш репозиторий из GitHub.
-4. В разделе **Environment Variables** добавьте:
-   - `TELEGRAM_BOT_TOKEN` = токен вашего бота от `@BotFather`.
-   - `WEBAPP_URL` = ваш будущий домен Vercel (например, `https://smart-meal-planner.vercel.app`).
-5. Нажмите **Deploy**. Через 20 секунд сайт будет онлайн!
-
-### Способ 2: Настройка кнопки Mini App в @BotFather
-Чтобы приложение открывалось прямо внутри Telegram по кнопке у поля ввода:
+### Шаг 3: Настройте кнопку меню в @BotFather (для красивой кнопки у поля ввода)
 1. Откройте `@BotFather` в Telegram.
-2. Введите команду `/mybots` и выберите вашего бота.
-3. Перейдите в **Bot Settings** -> **Menu Button** -> **Configure menu button**.
-4. Отправьте URL вашего сайта на Vercel (например, `https://smart-meal-planner.vercel.app`).
+2. Отправьте `/mybots` и выберите вашего бота.
+3. Нажмите **Bot Settings** ➔ **Menu Button** ➔ **Configure menu button**.
+4. Отправьте URL вашего сайта на Render (например, `https://smart-meal-planner.onrender.com`).
 5. Введите название кнопки: `🥗 Меню и Корзина`.
-6. Готово! Теперь у всех пользователей прямо в чате с ботом будет кнопка для открытия приложения!
+6. Готово! Теперь у пользователей прямо в поле ввода чата будет кнопка открытия приложения.
+
+---
+
+## 💻 Локальный запуск на компьютере
+
+### Просмотр сайта в браузере:
+```bash
+python3 main.py
+```
+Откройте в браузере: `http://localhost:5000`

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: smart-meal-planner
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --threads 4 --timeout 60 main:app
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: WEBAPP_URL
+        sync: false

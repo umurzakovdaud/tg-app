@@ -1,2 +1,2 @@
-# Requirements for Vercel Python Serverless
-# Python standard library is used for zero-dependency execution.
+Flask>=3.0.0
+gunicorn>=21.2.0
