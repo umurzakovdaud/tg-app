@@ -162,54 +162,181 @@ const EXERCISES_DB = [
     muscle_ru: "Трицепс",
     equipment: "Блок",
     tips: "В нижней точке разводите концы каната в стороны для максимального сокращения."
+  },
+
+  // Изоляция ног и икры
+  {
+    id: "ex_legs_5",
+    name: "Сгибания ног в тренажере лежа",
+    muscle: "legs",
+    muscle_ru: "Бицепс бедра",
+    equipment: "Тренажер",
+    tips: "Не отрывайте таз от скамьи, задержитесь на 1 секунду в точке пикового сокращения."
+  },
+  {
+    id: "ex_legs_6",
+    name: "Разгибания ног в тренажере сидя",
+    muscle: "legs",
+    muscle_ru: "Квадрицепс",
+    equipment: "Тренажер",
+    tips: "Отрегулируйте валик над голеностопом, выпрямляйте ноги мощно, но без рывков."
+  },
+  {
+    id: "ex_legs_7",
+    name: "Подъем на носки стоя на возвышении",
+    muscle: "legs",
+    muscle_ru: "Икроножные",
+    equipment: "Тренажер / Ступенька",
+    tips: "Опускайте пятки максимально глубоко для растяжения, в верхней точке вставайте на носки."
+  },
+
+  // Пресс и кор (Core)
+  {
+    id: "ex_core_1",
+    name: "Скручивания на пресс на коврике",
+    muscle: "core",
+    muscle_ru: "Прямая мышца живота",
+    equipment: "Коврик",
+    tips: "Прижмите поясницу к полу, скручивайте корпус ребрами к тазу, делая выдох."
+  },
+  {
+    id: "ex_core_2",
+    name: "Планка на предплечьях",
+    muscle: "core",
+    muscle_ru: "Мышцы кора",
+    equipment: "Собственный вес",
+    tips: "Тело в одну прямую линию, напрягите ягодицы и пресс, не прогибайтесь в пояснице."
+  },
+  {
+    id: "ex_core_3",
+    name: "Подъем ног в висе на перекладине",
+    muscle: "core",
+    muscle_ru: "Нижняя часть пресса",
+    equipment: "Турник",
+    tips: "Подкручивайте таз вверх, а не просто поднимайте ноги за счет сгибателей бедра."
   }
 ];
 
-// Default Program Splits
+// Programs Database — Flagship Onlyfits Upper/Lower Split
 const PROGRAMS = {
-  gym_3: {
-    title: "Классический сплит (Зал)",
+  upper_lower_gym_4: {
+    title: "Верх / Низ (4 дня, Зал)",
     days: [
       {
         dayNum: 1,
-        title: "Грудь + Трицепс",
-        subtitle: "5 упражнений • ~50 минут",
-        exercises: ["ex_chest_1", "ex_chest_2", "ex_chest_3", "ex_arms_2", "ex_arms_4"]
+        title: "Верх тела A",
+        subtitle: "Грудь, спина, плечи, руки",
+        exercises: ["ex_chest_1", "ex_back_2", "ex_chest_2", "ex_back_3", "ex_arms_1", "ex_arms_4"]
       },
       {
         dayNum: 2,
-        title: "Спина + Бицепс",
-        subtitle: "5 упражнений • ~50 минут",
-        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_arms_1", "ex_arms_3"]
+        title: "Низ тела A",
+        subtitle: "Квадрицепс, бицепс бедра, пресс",
+        exercises: ["ex_legs_1", "ex_legs_3", "ex_legs_2", "ex_legs_5", "ex_legs_7", "ex_core_1"]
       },
       {
         dayNum: 3,
-        title: "Ноги + Плечи",
-        subtitle: "5 упражнений • ~55 минут",
-        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_shoulders_1", "ex_shoulders_2"]
+        title: "Верх тела B",
+        subtitle: "Ширина спины, дельты, руки",
+        exercises: ["ex_back_1", "ex_shoulders_1", "ex_chest_3", "ex_back_4", "ex_shoulders_2", "ex_arms_3"]
+      },
+      {
+        dayNum: 4,
+        title: "Низ тела B",
+        subtitle: "Выпады, разгибания, кор, пресс",
+        exercises: ["ex_legs_4", "ex_legs_3", "ex_legs_6", "ex_legs_5", "ex_core_3", "ex_core_2"]
       }
     ]
   },
-  home_3: {
-    title: "Функциональный тренинг (Дом)",
+  upper_lower_gym_3: {
+    title: "Верх / Низ (3 дня, Зал)",
     days: [
       {
         dayNum: 1,
-        title: "Верх тела",
-        subtitle: "Отжимания, тяги с гантелями, плечи",
-        exercises: ["ex_chest_2", "ex_back_2", "ex_shoulders_1", "ex_arms_3"]
+        title: "Верх тела A",
+        subtitle: "Грудь, спина, плечи, руки",
+        exercises: ["ex_chest_1", "ex_back_2", "ex_chest_2", "ex_back_3", "ex_arms_1", "ex_arms_4"]
       },
       {
         dayNum: 2,
         title: "Низ тела",
-        subtitle: "Приседания, выпады, румынская тяга",
-        exercises: ["ex_legs_1", "ex_legs_3", "ex_legs_4"]
+        subtitle: "Приседания, румынская тяга, икры, пресс",
+        exercises: ["ex_legs_1", "ex_legs_3", "ex_legs_2", "ex_legs_5", "ex_legs_7", "ex_core_1"]
       },
       {
         dayNum: 3,
-        title: "Full Body & Руки",
-        subtitle: "Все тело + плечи и руки",
-        exercises: ["ex_chest_3", "ex_shoulders_2", "ex_arms_1", "ex_arms_4"]
+        title: "Верх тела B",
+        subtitle: "Ширина спины, дельты, руки",
+        exercises: ["ex_back_1", "ex_shoulders_1", "ex_chest_3", "ex_back_4", "ex_shoulders_2", "ex_arms_3"]
+      }
+    ]
+  },
+  upper_lower_home_3: {
+    title: "Верх / Низ (3 дня, Дом)",
+    days: [
+      {
+        dayNum: 1,
+        title: "Верх тела (Дом)",
+        subtitle: "Отжимания, тяги с гантелями, плечи",
+        exercises: ["ex_chest_2", "ex_back_2", "ex_shoulders_1", "ex_arms_1", "ex_arms_4"]
+      },
+      {
+        dayNum: 2,
+        title: "Низ тела (Дом)",
+        subtitle: "Приседания, выпады, пресс",
+        exercises: ["ex_legs_1", "ex_legs_4", "ex_legs_3", "ex_core_1", "ex_core_2"]
+      },
+      {
+        dayNum: 3,
+        title: "Верх тела B (Дом)",
+        subtitle: "Плечи, спина, отжимания на брусьях",
+        exercises: ["ex_chest_3", "ex_shoulders_2", "ex_back_1", "ex_arms_3"]
+      }
+    ]
+  },
+  push_pull_legs: {
+    title: "Push / Pull / Legs (3 дня, Зал)",
+    days: [
+      {
+        dayNum: 1,
+        title: "Push (Грудь, Плечи, Трицепс)",
+        subtitle: "Жимы, разводки, трицепс",
+        exercises: ["ex_chest_1", "ex_chest_2", "ex_shoulders_1", "ex_shoulders_2", "ex_arms_4"]
+      },
+      {
+        dayNum: 2,
+        title: "Pull (Спина, Бицепс, Задняя дельта)",
+        subtitle: "Тяги, подтягивания, бицепс",
+        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_shoulders_3", "ex_arms_1"]
+      },
+      {
+        dayNum: 3,
+        title: "Legs (Ноги и Пресс)",
+        subtitle: "Приседания, румынская тяга, икры",
+        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_legs_7", "ex_core_1"]
+      }
+    ]
+  },
+  full_body: {
+    title: "Full Body (3 дня)",
+    days: [
+      {
+        dayNum: 1,
+        title: "Full Body A",
+        subtitle: "Все тело: грудь, квадрицепс, спина",
+        exercises: ["ex_legs_1", "ex_chest_1", "ex_back_2", "ex_shoulders_2", "ex_arms_1"]
+      },
+      {
+        dayNum: 2,
+        title: "Full Body B",
+        subtitle: "Все тело: бицепс бедра, плечи, спина",
+        exercises: ["ex_legs_3", "ex_chest_2", "ex_back_3", "ex_shoulders_1", "ex_arms_4"]
+      },
+      {
+        dayNum: 3,
+        title: "Full Body C",
+        subtitle: "Все тело: выпады, брусья, подтягивания",
+        exercises: ["ex_legs_4", "ex_chest_3", "ex_back_1", "ex_arms_3", "ex_core_1"]
       }
     ]
   }
@@ -219,11 +346,12 @@ const PROGRAMS = {
 const state = {
   profile: {
     goal: "muscle_gain",
+    split: "upper_lower",
     weight: 74.5,
     height: 180,
     age: 25,
     location: "gym",
-    daysPerWeek: 3,
+    daysPerWeek: 4,
     streak: 3
   },
   selectedDayIndex: 0,
@@ -517,8 +645,15 @@ function renderProfile() {
 }
 
 function getActiveProgram() {
-  const key = `${state.profile.location}_3`;
-  return PROGRAMS[key] || PROGRAMS.gym_3;
+  const { split, location, daysPerWeek } = state.profile;
+  if (split === "push_pull_legs") return PROGRAMS.push_pull_legs;
+  if (split === "full_body") return PROGRAMS.full_body;
+
+  // Upper / Lower (Стандарт Onlyfits)
+  if (location === "home") {
+    return PROGRAMS.upper_lower_home_3;
+  }
+  return daysPerWeek === 4 ? PROGRAMS.upper_lower_gym_4 : PROGRAMS.upper_lower_gym_3;
 }
 
 // Render Week Program Grid
@@ -992,6 +1127,9 @@ function openProfileModal() {
   document.getElementById("inputHeight").value = state.profile.height;
   document.getElementById("inputAge").value = state.profile.age;
   document.getElementById("userGoalSelect").value = state.profile.goal;
+  if (document.getElementById("userSplitSelect")) {
+    document.getElementById("userSplitSelect").value = state.profile.split || "upper_lower";
+  }
   document.getElementById("profileModal").classList.remove("hidden");
   triggerHaptic("light");
 }
@@ -1005,12 +1143,16 @@ function saveProfileSettings() {
   state.profile.height = parseFloat(document.getElementById("inputHeight").value) || 180;
   state.profile.age = parseInt(document.getElementById("inputAge").value, 10) || 25;
   state.profile.goal = document.getElementById("userGoalSelect").value;
+  if (document.getElementById("userSplitSelect")) {
+    state.profile.split = document.getElementById("userSplitSelect").value;
+  }
 
+  state.selectedDayIndex = 0;
   closeProfileModal();
   saveState();
   renderAll();
   triggerHaptic("success");
-  showToast("Параметры профиля сохранены!");
+  showToast("Параметры программы сохранены!");
 }
 
 function renderMeasurements() {
