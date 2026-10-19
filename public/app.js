@@ -9,7 +9,7 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь",
     equipment: "Штанга",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-bench-press-workout-43407-large.mp4",
+    github_id: "Barbell_Bench_Press_-_Medium_Grip",
     steps: [
       "Лягте на скамью, сведите лопатки и прижмите их. Ноги плотно уприте в пол.",
       "Возьмитесь за гриф хватом чуть шире плеч. Снимите штангу со стоек на выпрямленные руки.",
@@ -31,7 +31,7 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь (Верх)",
     equipment: "Гантели",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    github_id: "Incline_Dumbbell_Press",
     steps: [
       "Установите скамью под углом 30 градусов. Закиньте гантели с колен в исходное положение.",
       "Сведите лопатки, грудь подайте вперед.",
@@ -52,7 +52,7 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь / Трицепс",
     equipment: "Брусья",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-young-man-doing-push-ups-in-the-gym-43401-large.mp4",
+    github_id: "Dips_-_Chest_Version",
     steps: [
       "Примите упор на брусьях на прямых руках. Слегка наклоните корпус вперед для акцента на грудные мышцы.",
       "На вдохе медленно опускайтесь вниз, разводя локти в стороны до прямого угла в суставе.",
@@ -72,7 +72,7 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь",
     equipment: "Блочный тренажер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-bench-press-workout-43407-large.mp4",
+    github_id: "Cable_Crossover",
     steps: [
       "Возьмите рукояти верхних блоков, сделайте шаг вперед и слегка наклоните корпус.",
       "Руки держите чуть согнутыми в локтях и зафиксируйте этот угол на протяжении всего сета.",
@@ -95,7 +95,7 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Турник",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    github_id: "Pullups",
     steps: [
       "Возьмитесь за перекладину хватом шире плеч. Полностью повисните, вытянув широчайшие мышцы.",
       "Опустите лопатки вниз и направьте локти к бокам корпуса.",
@@ -116,7 +116,7 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Штанга",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Bent_Over_Barbell_Row",
     steps: [
       "Наклоните корпус вперед под углом ~45°, слегка согнув колени. Спина строго прямая с естественным прогибом.",
       "Возьмите гриф хватом на ширине плеч.",
@@ -137,7 +137,7 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Блочный тренажер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    github_id: "Wide-Grip_Lat_Pulldown",
     steps: [
       "Отрегулируйте упорные валики под бедра. Сядьте ровно и возьмитесь широким хватом за рукоять.",
       "Слегка отклоните корпус назад (~10-15°), расправьте грудь.",
@@ -158,7 +158,7 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Блочный тренажер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    github_id: "Seated_Cable_Rows",
     steps: [
       "Сядьте на скамью, упритесь ногами в подставки, слегка согнув колени.",
       "Выпрямите спину, возьмитесь за рукоять нейтральным хватом.",
@@ -181,7 +181,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Ноги",
     equipment: "Штанга",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Barbell_Squat",
     steps: [
       "Положите гриф на верх трапеций (не на шею!). Поставьте стопы на ширине плеч, носки слегка разведены.",
       "Направьте взгляд вперед, напрягите пресс.",
@@ -203,7 +203,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Ноги",
     equipment: "Тренажер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Leg_Press",
     steps: [
       "Плотно прижмите спину и поясницу к креслу тренажера. Поставьте стопы на платформу на ширине плеч.",
       "Снимите фиксаторы платформы.",
@@ -224,7 +224,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Бицепс бедра / Ягодицы",
     equipment: "Гантели",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Romanian_Deadlift",
     steps: [
       "Встаньте прямо, гантели держите перед бедрами. Стопы на ширине таза, колени слегка подсогнуты.",
       "На вдохе отводите таз назад, ведя гантели строго вдоль голеней вниз.",
@@ -245,7 +245,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Ноги / Ягодицы",
     equipment: "Гантели",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Dumbbell_Lunges",
     steps: [
       "Возьмите гантели в руки вдоль корпуса. Сделайте широкий шаг вперед одной ногой.",
       "На вдохе опускайтесь строго вниз до прямого угла в переднем колене.",
@@ -266,7 +266,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Бицепс бедра",
     equipment: "Тренажер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Lying_Leg_Curls",
     steps: [
       "Лягте на скамью, заведите валик под ахилловы сухожилия (чуть ниже икр).",
       "Прижмите таз к подушке и возьмитесь за рукоятки.",
@@ -287,7 +287,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Квадрицепс",
     equipment: "Тренажер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Leg_Extensions",
     steps: [
       "Сядьте в тренажер, прижмите спину к спинке. Валик находится на уровне нижней части голени.",
       "Возьмитесь за боковые рукояти.",
@@ -308,7 +308,7 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Икроножные",
     equipment: "Тренажер / Ступенька",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    github_id: "Standing_Calf_Raises",
     steps: [
       "Встаньте носками на ступеньку платформы, пятки свободно свисают вниз.",
       "На вдохе опустите пятки максимально низко, почувствовав глубокое растяжение в икрах.",
@@ -330,7 +330,7 @@ const EXERCISES_DB = [
     muscle: "shoulders",
     muscle_ru: "Плечи",
     equipment: "Гантели",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    github_id: "Dumbbell_Shoulder_Press",
     steps: [
       "Установите спинку скамьи под углом 80-85 градусов. Поднимите гантели к плечам, ладони смотрят вперед.",
       "Локти направлены слегка вперед, а не строго в стороны.",
@@ -351,7 +351,7 @@ const EXERCISES_DB = [
     muscle: "shoulders",
     muscle_ru: "Средняя дельта",
     equipment: "Гантели",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    github_id: "Side_Lateral_Raise",
     steps: [
       "Встаньте ровно, слегка наклоните корпус вперед (~5°). Гантели перед бедрами, локти чуть согнуты.",
       "На выдохе поднимите руки через стороны до уровня плеч, ведя движение локтями.",
@@ -372,7 +372,7 @@ const EXERCISES_DB = [
     muscle: "shoulders",
     muscle_ru: "Задняя дельта",
     equipment: "Кроссовер",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    github_id: "Face_Pull",
     steps: [
       "Установите канатную рукоять на уровне глаз в кроссовере. Возьмитесь за концы каната нейтральным хватом.",
       "Сделайте шаг назад, напрягите пресс.",
@@ -395,7 +395,7 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Бицепс",
     equipment: "Штанга / EZ-гриф",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    github_id: "Barbell_Curl",
     steps: [
       "Встаньте прямо, возьмите штангу хватом снизу на ширине плеч.",
       "Прижмите локти к бокам корпуса и зафиксируйте их неподвижно.",
@@ -416,7 +416,7 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Трицепс",
     equipment: "Штанга",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-bench-press-workout-43407-large.mp4",
+    github_id: "EZ-Bar_Skullcrusher",
     steps: [
       "Лягте на горизонтальную скамью, поднимите EZ-гриф над грудью.",
       "Слегка отклоните руки назад от вертикали на 15 градусов и зафиксируйте локти.",
@@ -437,7 +437,7 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Брахиалис / Бицепс",
     equipment: "Гантели",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    github_id: "Alternate_Hammer_Curl",
     steps: [
       "Держите гантели в опущенных руках нейтральным хватом (ладони обращены друг к другу).",
       "Прижмите локти к корпусу.",
@@ -458,7 +458,7 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Трицепс",
     equipment: "Блок",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    github_id: "Triceps_Pushdown",
     steps: [
       "Закрепите канат на верхнем блоке, возьмитесь за концы каната.",
       "Прижмите локти к бокам, наклоните корпус вперед на 10 градусов.",
@@ -481,7 +481,7 @@ const EXERCISES_DB = [
     muscle: "core",
     muscle_ru: "Прямая мышца живота",
     equipment: "Коврик",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-young-man-doing-push-ups-in-the-gym-43401-large.mp4",
+    github_id: "Crunches",
     steps: [
       "Лягте на спину, согните ноги в коленях, стопы на полу. Поясницу плотно прижмите к коврику.",
       "Руки держите у висков (не сцепляйте за головой!).",
@@ -502,7 +502,7 @@ const EXERCISES_DB = [
     muscle: "core",
     muscle_ru: "Мышцы кора",
     equipment: "Собственный вес",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-young-man-doing-push-ups-in-the-gym-43401-large.mp4",
+    github_id: "Plank",
     steps: [
       "Встаньте в упор на предплечья, локти строго под плечевыми суставами.",
       "Вытяните ноги назад, опираясь на носки. Тело натянуто как струна в одну линию от затылка до пяток.",
@@ -523,7 +523,7 @@ const EXERCISES_DB = [
     muscle: "core",
     muscle_ru: "Нижняя часть пресса",
     equipment: "Турник",
-    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    github_id: "Hanging_Leg_Raise",
     steps: [
       "Повисните на турнике на прямых руках, стабилизируйте корпус от раскачивания.",
       "На выдохе поднимите колени (или прямые ноги) к груди, обязательно подкручивая таз вверх.",
@@ -1449,15 +1449,63 @@ function openExerciseVideoModal(exerciseId) {
   document.getElementById("videoExerciseMuscle").textContent = ex.muscle_ru;
   document.getElementById("videoEquipmentTag").textContent = `Оборудование: ${ex.equipment}`;
 
-  // Video element
-  const video = document.getElementById("exerciseVideoElement");
-  const videoSrc = document.getElementById("videoSourceMp4");
-  
-  if (ex.video_url) {
-    videoSrc.src = ex.video_url;
-    video.load();
-    video.play().catch(() => {});
+  // GitHub Exercise DB Images
+  const ghId = ex.github_id || "Barbell_Bench_Press_-_Medium_Grip";
+  const img0 = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ghId}/0.jpg`;
+  const img1 = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ghId}/1.jpg`;
+
+  // Preload images
+  const p0 = new Image(); p0.src = img0;
+  const p1 = new Image(); p1.src = img1;
+
+  let currentPhase = 0;
+  const imgElement = document.getElementById("exercisePhaseImage");
+  const btn0 = document.getElementById("phaseBtn0");
+  const btn1 = document.getElementById("phaseBtn1");
+
+  function setPhase(phase) {
+    currentPhase = phase;
+    imgElement.style.opacity = "0.75";
+    setTimeout(() => {
+      imgElement.src = phase === 0 ? img0 : img1;
+      imgElement.style.opacity = "1";
+    }, 80);
+
+    if (phase === 0) {
+      btn0.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500 text-dark-950 shadow-sm transition";
+      btn1.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-dark-800/90 text-slate-400 hover:text-white border border-dark-700/50 transition";
+    } else {
+      btn1.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500 text-dark-950 shadow-sm transition";
+      btn0.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold bg-dark-800/90 text-slate-400 hover:text-white border border-dark-700/50 transition";
+    }
   }
+
+  // Set initial phase
+  setPhase(0);
+
+  // Clear previous timer if any
+  if (state.exercisePhaseTimer) clearInterval(state.exercisePhaseTimer);
+
+  // Automatically cycle between Phase 0 and Phase 1 every 1250ms
+  state.exercisePhaseTimer = setInterval(() => {
+    setPhase(currentPhase === 0 ? 1 : 0);
+  }, 1250);
+
+  // Manual Phase button clicks
+  btn0.onclick = () => {
+    if (state.exercisePhaseTimer) clearInterval(state.exercisePhaseTimer);
+    setPhase(0);
+    triggerHaptic("light");
+  };
+  btn1.onclick = () => {
+    if (state.exercisePhaseTimer) clearInterval(state.exercisePhaseTimer);
+    setPhase(1);
+    triggerHaptic("light");
+  };
+
+  // Direct YouTube search link
+  const ytQuery = encodeURIComponent(`техника выполнения ${ex.name}`);
+  document.getElementById("youtubeVideoLink").href = `https://www.youtube.com/results?search_query=${ytQuery}`;
 
   // Steps
   const stepsList = document.getElementById("exerciseStepsList");
@@ -1496,8 +1544,10 @@ function openExerciseVideoModal(exerciseId) {
 }
 
 function closeExerciseVideoModal() {
-  const video = document.getElementById("exerciseVideoElement");
-  if (video) video.pause();
+  if (state.exercisePhaseTimer) {
+    clearInterval(state.exercisePhaseTimer);
+    state.exercisePhaseTimer = null;
+  }
   document.getElementById("exerciseVideoModal").classList.add("hidden");
 }
 
