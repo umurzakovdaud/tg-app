@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru" class="h-full">
+<html lang="ru" class="dark h-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Умное Меню и Корзина | MealPlanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>OnlyFits — Тренировки и Питание</title>
   
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -17,11 +17,17 @@
         extend: {
           colors: {
             brand: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
+              400: '#34d399',
               500: '#10b981',
               600: '#059669',
-              700: '#047857',
+              neon: '#22c55e'
+            },
+            dark: {
+              950: '#090d16',
+              900: '#0f172a',
+              850: '#151f38',
+              800: '#1e293b',
+              700: '#334155'
             }
           }
         }
@@ -34,342 +40,498 @@
   
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans transition-colors duration-200">
+<body class="bg-dark-950 text-slate-100 antialiased min-h-screen flex flex-col font-sans select-none pb-24">
   
-  <!-- Header / Navigation Bar -->
-  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 shadow-xs">
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-dark-900/90 backdrop-blur-md border-b border-dark-700/60 px-4 py-3">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-sm">
-          <i data-lucide="chef-hat" class="w-5 h-5"></i>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-green-400 flex items-center justify-center text-dark-950 font-black shadow-lg shadow-emerald-500/20">
+          <i data-lucide="zap" class="w-5 h-5 fill-current"></i>
         </div>
         <div>
-          <h1 class="text-base font-bold leading-tight text-slate-900">Умное Меню</h1>
-          <p class="text-xs text-slate-500 flex items-center gap-1">
-            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Конструктор & Корзина
-          </p>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-base font-extrabold tracking-tight text-white">OnlyFits</h1>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Free</span>
+          </div>
+          <p class="text-[11px] text-slate-400" id="headerSubtitle">Тренировки & КБЖУ</p>
         </div>
       </div>
       
-      <div class="flex items-center gap-1.5">
-        <button id="themeToggle" class="p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition" title="Сменить тему">
-          <i data-lucide="moon" class="w-4 h-4"></i>
+      <!-- Серия дней (Streak) и профиль -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-xs">
+          <span>🔥</span>
+          <span id="streakCount">3</span>
+          <span class="text-[10px] font-normal text-amber-300/80">дня</span>
+        </div>
+        <button id="profileBtn" class="w-8 h-8 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center text-slate-300 hover:text-white transition">
+          <i data-lucide="user" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Area -->
-  <main class="flex-1 max-w-md w-full mx-auto p-4 pb-24">
+  <!-- Main Container -->
+  <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
     
-    <!-- TAB 1: Конструктор (Настройки) -->
-    <section id="tab-settings" class="space-y-5 animate-fade-in">
+    <!-- ==================== TAB 1: ТРЕНИРОВКИ ==================== -->
+    <section id="tab-workouts" class="tab-content space-y-4 animate-fade-in">
       
-      <!-- Приветственный баннер -->
-      <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md">
-        <div class="flex items-start justify-between">
+      <!-- Баннер активной / сегодняшней тренировки -->
+      <div class="relative overflow-hidden p-4 rounded-3xl bg-gradient-to-br from-dark-850 to-dark-900 border border-dark-700/80 shadow-xl">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex items-start justify-between relative z-10">
           <div>
-            <span class="inline-block text-[11px] font-semibold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full mb-1">
-              Персональный план
-            </span>
-            <h2 class="text-lg font-bold">Меню под ваш бюджет</h2>
-            <p class="text-xs text-emerald-100 mt-1 leading-relaxed">
-              Быстрые рецепты до 30 минут и точный список продуктов без лишних трат и отходов.
-            </p>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                Сегодняшняя сессия
+              </span>
+              <span id="workoutDayLabel" class="text-xs text-slate-400">День 1 из 3</span>
+            </div>
+            <h2 id="currentWorkoutTitle" class="text-lg font-black text-white mt-1">Грудь + Трицепс</h2>
+            <p id="currentWorkoutSubtitle" class="text-xs text-slate-400 mt-0.5">5 упражнений • ~50 минут • Зал</p>
           </div>
-          <i data-lucide="sparkles" class="w-8 h-8 text-emerald-200 shrink-0"></i>
+          <button id="changeProgramBtn" class="p-2 rounded-xl bg-dark-800/80 border border-dark-700 text-slate-400 hover:text-white transition" title="Сменить программу">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </button>
         </div>
-      </div>
 
-      <!-- Цель питания -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
-        <label class="block text-sm font-semibold text-slate-800 flex items-center gap-2">
-          <i data-lucide="target" class="w-4 h-4 text-emerald-600"></i>
-          Ваша главная цель
-        </label>
-        <div class="grid grid-cols-2 gap-2" id="goalOptions">
-          <button type="button" data-value="weight_loss" class="goal-btn active p-3 rounded-xl border text-left flex flex-col justify-between transition border-emerald-500 bg-emerald-50/60 text-emerald-900">
-            <span class="text-lg mb-1">🥗</span>
-            <div>
-              <div class="font-semibold text-xs">Похудение</div>
-              <div class="text-[10px] text-slate-500">Дефицит, легкие блюда</div>
+        <div class="mt-4 pt-3 border-t border-dark-700/60 flex items-center justify-between relative z-10">
+          <div class="flex items-center gap-3 text-xs text-slate-300">
+            <div class="flex items-center gap-1">
+              <i data-lucide="dumbbell" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>18 подходов</span>
             </div>
-          </button>
-          <button type="button" data-value="budget" class="goal-btn p-3 rounded-xl border border-slate-200 text-left flex flex-col justify-between transition hover:border-slate-300">
-            <span class="text-lg mb-1">💰</span>
-            <div>
-              <div class="font-semibold text-xs">Экономия</div>
-              <div class="text-[10px] text-slate-500">Доступные продукты</div>
+            <div class="flex items-center gap-1">
+              <i data-lucide="flame" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>~380 ккал</span>
             </div>
-          </button>
-          <button type="button" data-value="balanced" class="goal-btn p-3 rounded-xl border border-slate-200 text-left flex flex-col justify-between transition hover:border-slate-300">
-            <span class="text-lg mb-1">🥑</span>
-            <div>
-              <div class="font-semibold text-xs">Баланс и ЗОЖ</div>
-              <div class="text-[10px] text-slate-500">Разнообразие и энергия</div>
-            </div>
-          </button>
-          <button type="button" data-value="muscle_gain" class="goal-btn p-3 rounded-xl border border-slate-200 text-left flex flex-col justify-between transition hover:border-slate-300">
-            <span class="text-lg mb-1">💪</span>
-            <div>
-              <div class="font-semibold text-xs">Набор массы</div>
-              <div class="text-[10px] text-slate-500">Высокий белок</div>
-            </div>
+          </div>
+          <button id="startWorkoutBtn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-dark-950 font-black text-xs shadow-lg shadow-emerald-500/25 transition active:scale-95 flex items-center gap-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+            <span>Начать</span>
           </button>
         </div>
       </div>
 
-      <!-- Состав семьи и порции -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <!-- Расписание сплита на неделю -->
+      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
         <div class="flex items-center justify-between">
-          <label class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-            <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
-            Количество человек
-          </label>
-          <span id="familyLabel" class="text-xs font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">1 чел</span>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
+            План тренировок на неделю
+          </h3>
+          <span class="text-[10px] text-emerald-400 font-semibold" id="programGoalBadge">Набор массы</span>
         </div>
-        <div class="grid grid-cols-4 gap-2">
-          <button type="button" data-family="1" class="family-btn active py-2 rounded-xl text-xs font-semibold border border-emerald-500 bg-emerald-50 text-emerald-800">1</button>
-          <button type="button" data-family="2" class="family-btn py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:border-slate-300">2</button>
-          <button type="button" data-family="3" class="family-btn py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:border-slate-300">3</button>
-          <button type="button" data-family="4" class="family-btn py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:border-slate-300">4+</button>
+
+        <div class="grid grid-cols-3 gap-2" id="weekScheduleGrid">
+          <!-- Генерируется через JS: День 1, День 2, День 3... -->
         </div>
       </div>
 
-      <!-- Бюджет на неделю -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
-        <div class="flex items-center justify-between">
-          <label class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-            <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
-            Бюджет на неделю
-          </label>
-          <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-xs font-semibold text-slate-600">
-            <button type="button" data-curr="₽" class="curr-btn active px-2 py-0.5 rounded-md bg-white shadow-xs text-slate-900">₽</button>
-            <button type="button" data-curr="₸" class="curr-btn px-2 py-0.5 rounded-md hover:text-slate-900">₸</button>
-            <button type="button" data-curr="$" class="curr-btn px-2 py-0.5 rounded-md hover:text-slate-900">$</button>
-          </div>
-        </div>
-        
-        <div class="flex items-center gap-3">
-          <input type="range" id="budgetRange" min="2000" max="25000" step="500" value="5000" class="flex-1 accent-emerald-600 h-2 bg-slate-200 rounded-lg cursor-pointer">
-          <div class="w-24 text-right font-bold text-sm text-slate-900">
-            <span id="budgetValue">5 000</span> <span id="budgetCurrency">₽</span>
-          </div>
-        </div>
-        <p class="text-[11px] text-slate-400">Ориентир на продукты: около <span id="budgetPerPerson">5 000</span> на чел./нед.</p>
-      </div>
-
-      <!-- Ограничения и аллергии -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
-        <label class="block text-sm font-semibold text-slate-800 flex items-center gap-2">
-          <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-600"></i>
-          Ограничения и предпочтения
-        </label>
-        <div class="flex flex-wrap gap-2" id="restrictionsList">
-          <button type="button" data-tag="lactose_free" class="tag-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:border-slate-300 transition">
-            🥛 Без лактозы
-          </button>
-          <button type="button" data-tag="sugar_free" class="tag-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:border-slate-300 transition">
-            🍬 Без сахара
-          </button>
-          <button type="button" data-tag="gluten_free" class="tag-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:border-slate-300 transition">
-            🌾 Без глютена
-          </button>
-          <button type="button" data-tag="keto" class="tag-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:border-slate-300 transition">
-            🥑 Кето
-          </button>
-          <button type="button" data-tag="vegetarian" class="tag-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:border-slate-300 transition">
-            🌱 Вегетарианство
-          </button>
-          <button type="button" data-tag="nut_free" class="tag-btn text-xs px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:border-slate-300 transition">
-            🥜 Без орехов
+      <!-- Упражнения текущего дня -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Упражнения дня</h3>
+          <button id="openCatalogBtn" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1">
+            <i data-lucide="book-open" class="w-3 h-3"></i>
+            База упражнений
           </button>
         </div>
-      </div>
 
-      <!-- Главная кнопка генерации -->
-      <button id="generateBtn" type="button" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-[0.99] transition flex items-center justify-center gap-2">
-        <i data-lucide="wand-2" class="w-4 h-4"></i>
-        <span>Сформировать меню и корзину</span>
-      </button>
-
-    </section>
-
-
-    <!-- TAB 2: Меню на неделю -->
-    <section id="tab-menu" class="hidden space-y-4 animate-fade-in">
-      
-      <!-- Переключатель дней недели -->
-      <div class="flex items-center justify-between overflow-x-auto pb-1 gap-1.5 no-scrollbar" id="dayTabs">
-        <!-- Генерируется динамически через JS: Пн, Вт, Ср, Чт, Пт, Сб, Вс -->
-      </div>
-
-      <!-- Инфо-шапка дня -->
-      <div class="flex items-center justify-between px-1">
-        <div>
-          <h2 id="currentDayTitle" class="text-base font-bold text-slate-900">Понедельник</h2>
-          <p id="currentDaySummary" class="text-xs text-slate-500">4 блюда • 1 650 ккал • готовка до 30 мин</p>
+        <div id="dayExercisesList" class="space-y-2">
+          <!-- Карточки упражнений генерируются через JS -->
         </div>
-        <button id="regenerateDayBtn" class="text-xs text-emerald-600 font-semibold flex items-center gap-1 hover:text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">
-          <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-          Обновить день
-        </button>
-      </div>
-
-      <!-- Список блюд на выбранный день -->
-      <div id="mealsList" class="space-y-3">
-        <!-- Карточки Завтрак, Обед, Ужин, Перекус генерируются через JS -->
       </div>
 
     </section>
 
 
-    <!-- TAB 3: Корзина покупок -->
-    <section id="tab-cart" class="hidden space-y-4 animate-fade-in">
+    <!-- ==================== TAB 2: ПИТАНИЕ & КБЖУ ==================== -->
+    <section id="tab-nutrition" class="tab-content hidden space-y-4 animate-fade-in">
       
-      <!-- Сводка корзины -->
-      <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <!-- Кольцо / Сводка калорий -->
+      <div class="p-4 rounded-3xl bg-dark-900 border border-dark-700/80 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-base font-bold text-slate-900">Корзина на неделю</h2>
-            <p id="cartItemsCount" class="text-xs text-slate-500">24 позиции без излишков</p>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Дневной баланс</span>
+            <h2 class="text-xl font-black text-white mt-0.5">
+              <span id="eatenCalories">1 420</span> <span class="text-xs text-slate-400 font-normal">/ <span id="targetCalories">2 250</span> ккал</span>
+            </h2>
           </div>
           <div class="text-right">
-            <div id="cartEstimatedCost" class="text-base font-bold text-emerald-600">~4 650 ₽</div>
-            <div id="cartBudgetStatus" class="text-[10px] text-slate-400">В рамках бюджета</div>
+            <div class="text-[10px] text-slate-400">Осталось</div>
+            <div id="remainingCalories" class="text-lg font-black text-emerald-400">830 ккал</div>
           </div>
         </div>
 
-        <!-- Прогресс покупок -->
-        <div class="space-y-1">
-          <div class="flex items-center justify-between text-xs text-slate-500">
-            <span>Прогресс сбора продуктов</span>
-            <span id="cartProgressText">0 / 24</span>
-          </div>
-          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-            <div id="cartProgressBar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
-          </div>
+        <!-- Прогресс-бар калорий -->
+        <div class="w-full bg-dark-800 h-2.5 rounded-full overflow-hidden">
+          <div id="caloriesBar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-full transition-all duration-300 rounded-full" style="width: 63%"></div>
         </div>
 
-        <!-- Кнопки действий -->
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <button id="copyListBtn" class="py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 hover:bg-slate-50 transition">
-            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-            <span>Скопировать</span>
-          </button>
-          <button id="sendTgBtn" class="py-2.5 px-3 rounded-xl bg-emerald-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-emerald-700 transition">
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-            <span>В Telegram</span>
-          </button>
+        <!-- БЖУ (Макронутриенты) -->
+        <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+          <div class="bg-dark-850/80 p-2.5 rounded-2xl border border-dark-700/60">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Белки</div>
+            <div class="text-xs font-bold text-white mt-0.5"><span id="proteinCurrent">95</span> / <span id="proteinTarget">140</span>г</div>
+            <div class="w-full bg-dark-800 h-1 rounded-full mt-1.5 overflow-hidden">
+              <div id="proteinBar" class="bg-blue-400 h-full rounded-full" style="width: 68%"></div>
+            </div>
+          </div>
+          <div class="bg-dark-850/80 p-2.5 rounded-2xl border border-dark-700/60">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Жиры</div>
+            <div class="text-xs font-bold text-white mt-0.5"><span id="fatsCurrent">45</span> / <span id="fatsTarget">70</span>г</div>
+            <div class="w-full bg-dark-800 h-1 rounded-full mt-1.5 overflow-hidden">
+              <div id="fatsBar" class="bg-amber-400 h-full rounded-full" style="width: 64%"></div>
+            </div>
+          </div>
+          <div class="bg-dark-850/80 p-2.5 rounded-2xl border border-dark-700/60">
+            <div class="text-[10px] text-slate-400 uppercase font-semibold">Углеводы</div>
+            <div class="text-xs font-bold text-white mt-0.5"><span id="carbsCurrent">160</span> / <span id="carbsTarget">250</span>г</div>
+            <div class="w-full bg-dark-800 h-1 rounded-full mt-1.5 overflow-hidden">
+              <div id="carbsBar" class="bg-emerald-400 h-full rounded-full" style="width: 64%"></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Партнерский баннер (монетизация) -->
-      <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-between">
+      <!-- AI Сканер еды по фото (Фирменная фишка Onlyfits) -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/70 to-dark-900 border border-emerald-500/40 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-700">
-            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+            📸
           </div>
           <div>
-            <div class="text-xs font-bold text-amber-950">Заказать готовую корзину</div>
-            <div class="text-[10px] text-amber-800">Доставка в Самокат / ВкусВилл / СберМаркет</div>
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>ИИ-сканер тарелки</span>
+              <span class="text-[9px] bg-emerald-500 text-dark-950 font-black px-1 rounded">AI</span>
+            </div>
+            <div class="text-[10px] text-slate-400">Сфоткайте еду для мгновенного расчета КБЖУ</div>
           </div>
         </div>
-        <button id="partnerOrderBtn" class="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-[11px] font-bold hover:bg-amber-600 transition">
-          Собрать
+        <button id="aiPhotoBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-dark-950 font-black text-xs hover:bg-emerald-400 transition active:scale-95">
+          Скан
         </button>
       </div>
 
-      <!-- Ингредиенты по категориям -->
-      <div id="cartCategories" class="space-y-3">
-        <!-- Генерируется через JS: Овощи, Мясо, Молочка, Бакалея и т.д. -->
+      <!-- Трекер воды -->
+      <div class="bg-dark-900 p-3.5 rounded-2xl border border-dark-700/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+            <i data-lucide="droplet" class="w-4 h-4 fill-current"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Водный баланс</div>
+            <div class="text-[10px] text-slate-400"><span id="waterCurrent">1 500</span> / 2 500 мл</div>
+          </div>
+        </div>
+        <button id="addWaterBtn" class="px-3 py-1.5 rounded-xl bg-dark-800 border border-dark-700 hover:border-cyan-500/40 text-cyan-400 font-bold text-xs flex items-center gap-1 transition active:scale-95">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>250 мл</span>
+        </button>
+      </div>
+
+      <!-- Приемы пищи (Завтрак, Обед, Ужин, Перекус) -->
+      <div class="space-y-2.5" id="mealsTrackerList">
+        <!-- Блоки приемов пищи генерируются через JS -->
+      </div>
+
+    </section>
+
+
+    <!-- ==================== TAB 3: ТЕЛО & ПРОГРЕСС ==================== -->
+    <section id="tab-progress" class="tab-content hidden space-y-4 animate-fade-in">
+      
+      <!-- Карточка веса -->
+      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Текущий вес</span>
+            <div class="flex items-baseline gap-1 mt-0.5">
+              <span id="currentWeightDisplay" class="text-2xl font-black text-white">74.5</span>
+              <span class="text-xs text-slate-400 font-semibold">кг</span>
+              <span id="weightDiffDisplay" class="text-xs font-bold text-emerald-400 ml-2">↓ -1.8 кг за месяц</span>
+            </div>
+          </div>
+          <button id="logWeightBtn" class="px-3 py-2 rounded-xl bg-dark-800 border border-dark-700 text-emerald-400 hover:bg-dark-700 font-bold text-xs flex items-center gap-1 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Записать</span>
+          </button>
+        </div>
+
+        <!-- Мини-график веса (SVG) -->
+        <div class="h-28 w-full pt-2">
+          <svg class="w-full h-full overflow-visible" viewBox="0 0 300 80">
+            <defs>
+              <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 10 30 Q 80 45, 150 35 T 290 20 L 290 80 L 10 80 Z" fill="url(#weightGrad)"/>
+            <path d="M 10 30 Q 80 45, 150 35 T 290 20" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="290" cy="20" r="4" fill="#34d399" stroke="#090d16" stroke-width="2"/>
+          </svg>
+          <div class="flex justify-between text-[10px] text-slate-500 pt-1">
+            <span>3 нед назад</span>
+            <span>2 нед</span>
+            <span>Неделю назад</span>
+            <span class="text-emerald-400 font-bold">Сегодня</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Замеры обхватов тела -->
+      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Обхваты тела (см)</h3>
+          <button id="editMeasurementsBtn" class="text-xs text-emerald-400 font-semibold hover:text-emerald-300">
+            Обновить
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
+            <span class="text-slate-400">Талия</span>
+            <span id="waistDisplay" class="font-bold text-white">78 см</span>
+          </div>
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
+            <span class="text-slate-400">Грудь</span>
+            <span id="chestDisplay" class="font-bold text-white">102 см</span>
+          </div>
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
+            <span class="text-slate-400">Бедра</span>
+            <span id="hipsDisplay" class="font-bold text-white">96 см</span>
+          </div>
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
+            <span class="text-slate-400">Бицепс</span>
+            <span id="armDisplay" class="font-bold text-white">36.5 см</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Достижения и статистика -->
+      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Общая статистика</h3>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60">
+            <div class="text-base font-black text-white" id="totalWorkoutsCount">14</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Тренировок</div>
+          </div>
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60">
+            <div class="text-base font-black text-emerald-400" id="totalTonnageCount">42.5 т</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Тоннаж</div>
+          </div>
+          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60">
+            <div class="text-base font-black text-amber-400" id="bestStreakCount">12</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Рекорд дней</div>
+          </div>
+        </div>
       </div>
 
     </section>
 
   </main>
 
-  <!-- Bottom Navigation Bar -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 py-2 px-6 shadow-lg">
-    <div class="max-w-md mx-auto flex items-center justify-around">
-      
-      <button data-tab="tab-settings" class="nav-tab active flex flex-col items-center gap-1 text-emerald-600 font-semibold transition">
-        <i data-lucide="sliders" class="w-5 h-5"></i>
-        <span class="text-[10px]">Параметры</span>
-      </button>
-
-      <button data-tab="tab-menu" class="nav-tab flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 font-medium transition">
-        <div class="relative">
-          <i data-lucide="calendar" class="w-5 h-5"></i>
-          <span id="menuBadge" class="hidden absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500"></span>
+  <!-- ==================== ACTIVE WORKOUT OVERLAY / MODAL ==================== -->
+  <div id="activeWorkoutModal" class="fixed inset-0 z-50 bg-dark-950 flex flex-col hidden animate-fade-in">
+    <!-- Шапка активной тренировки -->
+    <div class="p-4 bg-dark-900 border-b border-dark-700 flex items-center justify-between">
+      <div>
+        <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Идет тренировка
         </div>
-        <span class="text-[10px]">Меню на 7 дней</span>
-      </button>
-
-      <button data-tab="tab-cart" class="nav-tab flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 font-medium transition">
-        <div class="relative">
-          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-          <span id="cartBadge" class="hidden absolute -top-1.5 -right-2 px-1 text-[9px] font-bold rounded-full bg-emerald-500 text-white">0</span>
+        <h2 id="activeModalTitle" class="text-base font-black text-white mt-0.5">Грудь + Трицепс</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <div id="workoutTimer" class="font-mono text-sm font-bold text-slate-300 bg-dark-800 px-2.5 py-1 rounded-xl border border-dark-700">
+          00:00
         </div>
-        <span class="text-[10px]">Корзина</span>
-      </button>
-
-    </div>
-  </nav>
-
-  <!-- Recipe Details Modal -->
-  <div id="recipeModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl max-h-[85vh] flex flex-col overflow-hidden animate-slide-up shadow-2xl">
-      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-        <h3 id="modalTitle" class="text-base font-bold text-slate-900">Название рецепта</h3>
-        <button id="closeModalBtn" class="p-1 rounded-lg text-slate-400 hover:text-slate-600">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button id="finishWorkoutBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-dark-950 font-black text-xs transition">
+          Завершить
         </button>
       </div>
-      <div class="p-4 overflow-y-auto space-y-4 text-xs">
-        <!-- БЖУ и время -->
-        <div class="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-xl text-center">
-          <div>
-            <div class="text-[10px] text-slate-400">Время</div>
-            <div id="modalTime" class="font-bold text-slate-800">15 мин</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-slate-400">Калории</div>
-            <div id="modalCalories" class="font-bold text-slate-800">380 ккал</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-slate-400">Белки</div>
-            <div id="modalProtein" class="font-bold text-slate-800">22 г</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-slate-400">Жиры/Угл</div>
-            <div id="modalFatsCarbs" class="font-bold text-slate-800">12/35 г</div>
-          </div>
-        </div>
+    </div>
 
-        <!-- Ингредиенты -->
-        <div>
-          <h4 class="font-bold text-slate-800 mb-2">Ингредиенты:</h4>
-          <ul id="modalIngredients" class="space-y-1.5 text-slate-600">
-            <!-- Список -->
-          </ul>
-        </div>
+    <!-- Список упражнений активной тренировки с подходами -->
+    <div id="activeExercisesContainer" class="flex-1 overflow-y-auto p-4 space-y-4 pb-28">
+      <!-- Динамические карточки с чекбоксами подходов -->
+    </div>
 
-        <!-- Шаги приготовления -->
-        <div>
-          <h4 class="font-bold text-slate-800 mb-2">Пошаговое приготовление (до 30 мин):</h4>
-          <ol id="modalSteps" class="space-y-2 list-decimal list-inside text-slate-600 leading-relaxed">
-            <!-- Шаги -->
-          </ol>
-        </div>
+    <!-- Всплывающий таймер отдыха (Rest Timer) -->
+    <div id="restTimerBar" class="fixed bottom-0 left-0 right-0 p-4 bg-dark-900/95 backdrop-blur-md border-t border-dark-700 flex items-center justify-between hidden shadow-2xl z-50">
+      <div>
+        <div class="text-[10px] uppercase font-bold text-slate-400">Отдых между подходами</div>
+        <div id="restTimerDisplay" class="font-mono text-2xl font-black text-emerald-400">01:30</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="add30sBtn" class="px-3 py-2 rounded-xl bg-dark-800 border border-dark-700 text-xs font-bold text-slate-200 hover:text-white">
+          +30с
+        </button>
+        <button id="skipRestBtn" class="px-4 py-2 rounded-xl bg-emerald-500 text-dark-950 text-xs font-black hover:bg-emerald-400">
+          Пропустить
+        </button>
       </div>
     </div>
   </div>
 
+
+  <!-- ==================== EXERCISE CATALOG MODAL ==================== -->
+  <div id="catalogModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col border border-dark-700 overflow-hidden shadow-2xl animate-slide-up">
+      <div class="p-4 border-b border-dark-700 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">База упражнений</h3>
+          <p class="text-xs text-slate-400">Техника выполнения и советы</p>
+        </div>
+        <button id="closeCatalogBtn" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-dark-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Фильтр мышечных групп -->
+      <div class="flex gap-1.5 p-3 overflow-x-auto border-b border-dark-700/60 no-scrollbar" id="muscleFilterBtns">
+        <button data-muscle="all" class="muscle-filter active px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500 text-dark-950">Все</button>
+        <button data-muscle="chest" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Грудь</button>
+        <button data-muscle="back" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Спина</button>
+        <button data-muscle="legs" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Ноги</button>
+        <button data-muscle="shoulders" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Плечи</button>
+        <button data-muscle="arms" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Руки</button>
+      </div>
+
+      <!-- Список упражнений -->
+      <div id="catalogList" class="flex-1 overflow-y-auto p-4 space-y-2.5">
+        <!-- Генерируется через JS -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== AI FOOD SCANNER MODAL ==================== -->
+  <div id="aiModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-dark-700 overflow-hidden shadow-2xl animate-slide-up p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📸</span>
+          <h3 class="text-base font-bold text-white">ИИ-распознавание блюда</h3>
+        </div>
+        <button id="closeAiModalBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="border-2 border-dashed border-dark-700 rounded-2xl p-6 text-center space-y-2 hover:border-emerald-500/50 transition cursor-pointer" id="dropPhotoZone">
+        <div class="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+          <i data-lucide="camera" class="w-6 h-6"></i>
+        </div>
+        <div class="text-xs font-bold text-white">Сделайте фото или выберите из галереи</div>
+        <div class="text-[10px] text-slate-400">Нейросеть определит блюдо и рассчитает КБЖУ</div>
+        <input type="file" id="mealPhotoInput" accept="image/*" class="hidden">
+      </div>
+
+      <div id="aiAnalysisResult" class="hidden bg-dark-850 p-3.5 rounded-2xl border border-dark-700 space-y-2 text-xs">
+        <div class="flex items-center justify-between font-bold text-white">
+          <span id="aiResultTitle">Куриная грудка с рисом и овощами</span>
+          <span class="text-emerald-400" id="aiResultCalories">~480 ккал</span>
+        </div>
+        <div class="text-[11px] text-slate-400">Б: 42г • Ж: 8г • У: 55г • Порция: ~320г</div>
+        <button id="aiAddMealBtn" class="w-full py-2.5 rounded-xl bg-emerald-500 text-dark-950 font-black hover:bg-emerald-400 transition mt-2">
+          Добавить в дневник питания
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== PROFILE / SETTINGS MODAL ==================== -->
+  <div id="profileModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-dark-700 overflow-hidden shadow-2xl animate-slide-up p-5 space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-dark-700/80 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+          Профиль и Цели
+        </h3>
+        <button id="closeProfileBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Главная цель</label>
+          <select id="userGoalSelect" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500">
+            <option value="weight_loss">Снижение веса (дефицит калорий)</option>
+            <option value="muscle_gain" selected>Набор мышечной массы (профицит)</option>
+            <option value="maintenance">Рельеф и поддержание формы</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Вес (кг)</label>
+            <input type="number" id="inputWeight" value="74.5" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Рост (см)</label>
+            <input type="number" id="inputHeight" value="180" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-semibold mb-1">Возраст</label>
+            <input type="number" id="inputAge" value="25" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Локация тренировок</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-loc="gym" class="loc-btn active p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold">Тренажерный зал</button>
+            <button type="button" data-loc="home" class="loc-btn p-2.5 rounded-xl border border-dark-700 bg-dark-800 text-slate-400 font-bold">Дома / Гантели</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Тренировок в неделю</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" data-days="2" class="days-btn p-2 rounded-xl border border-dark-700 text-slate-400 font-bold">2 дня</button>
+            <button type="button" data-days="3" class="days-btn active p-2 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold">3 дня</button>
+            <button type="button" data-days="4" class="days-btn p-2 rounded-xl border border-dark-700 text-slate-400 font-bold">4 дня</button>
+          </div>
+        </div>
+
+        <button id="saveProfileBtn" class="w-full py-3 rounded-2xl bg-emerald-500 text-dark-950 font-black text-sm hover:bg-emerald-400 transition mt-2">
+          Сохранить параметры
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== BOTTOM TAB BAR ==================== -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-md border-t border-dark-700/80 py-2.5 px-6 shadow-2xl">
+    <div class="max-w-md mx-auto flex items-center justify-around">
+      <button data-tab="tab-workouts" class="bottom-tab active flex flex-col items-center gap-1 text-emerald-400 font-bold transition">
+        <i data-lucide="dumbbell" class="w-5 h-5"></i>
+        <span class="text-[10px]">Тренировки</span>
+      </button>
+
+      <button data-tab="tab-nutrition" class="bottom-tab flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 font-semibold transition">
+        <i data-lucide="utensils" class="w-5 h-5"></i>
+        <span class="text-[10px]">Питание</span>
+      </button>
+
+      <button data-tab="tab-progress" class="bottom-tab flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 font-semibold transition">
+        <i data-lucide="line-chart" class="w-5 h-5"></i>
+        <span class="text-[10px]">Прогресс</span>
+      </button>
+    </div>
+  </nav>
+
   <!-- Toast Notification -->
-  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 transition-opacity pointer-events-none flex items-center gap-2">
-    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-dark-950 font-bold text-xs px-4 py-2.5 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none flex items-center gap-2">
+    <span>✓</span>
     <span id="toastMsg">Успешно!</span>
   </div>
 

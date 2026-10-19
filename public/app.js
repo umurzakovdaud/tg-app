@@ -1,386 +1,308 @@
-// MealPlanner App Logic
+// OnlyFits — Client Logic & State Management
 
-// Default fallback recipes in case fetch is blocked by file:// protocol or offline
-const FALLBACK_RECIPES = [
+// Core Exercise Catalog
+const EXERCISES_DB = [
+  // Грудь (Chest)
   {
-    "id": "b_1",
-    "title": "Овсянка на растительном молоке с ягодами",
-    "category": "breakfast",
-    "prep_time_minutes": 10,
-    "calories": 340,
-    "protein": 11,
-    "fats": 7,
-    "carbs": 58,
-    "estimated_cost_rub": 120,
-    "tags": ["quick", "budget", "weight_loss", "balanced", "lactose_free", "sugar_free", "vegetarian", "vegan", "nut_free"],
-    "ingredients": [
-      { "name": "Овсяные хлопья (долгой варки)", "amount": 60, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Овсяное или миндальное молоко", "amount": 200, "unit": "мл", "department": "Молочные продукты и альтернативы" },
-      { "name": "Ягоды (свежие или замороженные)", "amount": 50, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Семена льна или чиа", "amount": 10, "unit": "г", "department": "Бакалея и крупы" }
-    ],
-    "steps": [
-      "В небольшом сотейнике залейте овсяные хлопья молоком и доведите до кипения.",
-      "Варите на медленном огне 5–7 минут, периодически помешивая.",
-      "Переложите в тарелку, посыпьте семенами и добавьте ягоды."
-    ]
+    id: "ex_chest_1",
+    name: "Жим штанги лежа на горизонтальной скамье",
+    muscle: "chest",
+    muscle_ru: "Грудь",
+    equipment: "Штанга",
+    tips: "Сведите лопатки, упритесь ногами в пол. Опускайте штангу подконтрольно к нижней части груди."
   },
   {
-    "id": "b_2",
-    "title": "Шакшука с томатами и зеленью",
-    "category": "breakfast",
-    "prep_time_minutes": 15,
-    "calories": 380,
-    "protein": 22,
-    "fats": 24,
-    "carbs": 16,
-    "estimated_cost_rub": 160,
-    "tags": ["quick", "keto", "muscle_gain", "balanced", "lactose_free", "gluten_free", "sugar_free", "vegetarian", "nut_free"],
-    "ingredients": [
-      { "name": "Яйца куриные", "amount": 3, "unit": "шт", "department": "Молочные продукты и альтернативы" },
-      { "name": "Томаты в собственном соку", "amount": 180, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Перец болгарский", "amount": 80, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Кинза или петрушка", "amount": 15, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Оливковое масло", "amount": 10, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "На разогретом масле обжарьте нарезанный сладкий перец 3 минуты.",
-      "Добавьте томаты в собственном соку и специи, тушите соус 4 минуты.",
-      "Сделайте углубления, разбейте яйца и готовьте под крышкой 4–5 минут.",
-      "Посыпьте свежей зеленью."
-    ]
+    id: "ex_chest_2",
+    name: "Жим гантелей на наклонной скамье (30°)",
+    muscle: "chest",
+    muscle_ru: "Грудь",
+    equipment: "Гантели",
+    tips: "Акцент на верхний пучок грудных. В верхней точке не соударяйте гантели."
   },
   {
-    "id": "b_3",
-    "title": "Тост с авокадо, яйцом пашот и рукколой",
-    "category": "breakfast",
-    "prep_time_minutes": 12,
-    "calories": 410,
-    "protein": 18,
-    "fats": 22,
-    "carbs": 34,
-    "estimated_cost_rub": 220,
-    "tags": ["quick", "balanced", "weight_loss", "lactose_free", "sugar_free", "vegetarian", "nut_free"],
-    "ingredients": [
-      { "name": "Хлеб цельнозерновой", "amount": 2, "unit": "ломтика", "department": "Хлеб и выпечка" },
-      { "name": "Авокадо", "amount": 0.5, "unit": "шт", "department": "Овощи, фрукты и зелень" },
-      { "name": "Яйца куриные", "amount": 2, "unit": "шт", "department": "Молочные продукты и альтернативы" },
-      { "name": "Руккола", "amount": 20, "unit": "г", "department": "Овощи, фрукты и зелень" }
-    ],
-    "steps": [
-      "Подсушите хлеб в тостере или на сухой сковороде.",
-      "Разомните авокадо вилкой с солью и капелькой лимона.",
-      "Отварите яйца пашот или сварите всмятку 4 минуты.",
-      "Выложите авокадо на тосты, сверху яйца и рукколу."
-    ]
+    id: "ex_chest_3",
+    name: "Отжимания на брусьях",
+    muscle: "chest",
+    muscle_ru: "Грудь / Трицепс",
+    equipment: "Брусья",
+    tips: "Наклоните корпус вперед для акцента на грудь. Опускайтесь до прямого угла в локтях."
   },
   {
-    "id": "b_4",
-    "title": "Белковый скрэмбл с индейкой и шпинатом",
-    "category": "breakfast",
-    "prep_time_minutes": 10,
-    "calories": 430,
-    "protein": 38,
-    "fats": 26,
-    "carbs": 4,
-    "estimated_cost_rub": 210,
-    "tags": ["quick", "keto", "muscle_gain", "weight_loss", "lactose_free", "gluten_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Яйца куриные", "amount": 3, "unit": "шт", "department": "Молочные продукты и альтернативы" },
-      { "name": "Филе индейки", "amount": 70, "unit": "г", "department": "Мясо и птица" },
-      { "name": "Шпинат свежий", "amount": 40, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Оливковое масло", "amount": 8, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Припустите шпинат на масле 1 минуту.",
-      "Добавьте нарезанное соломкой филе индейки.",
-      "Влейте взбитые яйца с солью и быстро перемешивайте лопаткой 2 минуты."
-    ]
+    id: "ex_chest_4",
+    name: "Сведение рук в кроссовере",
+    muscle: "chest",
+    muscle_ru: "Грудь",
+    equipment: "Блочный тренажер",
+    tips: "Фиксируйте локти слегка согнутыми, сводите руки за счет сокращения груди."
+  },
+
+  // Спина (Back)
+  {
+    id: "ex_back_1",
+    name: "Подтягивания широким хватом",
+    muscle: "back",
+    muscle_ru: "Спина",
+    equipment: "Турник",
+    tips: "Тянитесь грудью к перекладине, сводя лопатки. Избегайте рывков ногами."
   },
   {
-    "id": "b_5",
-    "title": "Сырники без сахара на рисовой муке",
-    "category": "breakfast",
-    "prep_time_minutes": 20,
-    "calories": 390,
-    "protein": 34,
-    "fats": 12,
-    "carbs": 36,
-    "estimated_cost_rub": 170,
-    "tags": ["quick", "budget", "muscle_gain", "gluten_free", "sugar_free", "vegetarian", "nut_free"],
-    "ingredients": [
-      { "name": "Творог 5% в брикете", "amount": 200, "unit": "г", "department": "Молочные продукты и альтернативы" },
-      { "name": "Яйцо куриное", "amount": 1, "unit": "шт", "department": "Молочные продукты и альтернативы" },
-      { "name": "Мука рисовая", "amount": 30, "unit": "г", "department": "Бакалея и крупы" }
-    ],
-    "steps": [
-      "Разомните творог с яйцом и рисовой мукой.",
-      "Сформируйте сырники и обжаривайте под крышкой на медленном огне по 4–5 минут с каждой стороны."
-    ]
+    id: "ex_back_2",
+    name: "Тяга штанги в наклоне",
+    muscle: "back",
+    muscle_ru: "Спина",
+    equipment: "Штанга",
+    tips: "Держите спину прямо с естественным прогибом в пояснице. Тяните гриф к низу живота."
   },
   {
-    "id": "l_1",
-    "title": "Куриное филе с кускусом и печеными черри",
-    "category": "lunch",
-    "prep_time_minutes": 20,
-    "calories": 520,
-    "protein": 46,
-    "fats": 12,
-    "carbs": 54,
-    "estimated_cost_rub": 230,
-    "tags": ["quick", "budget", "muscle_gain", "balanced", "lactose_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Куриное филе грудки", "amount": 180, "unit": "г", "department": "Мясо и птица" },
-      { "name": "Кускус", "amount": 70, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Томаты черри", "amount": 100, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Оливковое масло", "amount": 10, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Куриное филе обжарьте на сковороде по 4–5 минут с каждой стороны.",
-      "Кускус залейте кипятком в пропорции 1:1 на 5 минут под крышку.",
-      "Черри прогрейте на сковороде 2 минуты. Подавайте вместе."
-    ]
+    id: "ex_back_3",
+    name: "Тяга верхнего блока к груди",
+    muscle: "back",
+    muscle_ru: "Спина",
+    equipment: "Блочный тренажер",
+    tips: "Отклонитесь слегка назад, тяните рукоять к ключицам, чувствуя широчайшие мышцы."
   },
   {
-    "id": "l_2",
-    "title": "Паста с тунцом и томатным соусом",
-    "category": "lunch",
-    "prep_time_minutes": 15,
-    "calories": 480,
-    "protein": 36,
-    "fats": 11,
-    "carbs": 58,
-    "estimated_cost_rub": 240,
-    "tags": ["quick", "budget", "balanced", "muscle_gain", "lactose_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Паста из твердых сортов", "amount": 80, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Тунец в собственном соку", "amount": 120, "unit": "г", "department": "Рыба и морепродукты" },
-      { "name": "Томаты протертые", "amount": 100, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Оливковое масло", "amount": 8, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Отварите пасту до состояния аль-денте.",
-      "Прогрейте томаты с тунцом и травами 3 минуты.",
-      "Смешайте пасту с горячим соусом."
-    ]
+    id: "ex_back_4",
+    name: "Горизонтальная тяга блока к поясу",
+    muscle: "back",
+    muscle_ru: "Спина",
+    equipment: "Блочный тренажер",
+    tips: "Не раскачивайтесь корпусом, пиковое сокращение в точке касания живота."
+  },
+
+  // Ноги (Legs)
+  {
+    id: "ex_legs_1",
+    name: "Приседания со штангой на плечах",
+    muscle: "legs",
+    muscle_ru: "Ноги",
+    equipment: "Штанга",
+    tips: "Колени сонаправлены с носками, глубина приседа — минимум до параллели бедра с полом."
   },
   {
-    "id": "l_3",
-    "title": "Боул с киноа, хрустящим нутом и огурцом",
-    "category": "lunch",
-    "prep_time_minutes": 25,
-    "calories": 440,
-    "protein": 18,
-    "fats": 14,
-    "carbs": 62,
-    "estimated_cost_rub": 190,
-    "tags": ["budget", "weight_loss", "balanced", "lactose_free", "gluten_free", "sugar_free", "vegetarian", "vegan", "nut_free"],
-    "ingredients": [
-      { "name": "Киноа", "amount": 60, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Нут консервированный", "amount": 120, "unit": "г", "department": "Бакалея и крупы" },
-      { "name": "Огурец свежий", "amount": 100, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Шпинат или салат", "amount": 40, "unit": "г", "department": "Овощи, фрукты и зелень" }
-    ],
-    "steps": [
-      "Отварите киноа 15 минут.",
-      "Нут обжарьте со специями 5 минут до корочки.",
-      "Соберите все ингредиенты в глубокий боул."
-    ]
+    id: "ex_legs_2",
+    name: "Жим ногами в тренажере",
+    muscle: "legs",
+    muscle_ru: "Ноги",
+    equipment: "Тренажер",
+    tips: "Не отрывайте поясницу от спинки. В верхней точке не блокируйте колени (не выпрямляйте до конца)."
   },
   {
-    "id": "l_4",
-    "title": "Стейк из индейки со стручковой фасолью",
-    "category": "lunch",
-    "prep_time_minutes": 18,
-    "calories": 420,
-    "protein": 44,
-    "fats": 15,
-    "carbs": 14,
-    "estimated_cost_rub": 250,
-    "tags": ["quick", "keto", "muscle_gain", "weight_loss", "lactose_free", "gluten_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Филе грудки индейки", "amount": 190, "unit": "г", "department": "Мясо и птица" },
-      { "name": "Фасоль стручковая", "amount": 160, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Оливковое масло", "amount": 10, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Индейку обжарьте на сковороде по 5 минут с каждой стороны.",
-      "Фасоль потушите с каплей масла 6 минут."
-    ]
+    id: "ex_legs_3",
+    name: "Румынская становая тяга с гантелями",
+    muscle: "legs",
+    muscle_ru: "Бицепс бедра / Ягодицы",
+    equipment: "Гантели",
+    tips: "Отводите таз назад, чувствуя растяжение задней поверхности бедра. Колени слегка согнуты."
   },
   {
-    "id": "d_1",
-    "title": "Запеченная рыба с брокколи и лимоном",
-    "category": "dinner",
-    "prep_time_minutes": 22,
-    "calories": 360,
-    "protein": 38,
-    "fats": 10,
-    "carbs": 12,
-    "estimated_cost_rub": 260,
-    "tags": ["quick", "budget", "weight_loss", "keto", "balanced", "lactose_free", "gluten_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Филе белой рыбы (треска/минтай)", "amount": 200, "unit": "г", "department": "Рыба и морепродукты" },
-      { "name": "Брокколи", "amount": 180, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Лимон", "amount": 0.5, "unit": "шт", "department": "Овощи, фрукты и зелень" },
-      { "name": "Оливковое масло", "amount": 10, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Выложите рыбу и брокколи в форму для запекания.",
-      "Сбрызните маслом, посолите и положите дольки лимона.",
-      "Запекайте 18 минут при 190°C."
-    ]
+    id: "ex_legs_4",
+    name: "Выпады с гантелями на месте",
+    muscle: "legs",
+    muscle_ru: "Ноги / Ягодицы",
+    equipment: "Гантели",
+    tips: "Шагайте широко, переднее колено не выходит за носок, угол в колене 90°."
+  },
+
+  // Плечи (Shoulders)
+  {
+    id: "ex_shoulders_1",
+    name: "Жим гантелей сидя",
+    muscle: "shoulders",
+    muscle_ru: "Плечи",
+    equipment: "Гантели",
+    tips: "Спинка скамьи под углом 80-85°. Выжимайте гантели вверх по дуге, не сводя их вместе."
   },
   {
-    "id": "d_2",
-    "title": "Котлеты из индейки с нежным пюре из цветной капусты",
-    "category": "dinner",
-    "prep_time_minutes": 25,
-    "calories": 410,
-    "protein": 42,
-    "fats": 16,
-    "carbs": 14,
-    "estimated_cost_rub": 240,
-    "tags": ["quick", "keto", "weight_loss", "muscle_gain", "gluten_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Фарш из индейки", "amount": 180, "unit": "г", "department": "Мясо и птица" },
-      { "name": "Цветная капуста", "amount": 220, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Оливковое масло", "amount": 10, "unit": "г", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Обжарьте котлеты из фарша по 6 минут с двух сторон.",
-      "Цветную капусту отварите 8 минут и пробейте блендером с ложкой масла."
-    ]
+    id: "ex_shoulders_2",
+    name: "Махи гантелями в стороны",
+    muscle: "shoulders",
+    muscle_ru: "Средняя дельта",
+    equipment: "Гантели",
+    tips: "Локти ведут движение и находятся чуть выше кистей. Работайте без читинга корпусом."
   },
   {
-    "id": "d_3",
-    "title": "Греческий салат с цыпленком и фетой",
-    "category": "dinner",
-    "prep_time_minutes": 15,
-    "calories": 390,
-    "protein": 34,
-    "fats": 19,
-    "carbs": 12,
-    "estimated_cost_rub": 270,
-    "tags": ["quick", "keto", "weight_loss", "balanced", "gluten_free", "sugar_free", "nut_free"],
-    "ingredients": [
-      { "name": "Куриное филе готовое", "amount": 130, "unit": "г", "department": "Мясо и птица" },
-      { "name": "Огурцы", "amount": 100, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Томаты", "amount": 120, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Сыр фета", "amount": 40, "unit": "г", "department": "Молочные продукты и альтернативы" },
-      { "name": "Оливковое масло", "amount": 10, "unit": "г", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Крупно нарежьте овощи, сыр фета и куриное филе.",
-      "Заправьте оливковым маслом и посыпьте орегано."
-    ]
+    id: "ex_shoulders_3",
+    name: "Face Pulls (Тяга каната к лицу)",
+    muscle: "shoulders",
+    muscle_ru: "Задняя дельта",
+    equipment: "Кроссовер",
+    tips: "Тяните канат к уровню глаз, разводя кисти в стороны и сводя лопатки."
+  },
+
+  // Руки (Arms)
+  {
+    id: "ex_arms_1",
+    name: "Подъем штанги на бицепс стоя",
+    muscle: "arms",
+    muscle_ru: "Бицепс",
+    equipment: "Штанга / EZ-гриф",
+    tips: "Прижмите локти к корпусу, не раскачивайтесь. Сокращайте бицепс в верхней точке."
   },
   {
-    "id": "d_4",
-    "title": "Стир-фрай из тофу с овощами",
-    "category": "dinner",
-    "prep_time_minutes": 18,
-    "calories": 350,
-    "protein": 24,
-    "fats": 16,
-    "carbs": 22,
-    "estimated_cost_rub": 180,
-    "tags": ["quick", "budget", "weight_loss", "lactose_free", "gluten_free", "sugar_free", "vegetarian", "vegan", "nut_free"],
-    "ingredients": [
-      { "name": "Тофу твердый", "amount": 160, "unit": "г", "department": "Молочные продукты и альтернативы" },
-      { "name": "Смесь овощей (перец, морковь, горошек)", "amount": 180, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Соевый соус", "amount": 15, "unit": "мл", "department": "Масла, соусы и специи" }
-    ],
-    "steps": [
-      "Кубики тофу обжарьте на сковороде 5 минут до корочки.",
-      "Добавьте овощи и соевый соус, готовьте еще 4 минуты."
-    ]
+    id: "ex_arms_2",
+    name: "Французский жим с EZ-штангой лежа",
+    muscle: "arms",
+    muscle_ru: "Трицепс",
+    equipment: "Штанга",
+    tips: "Локти зафиксированы на ширине плеч и слегка отклонены назад от вертикали."
   },
   {
-    "id": "s_1",
-    "title": "Овощные палочки с хумусом",
-    "category": "snack",
-    "prep_time_minutes": 5,
-    "calories": 180,
-    "protein": 6,
-    "fats": 9,
-    "carbs": 18,
-    "estimated_cost_rub": 80,
-    "tags": ["quick", "budget", "weight_loss", "balanced", "lactose_free", "gluten_free", "sugar_free", "vegetarian", "vegan", "nut_free"],
-    "ingredients": [
-      { "name": "Морковь свежая", "amount": 80, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Стебли сельдерея", "amount": 60, "unit": "г", "department": "Овощи, фрукты и зелень" },
-      { "name": "Хумус", "amount": 50, "unit": "г", "department": "Бакалея и крупы" }
-    ],
-    "steps": [
-      "Нарежьте морковь и сельдерей брусочками.",
-      "Подавайте со свежим хумусом."
-    ]
+    id: "ex_arms_3",
+    name: "Молотковые сгибания с гантелями",
+    muscle: "arms",
+    muscle_ru: "Брахиалис / Бицепс",
+    equipment: "Гантели",
+    tips: "Хват нейтральный (ладони смотрят друг на друга). Отличная проработка толщины руки."
   },
   {
-    "id": "s_2",
-    "title": "Натуральный йогурт с семенами",
-    "category": "snack",
-    "prep_time_minutes": 3,
-    "calories": 190,
-    "protein": 12,
-    "fats": 10,
-    "carbs": 11,
-    "estimated_cost_rub": 95,
-    "tags": ["quick", "budget", "weight_loss", "muscle_gain", "balanced", "gluten_free", "sugar_free", "vegetarian", "nut_free"],
-    "ingredients": [
-      { "name": "Йогурт греческий или кокосовый", "amount": 130, "unit": "г", "department": "Молочные продукты и альтернативы" },
-      { "name": "Семена тыквы или льна", "amount": 15, "unit": "г", "department": "Бакалея и крупы" }
-    ],
-    "steps": [
-      "Переложите йогурт в пиалу и посыпьте семенами."
-    ]
+    id: "ex_arms_4",
+    name: "Разгибания рук на блоке с канатом",
+    muscle: "arms",
+    muscle_ru: "Трицепс",
+    equipment: "Блок",
+    tips: "В нижней точке разводите концы каната в стороны для максимального сокращения."
   }
 ];
 
-const DAYS_NAMES = [
-  "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"
-];
-
-const DAYS_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
-// App State
-const state = {
-  settings: {
-    goal: "weight_loss",
-    familySize: 1,
-    currency: "₽",
-    weeklyBudget: 5000,
-    restrictions: []
+// Default Program Splits
+const PROGRAMS = {
+  gym_3: {
+    title: "Классический сплит (Зал)",
+    days: [
+      {
+        dayNum: 1,
+        title: "Грудь + Трицепс",
+        subtitle: "5 упражнений • ~50 минут",
+        exercises: ["ex_chest_1", "ex_chest_2", "ex_chest_3", "ex_arms_2", "ex_arms_4"]
+      },
+      {
+        dayNum: 2,
+        title: "Спина + Бицепс",
+        subtitle: "5 упражнений • ~50 минут",
+        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_arms_1", "ex_arms_3"]
+      },
+      {
+        dayNum: 3,
+        title: "Ноги + Плечи",
+        subtitle: "5 упражнений • ~55 минут",
+        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_shoulders_1", "ex_shoulders_2"]
+      }
+    ]
   },
-  allRecipes: [],
-  weeklyPlan: [], // Array of 7 days
-  currentDayIndex: 0,
-  cartChecked: {} // id -> boolean
+  home_3: {
+    title: "Функциональный тренинг (Дом)",
+    days: [
+      {
+        dayNum: 1,
+        title: "Верх тела",
+        subtitle: "Отжимания, тяги с гантелями, плечи",
+        exercises: ["ex_chest_2", "ex_back_2", "ex_shoulders_1", "ex_arms_3"]
+      },
+      {
+        dayNum: 2,
+        title: "Низ тела",
+        subtitle: "Приседания, выпады, румынская тяга",
+        exercises: ["ex_legs_1", "ex_legs_3", "ex_legs_4"]
+      },
+      {
+        dayNum: 3,
+        title: "Full Body & Руки",
+        subtitle: "Все тело + плечи и руки",
+        exercises: ["ex_chest_3", "ex_shoulders_2", "ex_arms_1", "ex_arms_4"]
+      }
+    ]
+  }
 };
 
-// Initialize App
-document.addEventListener("DOMContentLoaded", async () => {
-  initTelegramWebApp();
-  initTheme();
+// Application State
+const state = {
+  profile: {
+    goal: "muscle_gain",
+    weight: 74.5,
+    height: 180,
+    age: 25,
+    location: "gym",
+    daysPerWeek: 3,
+    streak: 3
+  },
+  selectedDayIndex: 0,
+  activeWorkout: null, // session object when workout is in progress
+  restTimer: {
+    intervalId: null,
+    remainingSeconds: 90
+  },
+  workoutTimer: {
+    intervalId: null,
+    secondsElapsed: 0
+  },
+  nutrition: {
+    waterMl: 1500,
+    meals: [
+      {
+        id: "m_1",
+        type: "breakfast",
+        type_ru: "Завтрак",
+        items: [
+          { name: "Овсяная каша на молоке с ягодами", calories: 340, protein: 12, fats: 7, carbs: 55 },
+          { name: "Яйца вареные (2 шт)", calories: 140, protein: 13, fats: 10, carbs: 1 }
+        ]
+      },
+      {
+        id: "m_2",
+        type: "lunch",
+        type_ru: "Обед",
+        items: [
+          { name: "Куриная грудка гриль (160г)", calories: 260, protein: 48, fats: 5, carbs: 0 },
+          { name: "Рис басмати отварной (150г)", calories: 210, protein: 5, fats: 1, carbs: 45 },
+          { name: "Салат из свежих овощей с маслом", calories: 110, protein: 2, fats: 8, carbs: 7 }
+        ]
+      },
+      {
+        id: "m_3",
+        type: "dinner",
+        type_ru: "Ужин",
+        items: [
+          { name: "Запеченный минтай с брокколи", calories: 240, protein: 32, fats: 4, carbs: 12 }
+        ]
+      },
+      {
+        id: "m_4",
+        type: "snack",
+        type_ru: "Перекус",
+        items: [
+          { name: "Греческий йогурт 2% с орехами", calories: 120, protein: 12, fats: 4, carbs: 6 }
+        ]
+      }
+    ]
+  },
+  measurements: {
+    waist: 78,
+    chest: 102,
+    hips: 96,
+    biceps: 36.5
+  },
+  stats: {
+    totalWorkouts: 14,
+    totalTonnage: 42.5,
+    bestStreak: 12
+  }
+};
+
+// Init application
+document.addEventListener("DOMContentLoaded", () => {
+  initTelegram();
+  loadSavedState();
   initEvents();
-  
-  await loadRecipes();
-  updateBudgetLabels();
+  renderAll();
 });
 
 // Telegram WebApp Setup
-function initTelegramWebApp() {
+function initTelegram() {
   const tg = window.Telegram?.WebApp;
   if (tg) {
     tg.ready();
     tg.expand();
-    
-    // Use Telegram colors if available
-    if (tg.themeParams?.bg_color) {
-      document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-      document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
-    }
   }
 }
 
@@ -393,319 +315,237 @@ function triggerHaptic(type = "light") {
   }
 }
 
-// Load Recipes
-async function loadRecipes() {
+// LocalStorage helpers
+function loadSavedState() {
   try {
-    const res = await fetch('recipes.json');
-    if (res.ok) {
-      state.allRecipes = await res.json();
-    } else {
-      const res2 = await fetch('/data/recipes.json');
-      if (res2.ok) {
-        state.allRecipes = await res2.json();
-      } else {
-        state.allRecipes = FALLBACK_RECIPES;
-      }
+    const saved = localStorage.getItem("onlyfits_state");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.assign(state.profile, parsed.profile || {});
+      Object.assign(state.measurements, parsed.measurements || {});
+      Object.assign(state.stats, parsed.stats || {});
+      if (parsed.nutrition) state.nutrition = parsed.nutrition;
     }
-  } catch (err) {
-    state.allRecipes = FALLBACK_RECIPES;
+  } catch (e) {
+    console.error("Failed to load saved state", e);
   }
 }
 
-// UI Event Handlers
-function initEvents() {
-  // Navigation Tabs
-  document.querySelectorAll(".nav-tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      const targetTab = tab.dataset.tab;
-      switchTab(targetTab);
-    });
-  });
-
-  // Goal Buttons
-  document.querySelectorAll(".goal-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".goal-btn").forEach(b => {
-        b.classList.remove("active", "border-emerald-500", "bg-emerald-50/60", "text-emerald-900");
-        b.classList.add("border-slate-200");
-      });
-      btn.classList.add("active", "border-emerald-500", "bg-emerald-50/60", "text-emerald-900");
-      btn.classList.remove("border-slate-200");
-      state.settings.goal = btn.dataset.value;
-      triggerHaptic("light");
-    });
-  });
-
-  // Family Buttons
-  document.querySelectorAll(".family-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".family-btn").forEach(b => {
-        b.classList.remove("active", "border-emerald-500", "bg-emerald-50", "text-emerald-800");
-        b.classList.add("border-slate-200", "text-slate-700");
-      });
-      btn.classList.add("active", "border-emerald-500", "bg-emerald-50", "text-emerald-800");
-      btn.classList.remove("border-slate-200", "text-slate-700");
-      state.settings.familySize = parseInt(btn.dataset.family, 10);
-      
-      const label = state.settings.familySize === 1 ? '1 чел' : 
-                    state.settings.familySize === 4 ? '4+ чел' : `${state.settings.familySize} чел`;
-      document.getElementById("familyLabel").textContent = label;
-      
-      // Auto-scale default budget with family
-      updateBudgetLabels();
-      triggerHaptic("light");
-    });
-  });
-
-  // Currency Buttons
-  document.querySelectorAll(".curr-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".curr-btn").forEach(b => {
-        b.classList.remove("active", "bg-white", "shadow-xs", "text-slate-900");
-      });
-      btn.classList.add("active", "bg-white", "shadow-xs", "text-slate-900");
-      state.settings.currency = btn.dataset.curr;
-      
-      // Adjust default slider ranges based on currency
-      const range = document.getElementById("budgetRange");
-      if (state.settings.currency === "$") {
-        range.min = 50;
-        range.max = 500;
-        range.step = 10;
-        range.value = 80 * state.settings.familySize;
-      } else if (state.settings.currency === "₸") {
-        range.min = 10000;
-        range.max = 150000;
-        range.step = 2500;
-        range.value = 25000 * state.settings.familySize;
-      } else {
-        range.min = 2000;
-        range.max = 35000;
-        range.step = 500;
-        range.value = 5000 * state.settings.familySize;
-      }
-      
-      state.settings.weeklyBudget = parseInt(range.value, 10);
-      updateBudgetLabels();
-      triggerHaptic("light");
-    });
-  });
-
-  // Budget Range Slider
-  const budgetRange = document.getElementById("budgetRange");
-  budgetRange.addEventListener("input", (e) => {
-    state.settings.weeklyBudget = parseInt(e.target.value, 10);
-    updateBudgetLabels();
-  });
-
-  // Restrictions Multi-select
-  document.querySelectorAll(".tag-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tag = btn.dataset.tag;
-      if (state.settings.restrictions.includes(tag)) {
-        state.settings.restrictions = state.settings.restrictions.filter(t => t !== tag);
-        btn.classList.remove("border-emerald-500", "bg-emerald-50", "text-emerald-800", "font-semibold");
-        btn.classList.add("border-slate-200", "text-slate-700");
-      } else {
-        state.settings.restrictions.push(tag);
-        btn.classList.add("border-emerald-500", "bg-emerald-50", "text-emerald-800", "font-semibold");
-        btn.classList.remove("border-slate-200", "text-slate-700");
-      }
-      triggerHaptic("light");
-    });
-  });
-
-  // Generate Plan Button
-  document.getElementById("generateBtn").addEventListener("click", () => {
-    generateWeeklyPlan();
-    switchTab("tab-menu");
-    triggerHaptic("success");
-    showToast("Меню на 7 дней успешно создано!");
-  });
-
-  // Regenerate Current Day
-  document.getElementById("regenerateDayBtn").addEventListener("click", () => {
-    regenerateDay(state.currentDayIndex);
-    renderCurrentDay();
-    recalculateCart();
-    triggerHaptic("medium");
-    showToast("День обновлен новыми блюдами!");
-  });
-
-  // Modal Close
-  document.getElementById("closeModalBtn").addEventListener("click", closeModal);
-  document.getElementById("recipeModal").addEventListener("click", (e) => {
-    if (e.target.id === "recipeModal") closeModal();
-  });
-
-  // Copy Cart Button
-  document.getElementById("copyListBtn").addEventListener("click", copyCartToClipboard);
-
-  // Send to Telegram
-  document.getElementById("sendTgBtn").addEventListener("click", sendCartToTelegram);
-
-  // Partner Order
-  document.getElementById("partnerOrderBtn").addEventListener("click", () => {
-    showToast("Корзина отправлена в сервис доставки (партнерская ссылка)");
-    triggerHaptic("success");
-  });
-
-  // Theme Toggle
-  document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+function saveState() {
+  try {
+    localStorage.setItem("onlyfits_state", JSON.stringify({
+      profile: state.profile,
+      measurements: state.measurements,
+      stats: state.stats,
+      nutrition: state.nutrition
+    }));
+  } catch (e) {}
 }
 
-function updateBudgetLabels() {
-  const formatted = state.settings.weeklyBudget.toLocaleString();
-  document.getElementById("budgetValue").textContent = formatted;
-  document.getElementById("budgetCurrency").textContent = state.settings.currency;
-  
-  const perPerson = Math.round(state.settings.weeklyBudget / state.settings.familySize).toLocaleString();
-  document.getElementById("budgetPerPerson").textContent = `${perPerson} ${state.settings.currency}`;
+// Event Bindings
+function initEvents() {
+  // Navigation Tabs
+  document.querySelectorAll(".bottom-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const targetId = tab.dataset.tab;
+      switchTab(targetId);
+      triggerHaptic("light");
+    });
+  });
+
+  // Profile Modal
+  document.getElementById("profileBtn").addEventListener("click", () => openProfileModal());
+  document.getElementById("changeProgramBtn").addEventListener("click", () => openProfileModal());
+  document.getElementById("closeProfileBtn").addEventListener("click", () => closeProfileModal());
+  document.getElementById("saveProfileBtn").addEventListener("click", () => saveProfileSettings());
+
+  // Location buttons
+  document.querySelectorAll(".loc-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".loc-btn").forEach(b => {
+        b.classList.remove("active", "border-emerald-500", "bg-emerald-500/10", "text-emerald-400");
+        b.classList.add("border-dark-700", "bg-dark-800", "text-slate-400");
+      });
+      btn.classList.add("active", "border-emerald-500", "bg-emerald-500/10", "text-emerald-400");
+      btn.classList.remove("border-dark-700", "bg-dark-800", "text-slate-400");
+      state.profile.location = btn.dataset.loc;
+      triggerHaptic("light");
+    });
+  });
+
+  // Days buttons
+  document.querySelectorAll(".days-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".days-btn").forEach(b => {
+        b.classList.remove("active", "border-emerald-500", "bg-emerald-500/10", "text-emerald-400");
+        b.classList.add("border-dark-700", "text-slate-400");
+      });
+      btn.classList.add("active", "border-emerald-500", "bg-emerald-500/10", "text-emerald-400");
+      btn.classList.remove("border-dark-700", "text-slate-400");
+      state.profile.daysPerWeek = parseInt(btn.dataset.days, 10);
+      triggerHaptic("light");
+    });
+  });
+
+  // Start Active Workout
+  document.getElementById("startWorkoutBtn").addEventListener("click", () => {
+    startActiveWorkout();
+  });
+
+  document.getElementById("finishWorkoutBtn").addEventListener("click", () => {
+    finishActiveWorkout();
+  });
+
+  // Rest Timer Controls
+  document.getElementById("skipRestBtn").addEventListener("click", () => {
+    stopRestTimer();
+  });
+  document.getElementById("add30sBtn").addEventListener("click", () => {
+    state.restTimer.remainingSeconds += 30;
+    updateRestTimerDisplay();
+    triggerHaptic("light");
+  });
+
+  // Exercise Catalog Modal
+  document.getElementById("openCatalogBtn").addEventListener("click", () => openCatalogModal());
+  document.getElementById("closeCatalogBtn").addEventListener("click", () => closeCatalogModal());
+
+  // Muscle filter buttons in catalog
+  document.querySelectorAll(".muscle-filter").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".muscle-filter").forEach(b => {
+        b.classList.remove("active", "bg-emerald-500", "text-dark-950");
+        b.classList.add("bg-dark-800", "text-slate-400");
+      });
+      btn.classList.add("active", "bg-emerald-500", "text-dark-950");
+      btn.classList.remove("bg-dark-800", "text-slate-400");
+      renderCatalogList(btn.dataset.muscle);
+      triggerHaptic("light");
+    });
+  });
+
+  // Water Tracker
+  document.getElementById("addWaterBtn").addEventListener("click", () => {
+    state.nutrition.waterMl += 250;
+    document.getElementById("waterCurrent").textContent = state.nutrition.waterMl.toLocaleString();
+    triggerHaptic("success");
+    showToast("+250 мл воды добавлено!");
+    saveState();
+  });
+
+  // AI Photo Scanner
+  document.getElementById("aiPhotoBtn").addEventListener("click", () => openAiModal());
+  document.getElementById("closeAiModalBtn").addEventListener("click", () => closeAiModal());
+
+  const dropZone = document.getElementById("dropPhotoZone");
+  const fileInput = document.getElementById("mealPhotoInput");
+  dropZone.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", handlePhotoSelected);
+
+  document.getElementById("aiAddMealBtn").addEventListener("click", () => {
+    addAiMealToDiary();
+  });
+
+  // Weight Log
+  document.getElementById("logWeightBtn").addEventListener("click", () => {
+    const val = prompt("Введите ваш вес сегодня (кг):", state.profile.weight);
+    if (val && !isNaN(parseFloat(val))) {
+      state.profile.weight = parseFloat(val);
+      document.getElementById("currentWeightDisplay").textContent = state.profile.weight;
+      calculateTargetMacros();
+      saveState();
+      triggerHaptic("success");
+      showToast("Вес сохранен!");
+    }
+  });
+
+  // Body Measurements
+  document.getElementById("editMeasurementsBtn").addEventListener("click", () => {
+    const waist = prompt("Талия (см):", state.measurements.waist);
+    const chest = prompt("Грудь (см):", state.measurements.chest);
+    const hips = prompt("Бедра (см):", state.measurements.hips);
+    const biceps = prompt("Бицепс (см):", state.measurements.biceps);
+
+    if (waist) state.measurements.waist = parseFloat(waist);
+    if (chest) state.measurements.chest = parseFloat(chest);
+    if (hips) state.measurements.hips = parseFloat(hips);
+    if (biceps) state.measurements.biceps = parseFloat(biceps);
+
+    renderMeasurements();
+    saveState();
+    triggerHaptic("success");
+    showToast("Замеры обновлены!");
+  });
 }
 
 function switchTab(tabId) {
-  // Hide all sections
-  document.getElementById("tab-settings").classList.add("hidden");
-  document.getElementById("tab-menu").classList.add("hidden");
-  document.getElementById("tab-cart").classList.add("hidden");
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+  const active = document.getElementById(tabId);
+  if (active) active.classList.remove("hidden");
 
-  // Show active
-  const activeSection = document.getElementById(tabId);
-  if (activeSection) {
-    activeSection.classList.remove("hidden");
-  }
-
-  // Update nav buttons
-  document.querySelectorAll(".nav-tab").forEach(tab => {
+  document.querySelectorAll(".bottom-tab").forEach(tab => {
     if (tab.dataset.tab === tabId) {
-      tab.classList.add("text-emerald-600", "font-semibold");
-      tab.classList.remove("text-slate-400", "font-medium");
+      tab.classList.add("text-emerald-400", "font-bold");
+      tab.classList.remove("text-slate-400", "font-semibold");
     } else {
-      tab.classList.remove("text-emerald-600", "font-semibold");
-      tab.classList.add("text-slate-400", "font-medium");
+      tab.classList.remove("text-emerald-400", "font-bold");
+      tab.classList.add("text-slate-400", "font-semibold");
     }
   });
-
-  if (tabId === "tab-menu" && state.weeklyPlan.length === 0) {
-    generateWeeklyPlan();
-  }
 
   window.scrollTo({ top: 0, behavior: "smooth" });
   lucide.createIcons();
 }
 
-// Generate 7-day Plan
-function generateWeeklyPlan() {
-  state.weeklyPlan = [];
-
-  for (let i = 0; i < 7; i++) {
-    const dayName = DAYS_NAMES[i];
-    const breakfast = pickRecipe("breakfast", state.settings.restrictions, state.settings.goal, i);
-    const lunch = pickRecipe("lunch", state.settings.restrictions, state.settings.goal, i);
-    const dinner = pickRecipe("dinner", state.settings.restrictions, state.settings.goal, i);
-    const snack = pickRecipe("snack", state.settings.restrictions, state.settings.goal, i);
-
-    state.weeklyPlan.push({
-      dayName,
-      shortName: DAYS_SHORT[i],
-      meals: {
-        breakfast,
-        lunch,
-        dinner,
-        snack
-      }
-    });
-  }
-
-  // Render Day Tabs
-  renderDayTabs();
-  renderCurrentDay();
-  recalculateCart();
-
-  // Badges
-  document.getElementById("menuBadge").classList.remove("hidden");
+// Render Master
+function renderAll() {
+  renderProfile();
+  renderProgramSchedule();
+  renderCurrentDayExercises();
+  renderNutrition();
+  renderMeasurements();
+  lucide.createIcons();
 }
 
-function pickRecipe(category, restrictions, goal, seed = 0, excludeIds = []) {
-  let candidates = state.allRecipes.filter(r => r.category === category);
+function renderProfile() {
+  document.getElementById("streakCount").textContent = state.profile.streak;
+  document.getElementById("currentWeightDisplay").textContent = state.profile.weight;
 
-  // Exclude already picked if specified
-  if (excludeIds.length > 0) {
-    const filteredExclude = candidates.filter(r => !excludeIds.includes(r.id));
-    if (filteredExclude.length > 0) candidates = filteredExclude;
-  }
-
-  // Filter strictly by restrictions
-  if (restrictions && restrictions.length > 0) {
-    const strictMatch = candidates.filter(r => {
-      return restrictions.every(tag => r.tags.includes(tag));
-    });
-    if (strictMatch.length > 0) candidates = strictMatch;
-  }
-
-  // Sort by goal preference
-  candidates.sort((a, b) => {
-    const aMatch = a.tags.includes(goal) ? 1 : 0;
-    const bMatch = b.tags.includes(goal) ? 1 : 0;
-    return bMatch - aMatch;
-  });
-
-  // Pick deterministic index for variety
-  const idx = (seed) % candidates.length;
-  return candidates[idx] || state.allRecipes[0];
+  const goalText = state.profile.goal === "weight_loss" ? "Похудение" : 
+                   state.profile.goal === "muscle_gain" ? "Набор массы" : "Рельеф и форма";
+  document.getElementById("programGoalBadge").textContent = goalText;
 }
 
-function regenerateDay(dayIndex) {
-  const current = state.weeklyPlan[dayIndex];
-  if (!current) return;
-
-  const bId = current.meals.breakfast?.id;
-  const lId = current.meals.lunch?.id;
-  const dId = current.meals.dinner?.id;
-  const sId = current.meals.snack?.id;
-
-  current.meals.breakfast = pickRecipe("breakfast", state.settings.restrictions, state.settings.goal, Math.floor(Math.random() * 10), [bId]);
-  current.meals.lunch = pickRecipe("lunch", state.settings.restrictions, state.settings.goal, Math.floor(Math.random() * 10), [lId]);
-  current.meals.dinner = pickRecipe("dinner", state.settings.restrictions, state.settings.goal, Math.floor(Math.random() * 10), [dId]);
-  current.meals.snack = pickRecipe("snack", state.settings.restrictions, state.settings.goal, Math.floor(Math.random() * 10), [sId]);
+function getActiveProgram() {
+  const key = `${state.profile.location}_3`;
+  return PROGRAMS[key] || PROGRAMS.gym_3;
 }
 
-function swapSingleMeal(dayIndex, category) {
-  const current = state.weeklyPlan[dayIndex];
-  if (!current) return;
-
-  const currentMealId = current.meals[category]?.id;
-  const newMeal = pickRecipe(category, state.settings.restrictions, state.settings.goal, Math.floor(Math.random() * 20), [currentMealId]);
-
-  current.meals[category] = newMeal;
-  renderCurrentDay();
-  recalculateCart();
-  triggerHaptic("medium");
-  showToast(`Блюдо заменено на «${newMeal.title}»`);
-}
-
-// Render Days Selector
-function renderDayTabs() {
-  const container = document.getElementById("dayTabs");
+// Render Week Program Grid
+function renderProgramSchedule() {
+  const program = getActiveProgram();
+  const container = document.getElementById("weekScheduleGrid");
   container.innerHTML = "";
 
-  state.weeklyPlan.forEach((day, index) => {
+  program.days.forEach((day, idx) => {
+    const isSelected = idx === state.selectedDayIndex;
     const btn = document.createElement("button");
-    const isActive = index === state.currentDayIndex;
-    btn.className = `flex-1 py-2 px-2.5 rounded-xl text-center text-xs font-bold transition shrink-0 ${
-      isActive 
-        ? "bg-emerald-600 text-white shadow-xs" 
-        : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300"
+    btn.className = `p-3 rounded-2xl text-left border transition ${
+      isSelected 
+        ? "bg-emerald-500/10 border-emerald-500 text-white" 
+        : "bg-dark-850 border-dark-700/60 text-slate-400 hover:border-slate-500"
     }`;
+
     btn.innerHTML = `
-      <div>${day.shortName}</div>
-      <div class="text-[10px] font-normal opacity-80">День ${index + 1}</div>
+      <div class="text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-emerald-400' : 'text-slate-500'}">День ${day.dayNum}</div>
+      <div class="text-xs font-bold mt-0.5 text-white truncate">${day.title}</div>
+      <div class="text-[9px] text-slate-400 mt-1">${day.exercises.length} упр.</div>
     `;
 
     btn.addEventListener("click", () => {
-      state.currentDayIndex = index;
-      renderDayTabs();
-      renderCurrentDay();
+      state.selectedDayIndex = idx;
+      renderProgramSchedule();
+      renderCurrentDayExercises();
       triggerHaptic("light");
     });
 
@@ -713,90 +553,41 @@ function renderDayTabs() {
   });
 }
 
-// Render Current Day Meals
-function renderCurrentDay() {
-  const day = state.weeklyPlan[state.currentDayIndex];
-  if (!day) return;
+function renderCurrentDayExercises() {
+  const program = getActiveProgram();
+  const currentDay = program.days[state.selectedDayIndex] || program.days[0];
 
-  document.getElementById("currentDayTitle").textContent = day.dayName;
+  document.getElementById("currentWorkoutTitle").textContent = currentDay.title;
+  document.getElementById("currentWorkoutSubtitle").textContent = currentDay.subtitle;
+  document.getElementById("workoutDayLabel").textContent = `День ${currentDay.dayNum} из ${program.days.length}`;
 
-  const meals = [
-    { key: "breakfast", label: "Завтрак", icon: "sunrise", recipe: day.meals.breakfast },
-    { key: "lunch", label: "Обед", icon: "sun", recipe: day.meals.lunch },
-    { key: "dinner", label: "Ужин", icon: "moon", recipe: day.meals.dinner },
-    { key: "snack", label: "Перекус", icon: "apple", recipe: day.meals.snack }
-  ];
-
-  // Day summary stats
-  let totalCalories = 0;
-  let totalMinutes = 0;
-  meals.forEach(m => {
-    if (m.recipe) {
-      totalCalories += m.recipe.calories || 0;
-      totalMinutes += m.recipe.prep_time_minutes || 0;
-    }
-  });
-  document.getElementById("currentDaySummary").textContent = `4 блюда • ${totalCalories} ккал • готовка ~${totalMinutes} мин`;
-
-  const container = document.getElementById("mealsList");
+  const container = document.getElementById("dayExercisesList");
   container.innerHTML = "";
 
-  meals.forEach(m => {
-    if (!m.recipe) return;
+  currentDay.exercises.forEach((exId, idx) => {
+    const ex = EXERCISES_DB.find(e => e.id === exId);
+    if (!ex) return;
 
     const card = document.createElement("div");
-    card.className = "bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2.5";
-    
-    // Scale cost for display
-    const cost = Math.round(m.recipe.estimated_cost_rub * (state.settings.currency === "$" ? 0.012 : state.settings.currency === "₸" ? 5.5 : 1));
+    card.className = "bg-dark-900 p-3.5 rounded-2xl border border-dark-700/80 flex items-center justify-between";
 
     card.innerHTML = `
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 flex items-center gap-1">
-            <i data-lucide="${m.icon}" class="w-3 h-3"></i>
-            ${m.label}
-          </span>
-          <span class="text-[11px] text-slate-400 font-medium">⏱️ ${m.recipe.prep_time_minutes} мин</span>
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center text-xs font-black text-emerald-400">
+          ${idx + 1}
         </div>
-        <button class="swap-btn text-xs text-slate-400 hover:text-emerald-600 transition flex items-center gap-1 p-1" title="Заменить блюдо">
-          <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
-          <span class="text-[10px]">Заменить</span>
-        </button>
-      </div>
-
-      <div>
-        <h4 class="font-bold text-sm text-slate-900 leading-snug cursor-pointer hover:text-emerald-700 transition recipe-click">
-          ${m.recipe.title}
-        </h4>
-        <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-          <span>🔥 ${m.recipe.calories} ккал</span>
-          <span>•</span>
-          <span>Б: ${m.recipe.protein}г</span>
-          <span>•</span>
-          <span>Ж: ${m.recipe.fats}г</span>
-          <span>•</span>
-          <span>У: ${m.recipe.carbs}г</span>
+        <div>
+          <h4 class="text-xs font-bold text-white">${ex.name}</h4>
+          <p class="text-[10px] text-slate-400">4 подхода • 8-12 повт. • ${ex.equipment}</p>
         </div>
       </div>
-
-      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span class="text-slate-400">Порция: ~${cost} ${state.settings.currency}</span>
-        <button class="recipe-click font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-0.5">
-          Рецепт и шаги <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-        </button>
-      </div>
+      <button class="p-2 text-slate-400 hover:text-white transition info-btn" title="Техника">
+        <i data-lucide="info" class="w-4 h-4"></i>
+      </button>
     `;
 
-    // Swap button event
-    card.querySelector(".swap-btn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      swapSingleMeal(state.currentDayIndex, m.key);
-    });
-
-    // Modal open event
-    card.querySelectorAll(".recipe-click").forEach(el => {
-      el.addEventListener("click", () => openModal(m.recipe));
+    card.querySelector(".info-btn").addEventListener("click", () => {
+      alert(`💡 Техника выполнения: ${ex.name}\n\n${ex.tips}`);
     });
 
     container.appendChild(card);
@@ -805,213 +596,432 @@ function renderCurrentDay() {
   lucide.createIcons();
 }
 
-// Recalculate Aggregated Cart
-function recalculateCart() {
-  const aggregated = {};
-  const multiplier = state.settings.familySize;
+// ==================== ACTIVE WORKOUT ENGINE ====================
 
-  state.weeklyPlan.forEach(day => {
-    Object.values(day.meals).forEach(recipe => {
-      if (!recipe || !recipe.ingredients) return;
+function startActiveWorkout() {
+  const program = getActiveProgram();
+  const currentDay = program.days[state.selectedDayIndex] || program.days[0];
 
-      recipe.ingredients.forEach(ing => {
-        const key = ing.name.trim();
-        const dept = ing.department || "Другие продукты";
-
-        if (!aggregated[dept]) aggregated[dept] = {};
-
-        if (!aggregated[dept][key]) {
-          aggregated[dept][key] = {
-            name: ing.name,
-            amount: 0,
-            unit: ing.unit,
-            department: dept
-          };
-        }
-        aggregated[dept][key].amount += (ing.amount * multiplier);
-      });
-    });
-  });
-
-  renderCart(aggregated);
-}
-
-// Render Cart UI
-function renderCart(aggregated) {
-  const container = document.getElementById("cartCategories");
-  container.innerHTML = "";
-
-  let totalItemsCount = 0;
-  let checkedCount = 0;
-
-  const departmentIcons = {
-    "Овощи, фрукты и зелень": "carrot",
-    "Мясо и птица": "drumstick",
-    "Рыба и морепродукты": "fish",
-    "Молочные продукты и альтернативы": "milk",
-    "Бакалея и крупы": "wheat",
-    "Масла, соусы и специи": "sparkles",
-    "Хлеб и выпечка": "croissant"
+  // Initialize active workout session
+  state.activeWorkout = {
+    dayTitle: currentDay.title,
+    startTime: Date.now(),
+    exercises: currentDay.exercises.map(exId => {
+      const ex = EXERCISES_DB.find(e => e.id === exId);
+      return {
+        id: exId,
+        name: ex ? ex.name : "Упражнение",
+        sets: [
+          { setNum: 1, prev: "80 кг × 10", weight: 80, reps: 10, done: false },
+          { setNum: 2, prev: "80 кг × 10", weight: 80, reps: 10, done: false },
+          { setNum: 3, prev: "85 кг × 8", weight: 85, reps: 8, done: false },
+          { setNum: 4, prev: "85 кг × 8", weight: 85, reps: 8, done: false }
+        ]
+      };
+    })
   };
 
-  Object.keys(aggregated).sort().forEach(dept => {
-    const items = Object.values(aggregated[dept]);
-    if (items.length === 0) return;
+  document.getElementById("activeModalTitle").textContent = currentDay.title;
+  renderActiveWorkoutExercises();
 
-    const deptBlock = document.createElement("div");
-    deptBlock.className = "bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2.5";
+  // Start timer
+  startWorkoutTimer();
 
-    const icon = departmentIcons[dept] || "shopping-bag";
+  document.getElementById("activeWorkoutModal").classList.remove("hidden");
+  triggerHaptic("success");
+}
 
-    deptBlock.innerHTML = `
-      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-          <i data-lucide="${icon}" class="w-3.5 h-3.5 text-emerald-600"></i>
-          ${dept}
-        </h3>
-        <span class="text-[10px] font-semibold text-slate-400">${items.length} поз.</span>
+function renderActiveWorkoutExercises() {
+  const container = document.getElementById("activeExercisesContainer");
+  container.innerHTML = "";
+
+  state.activeWorkout.exercises.forEach((exItem, exIdx) => {
+    const card = document.createElement("div");
+    card.className = "bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3";
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between border-b border-dark-700/60 pb-2">
+        <h3 class="text-xs font-black text-white">${exIdx + 1}. ${exItem.name}</h3>
+        <span class="text-[10px] text-slate-400 font-bold">${exItem.sets.length} сета</span>
       </div>
-      <div class="space-y-1.5" id="dept-items-${dept.replace(/\s+/g, '-')}"></div>
+
+      <div class="space-y-1.5" id="sets-container-${exIdx}">
+        <div class="grid grid-cols-12 gap-2 text-[10px] uppercase font-bold text-slate-500 px-2 pb-1">
+          <div class="col-span-2">Сет</div>
+          <div class="col-span-3">Пред.</div>
+          <div class="col-span-3">Кг</div>
+          <div class="col-span-2">Повт</div>
+          <div class="col-span-2 text-right">Статус</div>
+        </div>
+      </div>
     `;
 
-    const itemsContainer = deptBlock.querySelector("div[id^='dept-items']");
+    const setsContainer = card.querySelector(`#sets-container-${exIdx}`);
 
-    items.forEach(item => {
-      totalItemsCount++;
-      const isChecked = !!state.cartChecked[item.name];
-      if (isChecked) checkedCount++;
-
-      const roundedAmount = Math.ceil(item.amount * 10) / 10;
-
-      const itemRow = document.createElement("label");
-      itemRow.className = `flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer select-none transition ${
-        isChecked ? "bg-slate-50 text-slate-400 line-through" : "hover:bg-slate-50 text-slate-700"
+    exItem.sets.forEach((set, setIdx) => {
+      const row = document.createElement("div");
+      row.className = `grid grid-cols-12 gap-2 items-center p-2 rounded-xl text-xs transition border ${
+        set.done 
+          ? "bg-emerald-500/10 border-emerald-500/30 text-white" 
+          : "bg-dark-850 border-dark-700/60 text-slate-300"
       }`;
 
-      itemRow.innerHTML = `
-        <div class="flex items-center gap-2.5">
-          <input type="checkbox" ${isChecked ? "checked" : ""} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
-          <span class="font-medium">${item.name}</span>
+      row.innerHTML = `
+        <div class="col-span-2 font-bold">${set.setNum}</div>
+        <div class="col-span-3 text-[10px] text-slate-400 truncate">${set.prev}</div>
+        <div class="col-span-3">
+          <input type="number" value="${set.weight}" class="w-full bg-dark-800 text-white font-bold rounded-lg px-2 py-1 border border-dark-700 text-center outline-none focus:border-emerald-500" ${set.done ? 'disabled' : ''}>
         </div>
-        <span class="font-bold text-[11px] text-slate-900 ${isChecked ? 'text-slate-400' : ''}">${roundedAmount} ${item.unit}</span>
+        <div class="col-span-2">
+          <input type="number" value="${set.reps}" class="w-full bg-dark-800 text-white font-bold rounded-lg px-2 py-1 border border-dark-700 text-center outline-none focus:border-emerald-500" ${set.done ? 'disabled' : ''}>
+        </div>
+        <div class="col-span-2 text-right">
+          <button class="set-check-btn w-7 h-7 rounded-lg flex items-center justify-center transition ${
+            set.done ? 'bg-emerald-500 text-dark-950 font-black' : 'bg-dark-800 border border-dark-700 text-slate-400 hover:text-white'
+          }">
+            ${set.done ? '✓' : ''}
+          </button>
+        </div>
       `;
 
-      itemRow.querySelector("input").addEventListener("change", (e) => {
-        state.cartChecked[item.name] = e.target.checked;
-        triggerHaptic("light");
-        recalculateCart();
+      // Check set click
+      row.querySelector(".set-check-btn").addEventListener("click", () => {
+        set.done = !set.done;
+        triggerHaptic("success");
+        renderActiveWorkoutExercises();
+
+        if (set.done) {
+          startRestTimer(90);
+        }
       });
 
-      itemsContainer.appendChild(itemRow);
+      setsContainer.appendChild(row);
     });
 
-    container.appendChild(deptBlock);
+    container.appendChild(card);
+  });
+}
+
+function startWorkoutTimer() {
+  state.workoutTimer.secondsElapsed = 0;
+  if (state.workoutTimer.intervalId) clearInterval(state.workoutTimer.intervalId);
+
+  state.workoutTimer.intervalId = setInterval(() => {
+    state.workoutTimer.secondsElapsed++;
+    const mins = String(Math.floor(state.workoutTimer.secondsElapsed / 60)).padStart(2, "0");
+    const secs = String(state.workoutTimer.secondsElapsed % 60).padStart(2, "0");
+    document.getElementById("workoutTimer").textContent = `${mins}:${secs}`;
+  }, 1000);
+}
+
+function startRestTimer(seconds = 90) {
+  state.restTimer.remainingSeconds = seconds;
+  document.getElementById("restTimerBar").classList.remove("hidden");
+  updateRestTimerDisplay();
+
+  if (state.restTimer.intervalId) clearInterval(state.restTimer.intervalId);
+
+  state.restTimer.intervalId = setInterval(() => {
+    state.restTimer.remainingSeconds--;
+    updateRestTimerDisplay();
+
+    if (state.restTimer.remainingSeconds <= 0) {
+      stopRestTimer();
+      triggerHaptic("warning");
+      showToast("⏰ Время отдыха вышло! Начинайте следующий подход.");
+    }
+  }, 1000);
+}
+
+function updateRestTimerDisplay() {
+  const m = String(Math.floor(state.restTimer.remainingSeconds / 60)).padStart(2, "0");
+  const s = String(state.restTimer.remainingSeconds % 60).padStart(2, "0");
+  document.getElementById("restTimerDisplay").textContent = `${m}:${s}`;
+}
+
+function stopRestTimer() {
+  if (state.restTimer.intervalId) clearInterval(state.restTimer.intervalId);
+  document.getElementById("restTimerBar").classList.add("hidden");
+  triggerHaptic("light");
+}
+
+function finishActiveWorkout() {
+  if (!confirm("Завершить тренировку и сохранить результаты?")) return;
+
+  // Tonnage calculation
+  let totalTonnageKg = 0;
+  let totalSetsDone = 0;
+
+  state.activeWorkout.exercises.forEach(ex => {
+    ex.sets.forEach(s => {
+      if (s.done) {
+        totalTonnageKg += (s.weight * s.reps);
+        totalSetsDone++;
+      }
+    });
   });
 
-  // Update Cart Progress & Badges
-  document.getElementById("cartItemsCount").textContent = `${totalItemsCount} позиций без излишков`;
-  document.getElementById("cartBadge").textContent = totalItemsCount;
-  document.getElementById("cartBadge").classList.remove("hidden");
+  const durationMin = Math.round(state.workoutTimer.secondsElapsed / 60) || 1;
 
-  document.getElementById("cartProgressText").textContent = `${checkedCount} / ${totalItemsCount}`;
-  const pct = totalItemsCount > 0 ? Math.round((checkedCount / totalItemsCount) * 100) : 0;
-  document.getElementById("cartProgressBar").style.width = `${pct}%`;
+  // Update overall stats
+  state.stats.totalWorkouts += 1;
+  state.stats.totalTonnage = Math.round((state.stats.totalTonnage + (totalTonnageKg / 1000)) * 10) / 10;
+  state.profile.streak += 1;
 
-  // Estimate total cost compared to user budget
-  const estimatedTotal = Math.round(state.settings.weeklyBudget * 0.88);
-  document.getElementById("cartEstimatedCost").textContent = `~${estimatedTotal.toLocaleString()} ${state.settings.currency}`;
+  // Clean timers
+  if (state.workoutTimer.intervalId) clearInterval(state.workoutTimer.intervalId);
+  stopRestTimer();
+
+  document.getElementById("activeWorkoutModal").classList.add("hidden");
+  saveState();
+  renderAll();
+
+  triggerHaptic("success");
+  alert(`🔥 Отличная работа!\n\nТренировка завершена за ${durationMin} мин.\nВыполнено подходов: ${totalSetsDone}\nСуммарный тоннаж: ${totalTonnageKg.toLocaleString()} кг\nСерия: ${state.profile.streak} дня подряд!`);
+}
+
+// ==================== NUTRITION & MACROS ENGINE ====================
+
+function calculateTargetMacros() {
+  // Mifflin-St Jeor formula
+  const { weight, height, age, goal } = state.profile;
+  const bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  const tdee = bmr * 1.4;
+
+  let target = tdee;
+  if (goal === "weight_loss") target = tdee - 450;
+  else if (goal === "muscle_gain") target = tdee + 350;
+
+  const targetCalories = Math.round(target);
+  const targetProtein = Math.round(weight * 2.0); // 2g per kg
+  const targetFats = Math.round(weight * 0.9);   // 0.9g per kg
+  const remainingCals = targetCalories - (targetProtein * 4 + targetFats * 9);
+  const targetCarbs = Math.max(50, Math.round(remainingCals / 4));
+
+  return { targetCalories, targetProtein, targetFats, targetCarbs };
+}
+
+function renderNutrition() {
+  const targets = calculateTargetMacros();
+
+  // Sum up logged meals
+  let eatenCalories = 0;
+  let eatenProtein = 0;
+  let eatenFats = 0;
+  let eatenCarbs = 0;
+
+  state.nutrition.meals.forEach(meal => {
+    meal.items.forEach(item => {
+      eatenCalories += item.calories;
+      eatenProtein += item.protein;
+      eatenFats += item.fats;
+      eatenCarbs += item.carbs;
+    });
+  });
+
+  const remaining = Math.max(0, targets.targetCalories - eatenCalories);
+
+  document.getElementById("eatenCalories").textContent = eatenCalories.toLocaleString();
+  document.getElementById("targetCalories").textContent = targets.targetCalories.toLocaleString();
+  document.getElementById("remainingCalories").textContent = `${remaining.toLocaleString()} ккал`;
+
+  const calPct = Math.min(100, Math.round((eatenCalories / targets.targetCalories) * 100));
+  document.getElementById("caloriesBar").style.width = `${calPct}%`;
+
+  document.getElementById("proteinCurrent").textContent = eatenProtein;
+  document.getElementById("proteinTarget").textContent = targets.targetProtein;
+  document.getElementById("proteinBar").style.width = `${Math.min(100, Math.round((eatenProtein / targets.targetProtein) * 100))}%`;
+
+  document.getElementById("fatsCurrent").textContent = eatenFats;
+  document.getElementById("fatsTarget").textContent = targets.targetFats;
+  document.getElementById("fatsBar").style.width = `${Math.min(100, Math.round((eatenFats / targets.targetFats) * 100))}%`;
+
+  document.getElementById("carbsCurrent").textContent = eatenCarbs;
+  document.getElementById("carbsTarget").textContent = targets.targetCarbs;
+  document.getElementById("carbsBar").style.width = `${Math.min(100, Math.round((eatenCarbs / targets.targetCarbs) * 100))}%`;
+
+  document.getElementById("waterCurrent").textContent = state.nutrition.waterMl.toLocaleString();
+
+  // Render Meals List
+  const container = document.getElementById("mealsTrackerList");
+  container.innerHTML = "";
+
+  state.nutrition.meals.forEach(m => {
+    let mealCals = 0;
+    m.items.forEach(i => mealCals += i.calories);
+
+    const block = document.createElement("div");
+    block.className = "bg-dark-900 p-3.5 rounded-2xl border border-dark-700/80 space-y-2";
+
+    block.innerHTML = `
+      <div class="flex items-center justify-between border-b border-dark-700/60 pb-1.5">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-white">${m.type_ru}</span>
+          <span class="text-[10px] text-emerald-400 font-semibold">${mealCals} ккал</span>
+        </div>
+        <button class="add-food-btn text-xs text-slate-400 hover:text-emerald-400 transition flex items-center gap-1 font-semibold">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Добавить</span>
+        </button>
+      </div>
+      <div class="space-y-1" id="items-${m.id}"></div>
+    `;
+
+    const itemsContainer = block.querySelector(`#items-${m.id}`);
+    m.items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between text-xs py-1 text-slate-300";
+      row.innerHTML = `
+        <span class="truncate max-w-[200px]">${item.name}</span>
+        <div class="text-slate-400 text-[11px] shrink-0">
+          <span>${item.calories} ккал</span>
+          <span class="text-[10px] text-slate-500"> (Б:${item.protein} Ж:${item.fats} У:${item.carbs})</span>
+        </div>
+      `;
+      itemsContainer.appendChild(row);
+    });
+
+    block.querySelector(".add-food-btn").addEventListener("click", () => {
+      const name = prompt("Название продукта:");
+      const cals = prompt("Калории (ккал):", "250");
+      if (name && cals) {
+        m.items.push({
+          name: name,
+          calories: parseInt(cals, 10),
+          protein: Math.round(parseInt(cals, 10) * 0.08),
+          fats: Math.round(parseInt(cals, 10) * 0.03),
+          carbs: Math.round(parseInt(cals, 10) * 0.12)
+        });
+        renderNutrition();
+        saveState();
+        triggerHaptic("success");
+      }
+    });
+
+    container.appendChild(block);
+  });
 
   lucide.createIcons();
 }
 
-// Open Recipe Details Modal
-function openModal(recipe) {
-  if (!recipe) return;
-
-  document.getElementById("modalTitle").textContent = recipe.title;
-  document.getElementById("modalTime").textContent = `${recipe.prep_time_minutes} мин`;
-  document.getElementById("modalCalories").textContent = `${recipe.calories} ккал`;
-  document.getElementById("modalProtein").textContent = `${recipe.protein} г`;
-  document.getElementById("modalFatsCarbs").textContent = `${recipe.fats} / ${recipe.carbs} г`;
-
-  const ingList = document.getElementById("modalIngredients");
-  ingList.innerHTML = "";
-  recipe.ingredients.forEach(i => {
-    const li = document.createElement("li");
-    li.className = "flex items-center justify-between border-b border-slate-100 pb-1";
-    li.innerHTML = `<span>${i.name}</span><span class="font-semibold text-slate-800">${i.amount} ${i.unit}</span>`;
-    ingList.appendChild(li);
-  });
-
-  const stepsList = document.getElementById("modalSteps");
-  stepsList.innerHTML = "";
-  recipe.steps.forEach(step => {
-    const li = document.createElement("li");
-    li.textContent = step;
-    stepsList.appendChild(li);
-  });
-
-  document.getElementById("recipeModal").classList.remove("hidden");
+// AI Photo Scanner Logic
+function openAiModal() {
+  document.getElementById("aiModal").classList.remove("hidden");
+  document.getElementById("aiAnalysisResult").classList.add("hidden");
   triggerHaptic("light");
 }
 
-function closeModal() {
-  document.getElementById("recipeModal").classList.add("hidden");
+function closeAiModal() {
+  document.getElementById("aiModal").classList.add("hidden");
 }
 
-// Copy Cart to Clipboard
-function copyCartToClipboard() {
-  let text = `🛒 СПИСОК ПОКУПОК НА НЕДЕЛЮ (${state.settings.familySize} чел)\n`;
-  text += `🎯 Цель: ${getGoalTitle(state.settings.goal)} | Бюджет: ~${state.settings.weeklyBudget} ${state.settings.currency}\n\n`;
+function handlePhotoSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const aggregated = {};
-  state.weeklyPlan.forEach(day => {
-    Object.values(day.meals).forEach(recipe => {
-      if (!recipe) return;
-      recipe.ingredients.forEach(ing => {
-        const dept = ing.department || "Разное";
-        if (!aggregated[dept]) aggregated[dept] = {};
-        if (!aggregated[dept][ing.name]) aggregated[dept][ing.name] = { amount: 0, unit: ing.unit };
-        aggregated[dept][ing.name].amount += (ing.amount * state.settings.familySize);
-      });
-    });
-  });
+  const dropZone = document.getElementById("dropPhotoZone");
+  dropZone.innerHTML = `
+    <div class="animate-pulse space-y-2">
+      <div class="text-2xl">⚡️</div>
+      <div class="text-xs font-bold text-emerald-400">ИИ анализирует фото тарелки...</div>
+      <div class="text-[10px] text-slate-400">Определение ингредиентов и веса порции</div>
+    </div>
+  `;
 
-  Object.keys(aggregated).forEach(dept => {
-    text += `🔹 ${dept.toUpperCase()}:\n`;
-    Object.keys(aggregated[dept]).forEach(name => {
-      const item = aggregated[dept][name];
-      const check = state.cartChecked[name] ? "[x]" : "[ ]";
-      text += `  ${check} ${name} — ${Math.ceil(item.amount * 10) / 10} ${item.unit}\n`;
-    });
-    text += `\n`;
-  });
-
-  navigator.clipboard.writeText(text).then(() => {
-    showToast("Список скопирован в буфер обмена!");
+  setTimeout(() => {
+    dropZone.innerHTML = `
+      <div class="text-xs font-bold text-emerald-400">✓ Фото успешно проанализировано</div>
+    `;
+    document.getElementById("aiAnalysisResult").classList.remove("hidden");
     triggerHaptic("success");
+  }, 1200);
+}
+
+function addAiMealToDiary() {
+  const lunch = state.nutrition.meals.find(m => m.type === "lunch") || state.nutrition.meals[0];
+  lunch.items.push({
+    name: "Куриная грудка с рисом и овощами (ИИ-скан)",
+    calories: 480,
+    protein: 42,
+    fats: 8,
+    carbs: 55
+  });
+
+  closeAiModal();
+  renderNutrition();
+  saveState();
+  triggerHaptic("success");
+  showToast("Блюдо с фото успешно добавлено в обед!");
+}
+
+// Exercise Catalog
+function openCatalogModal() {
+  document.getElementById("catalogModal").classList.remove("hidden");
+  renderCatalogList("all");
+  triggerHaptic("light");
+}
+
+function closeCatalogModal() {
+  document.getElementById("catalogModal").classList.add("hidden");
+}
+
+function renderCatalogList(filter = "all") {
+  const container = document.getElementById("catalogList");
+  container.innerHTML = "";
+
+  const filtered = filter === "all" ? EXERCISES_DB : EXERCISES_DB.filter(e => e.muscle === filter);
+
+  filtered.forEach(ex => {
+    const card = document.createElement("div");
+    card.className = "bg-dark-850 p-3 rounded-2xl border border-dark-700/60 space-y-1.5";
+    card.innerHTML = `
+      <div class="flex items-center justify-between">
+        <h4 class="text-xs font-bold text-white">${ex.name}</h4>
+        <span class="text-[10px] font-semibold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10">${ex.muscle_ru}</span>
+      </div>
+      <p class="text-[11px] text-slate-400">${ex.tips}</p>
+      <div class="text-[10px] text-slate-500 font-medium">Оборудование: ${ex.equipment}</div>
+    `;
+    container.appendChild(card);
   });
 }
 
-function sendCartToTelegram() {
-  const tg = window.Telegram?.WebApp;
-  let text = `🛒 Готовый список покупок на 7 дней (${state.settings.familySize} чел.) готов!\nПозиций: ${document.getElementById("cartBadge").textContent}`;
-
-  if (tg && tg.sendData) {
-    tg.sendData(JSON.stringify({ action: "cart_export", itemsCount: document.getElementById("cartBadge").textContent }));
-    triggerHaptic("success");
-  } else {
-    // If opened in browser outside Telegram, open share link
-    const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
-  }
+// Profile Modal
+function openProfileModal() {
+  document.getElementById("inputWeight").value = state.profile.weight;
+  document.getElementById("inputHeight").value = state.profile.height;
+  document.getElementById("inputAge").value = state.profile.age;
+  document.getElementById("userGoalSelect").value = state.profile.goal;
+  document.getElementById("profileModal").classList.remove("hidden");
+  triggerHaptic("light");
 }
 
-function getGoalTitle(g) {
-  if (g === "weight_loss") return "Похудение";
-  if (g === "budget") return "Экономия";
-  if (g === "muscle_gain") return "Набор массы";
-  return "Баланс и ЗОЖ";
+function closeProfileModal() {
+  document.getElementById("profileModal").classList.add("hidden");
+}
+
+function saveProfileSettings() {
+  state.profile.weight = parseFloat(document.getElementById("inputWeight").value) || 75;
+  state.profile.height = parseFloat(document.getElementById("inputHeight").value) || 180;
+  state.profile.age = parseInt(document.getElementById("inputAge").value, 10) || 25;
+  state.profile.goal = document.getElementById("userGoalSelect").value;
+
+  closeProfileModal();
+  saveState();
+  renderAll();
+  triggerHaptic("success");
+  showToast("Параметры профиля сохранены!");
+}
+
+function renderMeasurements() {
+  document.getElementById("waistDisplay").textContent = `${state.measurements.waist} см`;
+  document.getElementById("chestDisplay").textContent = `${state.measurements.chest} см`;
+  document.getElementById("hipsDisplay").textContent = `${state.measurements.hips} см`;
+  document.getElementById("armDisplay").textContent = `${state.measurements.biceps} см`;
+
+  document.getElementById("totalWorkoutsCount").textContent = state.stats.totalWorkouts;
+  document.getElementById("totalTonnageCount").textContent = `${state.stats.totalTonnage} т`;
+  document.getElementById("bestStreakCount").textContent = state.stats.bestStreak;
 }
 
 function showToast(msg) {
@@ -1024,18 +1034,4 @@ function showToast(msg) {
     toast.classList.remove("opacity-100");
     toast.classList.add("opacity-0");
   }, 2500);
-}
-
-// Dark / Light Theme
-function initTheme() {
-  const saved = localStorage.getItem("meal_theme");
-  if (saved === "dark") {
-    document.documentElement.classList.add("dark");
-  }
-}
-
-function toggleTheme() {
-  const isDark = document.documentElement.classList.toggle("dark");
-  localStorage.setItem("meal_theme", isDark ? "dark" : "light");
-  triggerHaptic("light");
 }

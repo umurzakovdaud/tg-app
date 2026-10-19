@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smart-meal-planner
+    name: onlyfits-tg
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt

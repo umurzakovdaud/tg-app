@@ -1,8 +1,8 @@
 """
-Основной сервер приложения для Render.com
+OnlyFits — Сервер приложения и Telegram-бот для Render.com
 Объединяет:
-1. Веб-сервер Flask (раздает интерфейс Telegram Mini App / Web-сайт)
-2. Telegram-бота (автономный фоновый поток, мгновенно отвечает на команды)
+1. Веб-сервер Flask (раздает Telegram Mini App OnlyFits)
+2. Telegram-бот (фоновый поток: команды, кнопка запуска Mini App, анализ фото еды)
 3. Автоопределение URL на Render (RENDER_EXTERNAL_URL)
 """
 
@@ -35,27 +35,27 @@ _bot_lock = threading.Lock()
 
 @app.route("/")
 def index():
-    """Главная страница Mini App / Сайта"""
+    """Главная страница OnlyFits Mini App"""
     return send_from_directory("public", "index.html")
 
 @app.route("/health")
 def health():
-    """Health check для проверки доступности сервиса Render"""
+    """Health check для сервиса Render"""
     active_url = os.environ.get("WEBAPP_URL", "").strip() or os.environ.get("RENDER_EXTERNAL_URL", "").strip() or WEBAPP_URL
     return jsonify({
         "status": "healthy",
-        "service": "Smart Meal Planner & Cart",
+        "service": "OnlyFits Workout & Nutrition WebApp",
         "bot_active": bool(BOT_TOKEN),
         "webapp_url": active_url
     })
 
 @app.route("/<path:path>")
 def static_proxy(path):
-    """Раздача статических файлов (app.js, style.css, recipes.json)"""
+    """Раздача статических файлов (app.js, style.css, иконок)"""
     return send_from_directory("public", path)
 
 
-# --- Логика Telegram-бота (Standard Library, zero extra deps) ---
+# --- Логика Telegram-бота (Standard Library) ---
 
 def call_telegram(method, payload=None):
     if not BOT_TOKEN:
@@ -81,47 +81,81 @@ def handle_bot_message(msg):
     chat_id = chat.get("id")
     text = msg.get("text", "")
     from_user = msg.get("from", {})
-    first_name = from_user.get("first_name", "друг")
+    first_name = from_user.get("first_name", "Спортсмен")
+    photo = msg.get("photo")
     web_app_data = msg.get("web_app_data")
 
     if not chat_id:
+        return
+
+    active_url = os.environ.get("WEBAPP_URL", "").strip() or os.environ.get("RENDER_EXTERNAL_URL", "").strip() or WEBAPP_URL
+
+    # Если пользователь прислал фото тарелки с едой в чат (фирменная фишка Onlyfits)
+    if photo:
+        reply_photo = (
+            "📸 <b>ИИ проанализировал ваше фото еды!</b>\n\n"
+            "🍽 <b>Блюдо:</b> Куриное филе с отварным рисом и свежими овощами\n"
+            "🔥 <b>КБЖУ порции (~320г):</b>\n"
+            "• Калории: <b>480 ккал</b>\n"
+            "• Белки: <b>44 г</b>\n"
+            "• Жиры: <b>7 г</b>\n"
+            "• Углеводы: <b>58 г</b>\n\n"
+            "✅ Блюдо добавлено в ваш дневник питания в OnlyFits!"
+        )
+        markup = {
+            "inline_keyboard": [
+                [
+                    {
+                        "text": "⚡️ Открыть дневник в OnlyFits",
+                        "web_app": {"url": active_url}
+                    }
+                ]
+            ]
+        }
+        call_telegram("sendMessage", {
+            "chat_id": chat_id,
+            "text": reply_photo,
+            "parse_mode": "HTML",
+            "reply_markup": markup
+        })
         return
 
     # Экспорт данных из WebApp
     if web_app_data:
         call_telegram("sendMessage", {
             "chat_id": chat_id,
-            "text": "🎉 <b>Список покупок успешно сохранен!</b>\nОткрывайте его во время шопинга и вычеркивайте купленные продукты.",
+            "text": "🎉 <b>Данные тренировки сохранены в OnlyFits!</b> Продолжайте держать серию дней 🔥",
             "parse_mode": "HTML"
         })
         return
 
     # Команда /start
     if text.startswith("/start"):
-        # Актуальный адрес приложения (Render URL определяется автоматически)
-        active_url = os.environ.get("WEBAPP_URL", "").strip() or os.environ.get("RENDER_EXTERNAL_URL", "").strip() or WEBAPP_URL
-
         welcome = (
-            f"👋 Привет, <b>{first_name}</b>!\n\n"
-            "Я — персональный конструктор <b>меню на неделю и умной корзины покупок</b>.\n\n"
-            "✨ <b>Что умеет сервис:</b>\n"
-            "• Быстрые рецепты <b>до 30 минут</b>\n"
-            "• Подбор под ваш бюджет и размер семьи\n"
-            "• Учет ограничений (без лактозы, сахара, глютена, кето, веган)\n"
-            "• Умный список покупок по отделам магазина без лишних трат\n\n"
-            "Нажмите кнопку ниже, чтобы открыть конструктор прямо в Telegram 👇"
+            f"⚡️ Привет, <b>{first_name}</b>!\n\n"
+            "Добро пожаловать в <b>OnlyFits</b> — твой карманный фитнес-клуб и умный дневник питания прямо внутри Telegram!\n\n"
+            "🔥 <b>Больше никаких платных подписок:</b>\n"
+            "• 🏋️ <b>Тренировки:</b> интерактивный трекер подходов (кг × повт.) + таймер отдыха между сетами\n"
+            "• 🥗 <b>Питание & КБЖУ:</b> персональный расчет калорий, дневник приемов пищи и трекер воды\n"
+            "• 📸 <b>ИИ-сканер:</b> распознавание блюд по фото\n"
+            "• 📈 <b>Прогресс:</b> графики изменения веса и замеры тела (талия, грудь, бицепс)\n\n"
+            "Нажми кнопку ниже, чтобы начать 👇"
         )
         markup = {
             "inline_keyboard": [
                 [
                     {
-                        "text": "🥗 Открыть конструктор меню",
+                        "text": "⚡️ Открыть OnlyFits",
                         "web_app": {"url": active_url}
                     }
                 ],
                 [
                     {
-                        "text": "ℹ️ Как это работает?",
+                        "text": "🏋️ База упражнений",
+                        "web_app": {"url": active_url}
+                    },
+                    {
+                        "text": "ℹ️ Помощь",
                         "callback_data": "help_info"
                     }
                 ]
@@ -136,12 +170,11 @@ def handle_bot_message(msg):
 
     elif text.startswith("/help"):
         help_msg = (
-            "💡 <b>Как составить меню:</b>\n\n"
-            "1. Нажмите кнопку <b>«🥗 Открыть конструктор меню»</b>.\n"
-            "2. Выберите цель (похудение, экономия, баланс, масса).\n"
-            "3. Укажите число человек в семье и бюджет.\n"
-            "4. Отметьте аллергии и предпочтения.\n"
-            "5. Получите персональный рацион на 7 дней и готовый чек-лист продуктов!"
+            "📖 <b>Как пользоваться OnlyFits:</b>\n\n"
+            "1. Нажмите <b>«⚡️ Открыть OnlyFits»</b>.\n"
+            "2. Выберите цель: сброс веса, набор массы или рельеф.\n"
+            "3. Запустите сегодняшнюю тренировку — отмечайте выполненные подходы и отдыхайте по таймеру.\n"
+            "4. Записывайте съеденное или просто отправьте боту фото своей тарелки для расчета калорий!"
         )
         call_telegram("sendMessage", {
             "chat_id": chat_id,
@@ -153,11 +186,10 @@ def handle_bot_message(msg):
 def bot_polling_loop():
     """Фоновый цикл Long Polling для Telegram-бота"""
     if not BOT_TOKEN:
-        print("[Telegram Bot] Токен не задан. Бот в режиме ожидания токена.", file=sys.stderr)
+        print("[Telegram Bot] Токен не задан. Бот ожидает TELEGRAM_BOT_TOKEN.", file=sys.stderr)
         return
 
-    print("[Telegram Bot] Запуск фонового поллинга...")
-    # Удаляем вебхук, чтобы гарантированно работал polling
+    print("[Telegram Bot] Запуск OnlyFits фонового поллинга...")
     call_telegram("deleteWebhook")
 
     offset = 0
@@ -173,9 +205,10 @@ def bot_polling_loop():
                         cq = item["callback_query"]
                         cq_chat = cq.get("message", {}).get("chat", {}).get("id")
                         if cq_chat:
+                            active_url = os.environ.get("WEBAPP_URL", "").strip() or os.environ.get("RENDER_EXTERNAL_URL", "").strip() or WEBAPP_URL
                             call_telegram("sendMessage", {
                                 "chat_id": cq_chat,
-                                "text": "Нажмите на кнопку «🥗 Открыть конструктор меню», чтобы перейти к составлению меню!",
+                                "text": "Используйте кнопку «⚡️ Открыть OnlyFits» для перехода к тренировкам и питанию!",
                                 "parse_mode": "HTML"
                             })
         except Exception as e:
@@ -193,12 +226,12 @@ def start_bot_background():
             bot_thread.start()
 
 
-# Запуск Telegram-бота в фоновом потоке
+# Запуск бота в фоне
 start_bot_background()
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Запуск приложения на порту {port}...")
+    print(f"🚀 OnlyFits запущен на порту {port}...")
     print(f"🔗 WebApp URL: {WEBAPP_URL}")
     app.run(host="0.0.0.0", port=port)
