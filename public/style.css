@@ -1,0 +1,89 @@
+/* Smooth animations & custom styles */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide scrollbar for tabs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Telegram theme variable compatibility */
+body {
+  background-color: var(--tg-theme-bg-color, #f8fafc);
+  color: var(--tg-theme-text-color, #1e293b);
+}
+
+/* Dark mode adjustments */
+html.dark body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+html.dark header,
+html.dark nav,
+html.dark .bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #334155 !important;
+}
+
+html.dark .border-slate-200 {
+  border-color: #334155 !important;
+}
+
+/* Checklist item completed state */
+.cart-item-checked {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
