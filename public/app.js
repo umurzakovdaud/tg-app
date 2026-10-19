@@ -9,15 +9,42 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь",
     equipment: "Штанга",
-    tips: "Сведите лопатки, упритесь ногами в пол. Опускайте штангу подконтрольно к нижней части груди."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-bench-press-workout-43407-large.mp4",
+    steps: [
+      "Лягте на скамью, сведите лопатки и прижмите их. Ноги плотно уприте в пол.",
+      "Возьмитесь за гриф хватом чуть шире плеч. Снимите штангу со стоек на выпрямленные руки.",
+      "На вдохе подконтрольно опустите гриф к нижней части грудных мышц (не бросайте на грудь).",
+      "На выдохе мощным усилием грудных выжмите штангу вверх, не отрывая таз от скамьи."
+    ],
+    mistakes: [
+      "Разведение локтей строго под 90° к корпусу (создает опасную нагрузку на плечевой сустав). Держите угол ~75°.",
+      "Отрыв таза или ступней от пола при максимальном усилии.",
+      "Отбив штанги от груди в нижней точке."
+    ],
+    primary: "Большая грудная мышца",
+    secondary: "Передняя дельта, Трицепс",
+    breathing: "Вдох на опускании, мощный выдох на подъеме"
   },
   {
     id: "ex_chest_2",
     name: "Жим гантелей на наклонной скамье (30°)",
     muscle: "chest",
-    muscle_ru: "Грудь",
+    muscle_ru: "Грудь (Верх)",
     equipment: "Гантели",
-    tips: "Акцент на верхний пучок грудных. В верхней точке не соударяйте гантели."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    steps: [
+      "Установите скамью под углом 30 градусов. Закиньте гантели с колен в исходное положение.",
+      "Сведите лопатки, грудь подайте вперед.",
+      "На вдохе плавно опустите гантели по дуге до уровня верхней части груди, почувствовав растяжение.",
+      "На выдохе выжмите гантели вверх, сводя их вместе в верхней точке без удара."
+    ],
+    mistakes: [
+      "Угол скамьи выше 45° — нагрузка уходит с верха груди на передние дельты.",
+      "Соударение гантелей в верхней точке с потерей напряжения в мышцах."
+    ],
+    primary: "Ключичная (верхняя) часть грудных",
+    secondary: "Передняя дельта, Трицепс",
+    breathing: "Вдох при опускании, выдох при жиме вверх"
   },
   {
     id: "ex_chest_3",
@@ -25,7 +52,19 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь / Трицепс",
     equipment: "Брусья",
-    tips: "Наклоните корпус вперед для акцента на грудь. Опускайтесь до прямого угла в локтях."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-young-man-doing-push-ups-in-the-gym-43401-large.mp4",
+    steps: [
+      "Примите упор на брусьях на прямых руках. Слегка наклоните корпус вперед для акцента на грудные мышцы.",
+      "На вдохе медленно опускайтесь вниз, разводя локти в стороны до прямого угла в суставе.",
+      "На выдохе усилием груди и трицепсов отожмитесь в исходное положение."
+    ],
+    mistakes: [
+      "Слишком глубокий провал вниз при недостаточной мобильности плечевых суставов.",
+      "Строго вертикальный корпус (смещает всю нагрузку исключительно на трицепс)."
+    ],
+    primary: "Нижняя и средняя часть груди",
+    secondary: "Трицепс, передняя дельта",
+    breathing: "Вдох на спуске, выдох на подъеме"
   },
   {
     id: "ex_chest_4",
@@ -33,7 +72,20 @@ const EXERCISES_DB = [
     muscle: "chest",
     muscle_ru: "Грудь",
     equipment: "Блочный тренажер",
-    tips: "Фиксируйте локти слегка согнутыми, сводите руки за счет сокращения груди."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-bench-press-workout-43407-large.mp4",
+    steps: [
+      "Возьмите рукояти верхних блоков, сделайте шаг вперед и слегка наклоните корпус.",
+      "Руки держите чуть согнутыми в локтях и зафиксируйте этот угол на протяжении всего сета.",
+      "На выдохе сведите руки перед собой, максимально напрягая грудные в пиковой точке на 1 секунду.",
+      "На вдохе подконтрольно вернитесь в точку растяжения."
+    ],
+    mistakes: [
+      "Сгибание и разгибание рук в локтях (превращение сведения в жим).",
+      "Раскачивание корпусом с задействованием инерции."
+    ],
+    primary: "Внутренняя и средняя часть груди",
+    secondary: "Передняя дельта",
+    breathing: "Вдох на разведении, выдох на сведении"
   },
 
   // Спина (Back)
@@ -43,15 +95,41 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Турник",
-    tips: "Тянитесь грудью к перекладине, сводя лопатки. Избегайте рывков ногами."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    steps: [
+      "Возьмитесь за перекладину хватом шире плеч. Полностью повисните, вытянув широчайшие мышцы.",
+      "Опустите лопатки вниз и направьте локти к бокам корпуса.",
+      "На выдохе тянитесь грудью к перекладине за счет спины, стараясь коснуться ее верхом груди.",
+      "На вдохе плавно опуститесь в нижнюю точку без резкого сброса веса."
+    ],
+    mistakes: [
+      "Рывки ногами и телом (киппинг вместо чистой силовой работы).",
+      "Тяга исключительно бицепсом без сведения лопаток."
+    ],
+    primary: "Широчайшие мышцы спины (ширина)",
+    secondary: "Бицепс, ромбовидные, предплечья",
+    breathing: "Выдох при подъеме вверх, вдох при опускании"
   },
   {
     id: "ex_back_2",
-    name: "Тяга штанги в наклоне",
+    name: "Тяга штанги в наклоне к поясу",
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Штанга",
-    tips: "Держите спину прямо с естественным прогибом в пояснице. Тяните гриф к низу живота."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Наклоните корпус вперед под углом ~45°, слегка согнув колени. Спина строго прямая с естественным прогибом.",
+      "Возьмите гриф хватом на ширине плеч.",
+      "На выдохе тяните штангу вдоль бедер к низу живота, сводя лопатки и ведя локти назад.",
+      "На вдохе подконтрольно опустите гриф в исходную точку."
+    ],
+    mistakes: [
+      "Округление поясницы (риск травмы позвоночника). Держите спину прогнутой!",
+      "Слишком вертикальное положение корпуса (превращает упражнение в шраги)."
+    ],
+    primary: "Широчайшие и трапециевидные мышцы (толщина спины)",
+    secondary: "Задняя дельта, бицепс, разгибатели позвоночника",
+    breathing: "Вдох внизу, выдох при подтягивании к поясу"
   },
   {
     id: "ex_back_3",
@@ -59,7 +137,20 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Блочный тренажер",
-    tips: "Отклонитесь слегка назад, тяните рукоять к ключицам, чувствуя широчайшие мышцы."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    steps: [
+      "Отрегулируйте упорные валики под бедра. Сядьте ровно и возьмитесь широким хватом за рукоять.",
+      "Слегка отклоните корпус назад (~10-15°), расправьте грудь.",
+      "На выдохе тяните рукоять к верхней части груди, направляя локти вниз и назад.",
+      "Сделайте паузу в пиковой точке и плавно вернитесь на вдохе."
+    ],
+    mistakes: [
+      "Сильное раскачивание корпуса назад для преодоления веса по инерции.",
+      "Опускание рукояти слишком низко к животу с подворачиванием плеч вперед."
+    ],
+    primary: "Верхняя часть широчайших",
+    secondary: "Бицепс, большая круглая мышца",
+    breathing: "Выдох при тяге вниз, вдох при возврате"
   },
   {
     id: "ex_back_4",
@@ -67,7 +158,20 @@ const EXERCISES_DB = [
     muscle: "back",
     muscle_ru: "Спина",
     equipment: "Блочный тренажер",
-    tips: "Не раскачивайтесь корпусом, пиковое сокращение в точке касания живота."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    steps: [
+      "Сядьте на скамью, упритесь ногами в подставки, слегка согнув колени.",
+      "Выпрямите спину, возьмитесь за рукоять нейтральным хватом.",
+      "На выдохе потяните рукоять к нижней части живота, максимально сводя лопатки.",
+      "На вдохе плавно вытяните руки вперед, чувствуя растяжение широчайших."
+    ],
+    mistakes: [
+      "Сильный наклон корпуса вперед-назад (работа поясницей вместо спины).",
+      "Разведение локтей широко в стороны вместо движения вдоль корпуса."
+    ],
+    primary: "Середина спины, ромбовидные, широчайшие",
+    secondary: "Бицепс, задняя дельта",
+    breathing: "Вдох на растяжении, выдох при тяге к животу"
   },
 
   // Ноги (Legs)
@@ -77,7 +181,21 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Ноги",
     equipment: "Штанга",
-    tips: "Колени сонаправлены с носками, глубина приседа — минимум до параллели бедра с полом."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Положите гриф на верх трапеций (не на шею!). Поставьте стопы на ширине плеч, носки слегка разведены.",
+      "Направьте взгляд вперед, напрягите пресс.",
+      "На вдохе отводите таз назад и сгибайте колени, опускаясь минимум до параллели бедра с полом.",
+      "Колени строго смотрят в сторону носков. На выдохе мощным толчком пяток вернитесь вверх."
+    ],
+    mistakes: [
+      "Завал коленей внутрь при подъеме.",
+      "Отрыв пяток от пола и перенос веса на носки.",
+      "Клевок тазом и скругление поясницы в нижней точке."
+    ],
+    primary: "Квадрицепсы, большие ягодичные мышцы",
+    secondary: "Бицепс бедра, мышцы кора, икроножные",
+    breathing: "Вдох перед опусканием, выдох после прохождения сложной точки"
   },
   {
     id: "ex_legs_2",
@@ -85,7 +203,20 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Ноги",
     equipment: "Тренажер",
-    tips: "Не отрывайте поясницу от спинки. В верхней точке не блокируйте колени (не выпрямляйте до конца)."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Плотно прижмите спину и поясницу к креслу тренажера. Поставьте стопы на платформу на ширине плеч.",
+      "Снимите фиксаторы платформы.",
+      "На вдохе плавно опустите платформу до прямого угла в коленях, не отрывая поясницу.",
+      "На выдохе выжмите платформу пятками вверх. В верхней точке НЕ выпрямляйте колени полностью (оставляйте микроизгиб)!"
+    ],
+    mistakes: [
+      "Блокировка (переразгибание) коленных суставов в верхней точке под нагрузкой — крайне травмоопасно!",
+      "Отрыв поясницы от сиденья при слишком глубоком опускании."
+    ],
+    primary: "Квадрицепсы",
+    secondary: "Ягодичные, приводящие мышцы",
+    breathing: "Вдох на спуске, выдох при жиме платформы"
   },
   {
     id: "ex_legs_3",
@@ -93,7 +224,20 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Бицепс бедра / Ягодицы",
     equipment: "Гантели",
-    tips: "Отводите таз назад, чувствуя растяжение задней поверхности бедра. Колени слегка согнуты."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Встаньте прямо, гантели держите перед бедрами. Стопы на ширине таза, колени слегка подсогнуты.",
+      "На вдохе отводите таз назад, ведя гантели строго вдоль голеней вниз.",
+      "Опускайтесь до середины голени, пока спина остается идеально прямой, а в задней поверхности бедра чувствуется натяжение.",
+      "На выдохе за счет сокращения ягодиц верните корпус в вертикальное положение."
+    ],
+    mistakes: [
+      "Сгибание коленей как в приседе вместо отведения таза назад.",
+      "Скругление спины в пояснице или отдаление гантелей от ног."
+    ],
+    primary: "Бицепс бедра, ягодичные мышцы",
+    secondary: "Разгибатели спины, предплечья",
+    breathing: "Вдох на наклоне, выдох при возврате"
   },
   {
     id: "ex_legs_4",
@@ -101,25 +245,126 @@ const EXERCISES_DB = [
     muscle: "legs",
     muscle_ru: "Ноги / Ягодицы",
     equipment: "Гантели",
-    tips: "Шагайте широко, переднее колено не выходит за носок, угол в колене 90°."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Возьмите гантели в руки вдоль корпуса. Сделайте широкий шаг вперед одной ногой.",
+      "На вдохе опускайтесь строго вниз до прямого угла в переднем колене.",
+      "Заднее колено почти касается пола (1-2 см от коврика). Корпус держите прямо.",
+      "На выдохе оттолкнитесь пяткой передней ноги и поднимитесь."
+    ],
+    mistakes: [
+      "Выход переднего колена далеко за линию носка.",
+      "Слишком узкий шаг, перегружающий коленный сустав."
+    ],
+    primary: "Ягодичные мышцы, квадрицепс",
+    secondary: "Бицепс бедра, икры",
+    breathing: "Вдох на спуске, выдох на подъеме"
+  },
+  {
+    id: "ex_legs_5",
+    name: "Сгибания ног в тренажере лежа",
+    muscle: "legs",
+    muscle_ru: "Бицепс бедра",
+    equipment: "Тренажер",
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Лягте на скамью, заведите валик под ахилловы сухожилия (чуть ниже икр).",
+      "Прижмите таз к подушке и возьмитесь за рукоятки.",
+      "На выдохе согните ноги в коленях, стараясь коснуться валиком ягодиц.",
+      "Задержитесь на 1 секунду в пиковом напряжении и плавно опустите на вдохе."
+    ],
+    mistakes: [
+      "Отрыв таза от скамьи для читинга.",
+      "Резкий бросок веса в нижней точке без негативной фазы."
+    ],
+    primary: "Двуглавая мышца бедра (бицепс бедра)",
+    secondary: "Икроножные мышцы",
+    breathing: "Выдох при сгибании, вдох при опускании"
+  },
+  {
+    id: "ex_legs_6",
+    name: "Разгибания ног в тренажере сидя",
+    muscle: "legs",
+    muscle_ru: "Квадрицепс",
+    equipment: "Тренажер",
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Сядьте в тренажер, прижмите спину к спинке. Валик находится на уровне нижней части голени.",
+      "Возьмитесь за боковые рукояти.",
+      "На выдохе мощно разогните ноги до полной параллели полу, прожимая квадрицепсы.",
+      "На вдохе подконтрольно вернитесь в исходную точку."
+    ],
+    mistakes: [
+      "Рывковое движение веса с подпрыгиванием таза на сиденье.",
+      "Неправильная настройка оси тренажера относительно коленного сустава."
+    ],
+    primary: "Четырехглавая мышца бедра (квадрицепс)",
+    secondary: "Связки коленного сустава",
+    breathing: "Выдох при разгибании вверх, вдох при возврате"
+  },
+  {
+    id: "ex_legs_7",
+    name: "Подъем на носки стоя на возвышении",
+    muscle: "legs",
+    muscle_ru: "Икроножные",
+    equipment: "Тренажер / Ступенька",
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-squats-with-a-barbell-43409-large.mp4",
+    steps: [
+      "Встаньте носками на ступеньку платформы, пятки свободно свисают вниз.",
+      "На вдохе опустите пятки максимально низко, почувствовав глубокое растяжение в икрах.",
+      "На выдохе мощно поднимитесь на носки как можно выше и задержитесь на 1 секунду в верхней точке."
+    ],
+    mistakes: [
+      "Пружинящие быстрые движения без паузы (работа ахиллова сухожилия вместо мышцы).",
+      "Сгибание коленей."
+    ],
+    primary: "Икроножная мышца",
+    secondary: "Камбаловидная мышца",
+    breathing: "Вдох на растяжении пятки вниз, выдох на подъеме на носок"
   },
 
   // Плечи (Shoulders)
   {
     id: "ex_shoulders_1",
-    name: "Жим гантелей сидя",
+    name: "Жим гантелей сидя на скамье",
     muscle: "shoulders",
     muscle_ru: "Плечи",
     equipment: "Гантели",
-    tips: "Спинка скамьи под углом 80-85°. Выжимайте гантели вверх по дуге, не сводя их вместе."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    steps: [
+      "Установите спинку скамьи под углом 80-85 градусов. Поднимите гантели к плечам, ладони смотрят вперед.",
+      "Локти направлены слегка вперед, а не строго в стороны.",
+      "На выдохе выжмите гантели вверх по естественной дуге, не сводя их до удара.",
+      "На вдохе плавно опустите до уровня ушей."
+    ],
+    mistakes: [
+      "Слишком сильный прогиб в пояснице и отрыв лопаток от скамьи.",
+      "Выпрямление локтей до жесткого щелчка в верхней точке."
+    ],
+    primary: "Передняя и средняя дельтовидные мышцы",
+    secondary: "Трицепс, верх трапеций",
+    breathing: "Вдох внизу, выдох при выжиме вверх"
   },
   {
     id: "ex_shoulders_2",
-    name: "Махи гантелями в стороны",
+    name: "Махи гантелями в стороны стоя",
     muscle: "shoulders",
     muscle_ru: "Средняя дельта",
     equipment: "Гантели",
-    tips: "Локти ведут движение и находятся чуть выше кистей. Работайте без читинга корпусом."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    steps: [
+      "Встаньте ровно, слегка наклоните корпус вперед (~5°). Гантели перед бедрами, локти чуть согнуты.",
+      "На выдохе поднимите руки через стороны до уровня плеч, ведя движение локтями.",
+      "Кисти не должны подниматься выше локтей! Мизинец чуть выше большого пальца.",
+      "На вдохе плавно опустите руки обратно."
+    ],
+    mistakes: [
+      "Раскачивание корпусом и подъем веса за счет инерции спины.",
+      "Подъем кистей выше локтей (включает переднюю дельту вместо средней)."
+    ],
+    primary: "Средняя дельта (ширина плеч)",
+    secondary: "Трапеция, надостная мышца",
+    breathing: "Вдох внизу, выдох при махе в стороны"
   },
   {
     id: "ex_shoulders_3",
@@ -127,7 +372,20 @@ const EXERCISES_DB = [
     muscle: "shoulders",
     muscle_ru: "Задняя дельта",
     equipment: "Кроссовер",
-    tips: "Тяните канат к уровню глаз, разводя кисти в стороны и сводя лопатки."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    steps: [
+      "Установите канатную рукоять на уровне глаз в кроссовере. Возьмитесь за концы каната нейтральным хватом.",
+      "Сделайте шаг назад, напрягите пресс.",
+      "На выдохе тяните канат к переносице, разводя кисти в стороны и отводя локти назад.",
+      "Задержитесь на 1 секунду и вернитесь на вдохе."
+    ],
+    mistakes: [
+      "Опускание локтей вниз (превращает упражнение в тягу на широчайшие).",
+      "Рывки головой навстречу канату."
+    ],
+    primary: "Задняя дельта, ротаторная манжета плеча",
+    secondary: "Трапециевидные, ромбовидные мышцы",
+    breathing: "Вдох вперед, выдох при тяге к лицу"
   },
 
   // Руки (Arms)
@@ -137,7 +395,20 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Бицепс",
     equipment: "Штанга / EZ-гриф",
-    tips: "Прижмите локти к корпусу, не раскачивайтесь. Сокращайте бицепс в верхней точке."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    steps: [
+      "Встаньте прямо, возьмите штангу хватом снизу на ширине плеч.",
+      "Прижмите локти к бокам корпуса и зафиксируйте их неподвижно.",
+      "На выдохе согните руки в локтях, поднимая гриф к груди силой бицепсов.",
+      "В верхней точке прожмите бицепс на 1 секунду и плавно опустите на вдохе."
+    ],
+    mistakes: [
+      "Вывод локтей вперед при подъеме (включает переднюю дельту и снимает нагрузку с бицепса).",
+      "Заброс веса телом назад."
+    ],
+    primary: "Двуглавая мышца плеча (бицепс)",
+    secondary: "Брахиалис, предплечья",
+    breathing: "Вдох на спуске, выдох при подъеме"
   },
   {
     id: "ex_arms_2",
@@ -145,15 +416,41 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Трицепс",
     equipment: "Штанга",
-    tips: "Локти зафиксированы на ширине плеч и слегка отклонены назад от вертикали."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-doing-bench-press-workout-43407-large.mp4",
+    steps: [
+      "Лягте на горизонтальную скамью, поднимите EZ-гриф над грудью.",
+      "Слегка отклоните руки назад от вертикали на 15 градусов и зафиксируйте локти.",
+      "На вдохе сгибайте только предплечья, опуская гриф за голову.",
+      "На выдохе изолированным усилием трицепсов верните штангу вверх."
+    ],
+    mistakes: [
+      "Разведение локтей в стороны (держите их на ширине плеч).",
+      "Движение плечевой костью вместо работы только в локтевом суставе."
+    ],
+    primary: "Длинная и латеральная головки трицепса",
+    secondary: "Локтевой сустав",
+    breathing: "Вдох при опускании за голову, выдох при разгибании"
   },
   {
     id: "ex_arms_3",
-    name: "Молотковые сгибания с гантелями",
+    name: "Молотковые сгибания с гантелями (Хаммер)",
     muscle: "arms",
     muscle_ru: "Брахиалис / Бицепс",
     equipment: "Гантели",
-    tips: "Хват нейтральный (ладони смотрят друг на друга). Отличная проработка толщины руки."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    steps: [
+      "Держите гантели в опущенных руках нейтральным хватом (ладони обращены друг к другу).",
+      "Прижмите локти к корпусу.",
+      "На выдохе согните руку, поднимая гантель вверх без разворота кисти.",
+      "На вдохе подконтрольно опустите вниз."
+    ],
+    mistakes: [
+      "Разворот кистей (супинация) — в молотах хват должен оставаться строго нейтральным.",
+      "Использование инерции."
+    ],
+    primary: "Плечелучевая мышца и брахиалис",
+    secondary: "Бицепс",
+    breathing: "Вдох внизу, выдох при подъеме"
   },
   {
     id: "ex_arms_4",
@@ -161,33 +458,20 @@ const EXERCISES_DB = [
     muscle: "arms",
     muscle_ru: "Трицепс",
     equipment: "Блок",
-    tips: "В нижней точке разводите концы каната в стороны для максимального сокращения."
-  },
-
-  // Изоляция ног и икры
-  {
-    id: "ex_legs_5",
-    name: "Сгибания ног в тренажере лежа",
-    muscle: "legs",
-    muscle_ru: "Бицепс бедра",
-    equipment: "Тренажер",
-    tips: "Не отрывайте таз от скамьи, задержитесь на 1 секунду в точке пикового сокращения."
-  },
-  {
-    id: "ex_legs_6",
-    name: "Разгибания ног в тренажере сидя",
-    muscle: "legs",
-    muscle_ru: "Квадрицепс",
-    equipment: "Тренажер",
-    tips: "Отрегулируйте валик над голеностопом, выпрямляйте ноги мощно, но без рывков."
-  },
-  {
-    id: "ex_legs_7",
-    name: "Подъем на носки стоя на возвышении",
-    muscle: "legs",
-    muscle_ru: "Икроножные",
-    equipment: "Тренажер / Ступенька",
-    tips: "Опускайте пятки максимально глубоко для растяжения, в верхней точке вставайте на носки."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-man-lifting-dumbbells-in-a-gym-43405-large.mp4",
+    steps: [
+      "Закрепите канат на верхнем блоке, возьмитесь за концы каната.",
+      "Прижмите локти к бокам, наклоните корпус вперед на 10 градусов.",
+      "На выдохе полностью разогните руки вниз, в нижней точке разводя кисти в стороны.",
+      "На вдохе поднимите предплечья до угла 90 градусов."
+    ],
+    mistakes: [
+      "Движение локтей вперед-назад вместе с канатом.",
+      "Подъем веса за счет наклона тела вниз."
+    ],
+    primary: "Внешняя (латеральная) головка трицепса",
+    secondary: "Локтевая мышца",
+    breathing: "Вдох при сгибании локтей вверх, выдох при выпрямлении вниз"
   },
 
   // Пресс и кор (Core)
@@ -197,7 +481,20 @@ const EXERCISES_DB = [
     muscle: "core",
     muscle_ru: "Прямая мышца живота",
     equipment: "Коврик",
-    tips: "Прижмите поясницу к полу, скручивайте корпус ребрами к тазу, делая выдох."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-young-man-doing-push-ups-in-the-gym-43401-large.mp4",
+    steps: [
+      "Лягте на спину, согните ноги в коленях, стопы на полу. Поясницу плотно прижмите к коврику.",
+      "Руки держите у висков (не сцепляйте за головой!).",
+      "На выдохе скручивайте верхнюю часть корпуса, подтягивая ребра к тазу.",
+      "Поясница остается прижатой! На вдохе плавно вернитесь обратно."
+    ],
+    mistakes: [
+      "Тяга головы руками за шею (нагрузка на шейный отдел).",
+      "Подъем прямой спиной за счет сгибателей бедра."
+    ],
+    primary: "Прямая мышца живота",
+    secondary: "Косые мышцы",
+    breathing: "Вдох лежа, мощный выдох на скручивании"
   },
   {
     id: "ex_core_2",
@@ -205,7 +502,20 @@ const EXERCISES_DB = [
     muscle: "core",
     muscle_ru: "Мышцы кора",
     equipment: "Собственный вес",
-    tips: "Тело в одну прямую линию, напрягите ягодицы и пресс, не прогибайтесь в пояснице."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-young-man-doing-push-ups-in-the-gym-43401-large.mp4",
+    steps: [
+      "Встаньте в упор на предплечья, локти строго под плечевыми суставами.",
+      "Вытяните ноги назад, опираясь на носки. Тело натянуто как струна в одну линию от затылка до пяток.",
+      "Сожмите ягодицы и втяните живот, не позволяя пояснице провисать.",
+      "Удерживайте положение неподвижно, ровно дыша."
+    ],
+    mistakes: [
+      "Провисание таза вниз (опасная компрессия поясницы).",
+      "Подъем таза домиком вверх (снимает нагрузку с кора)."
+    ],
+    primary: "Поперечная и прямая мышцы живота, кор",
+    secondary: "Ягодичные, плечи, квадрицепсы",
+    breathing: "Равномерное глубокое дыхание без задержек"
   },
   {
     id: "ex_core_3",
@@ -213,7 +523,19 @@ const EXERCISES_DB = [
     muscle: "core",
     muscle_ru: "Нижняя часть пресса",
     equipment: "Турник",
-    tips: "Подкручивайте таз вверх, а не просто поднимайте ноги за счет сгибателей бедра."
+    video_url: "https://assets.mixkit.co/videos/preview/mixkit-athlete-doing-pull-ups-43399-large.mp4",
+    steps: [
+      "Повисните на турнике на прямых руках, стабилизируйте корпус от раскачивания.",
+      "На выдохе поднимите колени (или прямые ноги) к груди, обязательно подкручивая таз вверх.",
+      "Задержитесь на секунду вверху и на вдохе плавно опустите ноги."
+    ],
+    mistakes: [
+      "Раскачивание телом маятником и подъем ног по инерции.",
+      "Подъем ног без подкручивания таза (работают сгибатели бедра, а не пресс)."
+    ],
+    primary: "Нижний отдел прямой мышцы живота",
+    secondary: "Сгибатели бедра, предплечья",
+    breathing: "Вдох внизу, мощный выдох при подъеме таза и ног"
   }
 ];
 
@@ -534,6 +856,17 @@ function initEvents() {
     triggerHaptic("light");
   });
 
+  // Exercise Video & Technique Modal
+  document.getElementById("closeVideoModalBtn").addEventListener("click", () => closeExerciseVideoModal());
+  document.getElementById("replayVideoBtn").addEventListener("click", () => {
+    const v = document.getElementById("exerciseVideoElement");
+    if (v) {
+      v.currentTime = 0;
+      v.play();
+    }
+    triggerHaptic("light");
+  });
+
   // Exercise Catalog Modal
   document.getElementById("openCatalogBtn").addEventListener("click", () => openCatalogModal());
   document.getElementById("closeCatalogBtn").addEventListener("click", () => closeCatalogModal());
@@ -707,22 +1040,28 @@ function renderCurrentDayExercises() {
     card.className = "bg-dark-900 p-3.5 rounded-2xl border border-dark-700/80 flex items-center justify-between";
 
     card.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center text-xs font-black text-emerald-400">
+      <div class="flex items-center gap-3 cursor-pointer flex-1 mr-2 open-video-trigger" data-ex-id="${ex.id}">
+        <div class="w-8 h-8 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center text-xs font-black text-emerald-400 shrink-0">
           ${idx + 1}
         </div>
         <div>
-          <h4 class="text-xs font-bold text-white">${ex.name}</h4>
+          <h4 class="text-xs font-bold text-white hover:text-emerald-400 transition">${ex.name}</h4>
           <p class="text-[10px] text-slate-400">4 подхода • 8-12 повт. • ${ex.equipment}</p>
         </div>
       </div>
-      <button class="p-2 text-slate-400 hover:text-white transition info-btn" title="Техника">
-        <i data-lucide="info" class="w-4 h-4"></i>
+      <button class="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-dark-950 transition info-btn flex items-center gap-1.5 text-xs font-bold shrink-0" title="Видео и техника">
+        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+        <span>Видео</span>
       </button>
     `;
 
-    card.querySelector(".info-btn").addEventListener("click", () => {
-      alert(`💡 Техника выполнения: ${ex.name}\n\n${ex.tips}`);
+    card.querySelector(".info-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openExerciseVideoModal(ex.id);
+    });
+
+    card.querySelector(".open-video-trigger").addEventListener("click", () => {
+      openExerciseVideoModal(ex.id);
     });
 
     container.appendChild(card);
@@ -776,8 +1115,13 @@ function renderActiveWorkoutExercises() {
 
     card.innerHTML = `
       <div class="flex items-center justify-between border-b border-dark-700/60 pb-2">
-        <h3 class="text-xs font-black text-white">${exIdx + 1}. ${exItem.name}</h3>
-        <span class="text-[10px] text-slate-400 font-bold">${exItem.sets.length} сета</span>
+        <h3 class="text-xs font-black text-white hover:text-emerald-400 transition cursor-pointer active-ex-link" data-ex-id="${exItem.id}">
+          ${exIdx + 1}. ${exItem.name}
+        </h3>
+        <button class="active-video-btn text-emerald-400 hover:text-white flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 transition" data-ex-id="${exItem.id}">
+          <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+          <span>Видео</span>
+        </button>
       </div>
 
       <div class="space-y-1.5" id="sets-container-${exIdx}">
@@ -790,6 +1134,13 @@ function renderActiveWorkoutExercises() {
         </div>
       </div>
     `;
+
+    card.querySelector(".active-ex-link").addEventListener("click", () => {
+      openExerciseVideoModal(exItem.id);
+    });
+    card.querySelector(".active-video-btn").addEventListener("click", () => {
+      openExerciseVideoModal(exItem.id);
+    });
 
     const setsContainer = card.querySelector(`#sets-container-${exIdx}`);
 
@@ -1089,6 +1440,67 @@ function addAiMealToDiary() {
   showToast("Блюдо с фото успешно добавлено в обед!");
 }
 
+// Exercise Video & Technique Modal
+function openExerciseVideoModal(exerciseId) {
+  const ex = EXERCISES_DB.find(e => e.id === exerciseId);
+  if (!ex) return;
+
+  document.getElementById("videoExerciseTitle").textContent = ex.name;
+  document.getElementById("videoExerciseMuscle").textContent = ex.muscle_ru;
+  document.getElementById("videoEquipmentTag").textContent = `Оборудование: ${ex.equipment}`;
+
+  // Video element
+  const video = document.getElementById("exerciseVideoElement");
+  const videoSrc = document.getElementById("videoSourceMp4");
+  
+  if (ex.video_url) {
+    videoSrc.src = ex.video_url;
+    video.load();
+    video.play().catch(() => {});
+  }
+
+  // Steps
+  const stepsList = document.getElementById("exerciseStepsList");
+  stepsList.innerHTML = "";
+  (ex.steps || [
+    "Примите устойчивое исходное положение, зафиксируйте корпус.",
+    "На вдохе выполните подконтрольное движение по заданной траектории.",
+    "На выдохе вернитесь в исходную точку, сделав пиковое сокращение."
+  ]).forEach(step => {
+    const li = document.createElement("li");
+    li.textContent = step;
+    stepsList.appendChild(li);
+  });
+
+  // Mistakes
+  const mistakesList = document.getElementById("exerciseMistakesList");
+  mistakesList.innerHTML = "";
+  (ex.mistakes || [
+    "Использование слишком тяжелого веса и читинг корпусом.",
+    "Отсутствие контроля в негативной фазе движения.",
+    "Задержка дыхания на максимальном усилии."
+  ]).forEach(mistake => {
+    const li = document.createElement("li");
+    li.textContent = mistake;
+    mistakesList.appendChild(li);
+  });
+
+  // Anatomy & Breathing
+  document.getElementById("targetMusclesLabel").textContent = ex.primary || ex.muscle_ru;
+  document.getElementById("synergistMusclesLabel").textContent = ex.secondary || "Кор, мышцы-стабилизаторы";
+  document.getElementById("breathingLabel").textContent = ex.breathing || "Вдох при растяжении, выдох на сокращении";
+
+  document.getElementById("exerciseVideoModal").classList.remove("hidden");
+  triggerHaptic("light");
+  lucide.createIcons();
+}
+
+function closeExerciseVideoModal() {
+  const video = document.getElementById("exerciseVideoElement");
+  if (video) video.pause();
+  document.getElementById("exerciseVideoModal").classList.add("hidden");
+}
+
 // Exercise Catalog
 function openCatalogModal() {
   document.getElementById("catalogModal").classList.remove("hidden");
@@ -1108,17 +1520,26 @@ function renderCatalogList(filter = "all") {
 
   filtered.forEach(ex => {
     const card = document.createElement("div");
-    card.className = "bg-dark-850 p-3 rounded-2xl border border-dark-700/60 space-y-1.5";
+    card.className = "bg-dark-850 p-3.5 rounded-2xl border border-dark-700/60 space-y-2 cursor-pointer hover:border-emerald-500/50 transition";
     card.innerHTML = `
       <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold text-white">${ex.name}</h4>
+        <h4 class="text-xs font-bold text-white hover:text-emerald-400 transition">${ex.name}</h4>
         <span class="text-[10px] font-semibold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10">${ex.muscle_ru}</span>
       </div>
-      <p class="text-[11px] text-slate-400">${ex.tips}</p>
-      <div class="text-[10px] text-slate-500 font-medium">Оборудование: ${ex.equipment}</div>
+      <div class="flex items-center justify-between text-[11px] text-slate-400">
+        <span>Оборудование: ${ex.equipment}</span>
+        <span class="text-emerald-400 flex items-center gap-1 font-bold text-[10px]">
+          <i data-lucide="play" class="w-3 h-3 fill-current"></i> Смотреть видео
+        </span>
+      </div>
     `;
+    card.addEventListener("click", () => {
+      openExerciseVideoModal(ex.id);
+    });
     container.appendChild(card);
   });
+
+  lucide.createIcons();
 }
 
 // Profile Modal

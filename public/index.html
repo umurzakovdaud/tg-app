@@ -379,6 +379,86 @@
   </div>
 
 
+  <!-- ==================== EXERCISE VIDEO & TECHNIQUE MODAL ==================== -->
+  <div id="exerciseVideoModal" class="fixed inset-0 z-50 bg-dark-950/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col border border-dark-700 overflow-hidden shadow-2xl animate-slide-up">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-dark-700/80 flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="videoExerciseMuscle" class="text-[10px] uppercase font-bold text-emerald-400">Грудь</span>
+          </div>
+          <h3 id="videoExerciseTitle" class="text-base font-black text-white mt-0.5">Жим штанги лежа</h3>
+        </div>
+        <button id="closeVideoModalBtn" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-dark-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-4 overflow-y-auto space-y-3.5 text-xs">
+        <!-- Video Player / Visual Demonstration Card -->
+        <div class="relative w-full rounded-2xl overflow-hidden bg-dark-950 border border-dark-700/80 shadow-inner group">
+          <video id="exerciseVideoElement" class="w-full h-48 sm:h-56 object-cover bg-black" autoplay loop muted playsinline>
+            <source id="videoSourceMp4" src="" type="video/mp4">
+          </video>
+          
+          <!-- Animated Muscle/Equipment Indicator Overlay -->
+          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-dark-900/80 backdrop-blur-md border border-dark-700/50 text-[10px] text-slate-300">
+            <div class="flex items-center gap-1.5">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              <span id="videoEquipmentTag">Оборудование: Штанга</span>
+            </div>
+            <button id="replayVideoBtn" class="text-emerald-400 hover:text-white flex items-center gap-0.5 font-bold">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <span>Повтор</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Пошаговая техника -->
+        <div class="bg-dark-850 p-3.5 rounded-2xl border border-dark-700/60 space-y-2">
+          <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            Правильная техника выполнения:
+          </h4>
+          <ol id="exerciseStepsList" class="space-y-1.5 list-decimal list-inside text-slate-300 leading-relaxed text-[11px]">
+            <!-- Шаги -->
+          </ol>
+        </div>
+
+        <!-- Частые ошибки (Топ ошибок) -->
+        <div class="bg-rose-950/20 p-3.5 rounded-2xl border border-rose-500/30 space-y-2">
+          <h4 class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+            Частые ошибки (избегайте травм):
+          </h4>
+          <ul id="exerciseMistakesList" class="space-y-1 list-disc list-inside text-rose-200/90 text-[11px] leading-relaxed">
+            <!-- Ошибки -->
+          </ul>
+        </div>
+
+        <!-- Мышечные группы и дыхание -->
+        <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 space-y-1.5 text-[11px]">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Целевая группа (таргет):</span>
+            <span id="targetMusclesLabel" class="font-bold text-emerald-400">Большая грудная</span>
+          </div>
+          <div class="flex items-center justify-between border-t border-dark-700/40 pt-1.5">
+            <span class="text-slate-400">Вспомогательные мышцы:</span>
+            <span id="synergistMusclesLabel" class="font-semibold text-slate-300">Трицепс, дельты</span>
+          </div>
+          <div class="flex items-center justify-between border-t border-dark-700/40 pt-1.5">
+            <span class="text-slate-400">Дыхание:</span>
+            <span id="breathingLabel" class="font-semibold text-slate-300">Вдох при опускании, выдох на усилии</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ==================== EXERCISE CATALOG MODAL ==================== -->
   <div id="catalogModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col border border-dark-700 overflow-hidden shadow-2xl animate-slide-up">
