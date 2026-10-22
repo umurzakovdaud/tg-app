@@ -448,9 +448,53 @@
       <!-- Top Title -->
       <div class="flex items-center justify-between px-1">
         <h1 class="text-2xl font-black text-white">Статистика</h1>
-        <button class="w-9 h-9 rounded-full bg-of-card border border-of-border flex items-center justify-center text-slate-300">
-          <i data-lucide="menu" class="w-5 h-5"></i>
+        <button id="topHealthSyncQuickBtn" class="w-9 h-9 rounded-full bg-of-card border border-of-border flex items-center justify-center text-slate-300 hover:text-white transition" title="Синхронизация Здоровья">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
+      </div>
+
+      <!-- Карточка: Синхронизация с Apple Здоровье (HealthKit) -->
+      <div id="appleHealthCard" class="bg-gradient-to-r from-of-card to-of-subcard p-4 rounded-3xl border border-of-border/90 shadow-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <!-- iOS Apple Health Icon: white square with red/pink heart -->
+            <div class="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-red-500/10 shrink-0 border border-slate-100">
+              <svg class="w-6 h-6 text-red-500 fill-current" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-extrabold text-white text-sm">Apple Здоровье</h3>
+                <span id="healthSyncStatusBadge" class="text-[9px] px-2 py-0.5 rounded-full font-bold bg-slate-700 text-slate-300">Не подключено</span>
+              </div>
+              <p id="healthSyncSubtext" class="text-[10px] text-slate-400 mt-0.5">Синхронизация шагов, сна, калорий и веса</p>
+            </div>
+          </div>
+
+          <!-- Sync Action Button -->
+          <button id="healthSyncActionBtn" class="px-3.5 py-2 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-extrabold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-md shadow-of-blue/10">
+            <i data-lucide="link-2" class="w-3.5 h-3.5"></i>
+            <span id="healthSyncActionLabel">Подключить</span>
+          </button>
+        </div>
+
+        <!-- Connected state row -->
+        <div id="healthSyncDetailsRow" class="hidden pt-2.5 border-t border-of-border/60 flex items-center justify-between text-[11px] text-slate-300">
+          <div class="flex items-center gap-1.5 text-slate-400">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span id="healthSyncLastTime">Синхронизировано сегодня</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="openShortcutGuideBtn" class="text-of-blue hover:text-white font-bold text-[10px] flex items-center gap-1">
+              <i data-lucide="zap" class="w-3 h-3"></i>
+              <span>Быстрая команда</span>
+            </button>
+            <button id="openHealthSettingsBtn" class="text-slate-400 hover:text-white font-bold text-[10px]">
+              Доступ
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Карточка 1: Зал (Screenshot 1) -->
@@ -458,7 +502,7 @@
         <div class="flex items-center justify-between">
           <div class="text-xs font-bold text-white">Зал</div>
           <div class="flex items-center gap-2">
-            <span class="text-[10px] text-slate-400 bg-of-subcard px-2 py-0.5 rounded-md border border-of-border/60">19 октября — 25 октября · четверг</span>
+            <span class="text-[10px] text-slate-400 bg-of-subcard px-2 py-0.5 rounded-md border border-of-border/60">Текущая неделя</span>
             <button class="text-xs text-slate-400 hover:text-white flex items-center">
               <span>Подробнее</span>
               <i data-lucide="chevron-right" class="w-3 h-3"></i>
@@ -475,11 +519,11 @@
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
             </button>
           </div>
-          <div class="text-xs text-slate-400">2 тренировки из 4</div>
+          <div class="text-xs text-slate-400" id="statsGymWorkoutsSub">2 тренировки из 4</div>
         </div>
 
-        <!-- Gym Bar Chart (ПН 26, СР 27) in Sky Blue -->
-        <div class="h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-around">
+        <!-- Gym Bar Chart in Sky Blue -->
+        <div id="statsGymBarChart" class="h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-around">
           <div class="flex flex-col items-center gap-1.5 h-full justify-end">
             <span class="text-[11px] font-bold text-slate-300">26</span>
             <div class="w-8 h-16 rounded-xl bg-of-blue shadow-sm"></div>
@@ -495,7 +539,7 @@
         <!-- Insight Pill -->
         <div class="p-3 rounded-2xl bg-of-subcard border border-of-border/60 flex items-start gap-2.5 text-xs text-slate-300">
           <span class="text-emerald-400 text-sm mt-0.5">💡</span>
-          <div class="text-[11px] leading-relaxed text-slate-300">
+          <div class="text-[11px] leading-relaxed text-slate-300" id="statsGymInsightText">
             <span class="font-bold text-white">До плана на неделю — ещё 2 тренировки, а впереди 4 дня —</span>
             Сравниваем с сегодняшней программой: 4 тренировки в неделю.
           </div>
@@ -513,45 +557,18 @@
         </div>
 
         <div>
-          <span class="text-2xl font-black text-white">972</span>
+          <span class="text-2xl font-black text-white" id="statsActiveCaloriesDisplay">972</span>
           <span class="text-xs text-slate-400 font-medium ml-1">ккал затрачено</span>
         </div>
 
         <!-- Activity Bar Chart (Пн - Вс) -->
-        <div class="h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between">
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-18 rounded-xl bg-of-blue" style="height: 72px;"></div>
-            <span class="text-[10px] text-slate-400">пн</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">вт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-14 rounded-xl bg-of-blue" style="height: 56px;"></div>
-            <span class="text-[10px] text-slate-400">ср</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">чт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">пт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">сб</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">вс</span>
-          </div>
+        <div id="statsActivityBarChart" class="h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between">
+          <!-- Populated dynamically via JS -->
         </div>
 
         <div class="flex items-center gap-1.5 text-xs text-slate-300">
           <span class="w-2.5 h-2.5 rounded-full bg-of-blue"></span>
-          <span>Спорт</span>
+          <span>Спорт и движение (Apple Здоровье)</span>
         </div>
       </div>
 
@@ -560,7 +577,7 @@
         <div class="flex items-center justify-between">
           <div class="text-xs font-bold text-white">Шаги</div>
           <div class="flex items-center gap-2">
-            <span class="text-[10px] text-slate-400 bg-of-subcard px-2 py-0.5 rounded-md border border-of-border/60">19 октября — 25 октября · четверг</span>
+            <span class="text-[10px] text-slate-400 bg-of-subcard px-2 py-0.5 rounded-md border border-of-border/60">Apple Здоровье</span>
             <button class="text-xs text-slate-400 hover:text-white flex items-center">
               <span>Подробнее</span>
               <i data-lucide="chevron-right" class="w-3 h-3"></i>
@@ -571,55 +588,24 @@
         <div class="flex items-baseline justify-between">
           <div>
             <span class="text-2xl font-black text-white" id="stepsTodayCount">8 266</span>
-            <span class="text-xs text-slate-400 ml-1">/ 6 000 шагов в день</span>
+            <span class="text-xs text-slate-400 ml-1">/ <span id="stepsTargetDisplay">10 000</span> шагов в день</span>
           </div>
-          <span class="text-[10px] text-slate-300 bg-of-subcard px-2 py-1 rounded-xl border border-of-border/60">В среднем 8 266</span>
+          <span class="text-[10px] text-slate-300 bg-of-subcard px-2 py-1 rounded-xl border border-of-border/60" id="stepsAvgDisplay">В среднем 8 266</span>
         </div>
 
         <!-- Steps Bar Chart (Orange bars with target line) -->
-        <div class="relative h-32 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between overflow-hidden">
-          <!-- Target Average Dashed Line -->
-          <div class="absolute left-3 right-3 top-12 border-b border-dashed border-slate-500/50 pointer-events-none"></div>
-
-          <!-- Days bars in orange -->
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-orange-600/90" style="height: 55px;"></div>
-            <span class="text-[10px] text-slate-400">пн</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-orange-500 shadow-md shadow-orange-500/20" style="height: 90px;"></div>
-            <span class="text-[10px] text-slate-400 font-bold text-orange-400">вт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-orange-600/90" style="height: 52px;"></div>
-            <span class="text-[10px] text-slate-400">ср</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-orange-700/80" style="height: 25px;"></div>
-            <span class="text-[10px] text-slate-400">чт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">пт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">сб</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">вс</span>
-          </div>
+        <div id="statsStepsBarChart" class="relative h-32 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between overflow-hidden">
+          <!-- Populated dynamically via JS -->
         </div>
 
         <!-- Motivational Inner Card: "Уже неплохо" -->
         <div class="p-3.5 rounded-2xl bg-of-subcard border border-of-border/70 space-y-2 text-xs">
           <div class="font-bold text-white text-sm">Уже неплохо</div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
+          <p class="text-[11px] text-slate-300 leading-relaxed" id="stepsMotivationText">
             Добавим немного — этого хватит, чтобы сдвинуться, и не хватит, чтобы бросить. Дни с занятием тоже считаются: разминка и ходьба по квартире — те же шаги.
           </p>
           <div class="text-center pt-1">
-            <button class="px-5 py-1.5 rounded-xl bg-of-card hover:bg-of-cardHover text-slate-200 font-bold text-xs border border-of-border transition active:scale-95">
+            <button onclick="showToast('Отличный настрой! Держите темп 🔥')" class="px-5 py-1.5 rounded-xl bg-of-card hover:bg-of-cardHover text-slate-200 font-bold text-xs border border-of-border transition active:scale-95">
               Понятно!
             </button>
           </div>
@@ -628,9 +614,9 @@
         <!-- Steps Insight Pill -->
         <div class="p-3 rounded-2xl bg-of-subcard border border-of-border/60 flex items-start gap-2.5 text-xs text-slate-300">
           <span class="text-emerald-400 text-sm mt-0.5">💡</span>
-          <div class="text-[11px] leading-relaxed">
-            <span class="font-bold text-white">Шаги выше цели: 8 266 в день —</span>
-            Цель 6 000, в среднем 8 266. Лучший день — вт, 12 683.
+          <div class="text-[11px] leading-relaxed" id="stepsInsightPill">
+            <span class="font-bold text-white">Шаги на высоте:</span>
+            Синхронизировано из Apple Здоровье за сегодня.
           </div>
         </div>
       </div>
@@ -647,19 +633,19 @@
 
         <div class="flex items-center justify-between pt-1">
           <div>
-            <h3 class="text-xl font-black text-white">Нормально</h3>
-            <p class="text-xs text-slate-400 mt-0.5"><span id="sleepScoreNumber">63</span> из 100</p>
+            <h3 class="text-xl font-black text-white" id="sleepQualityTitle">Отличный сон</h3>
+            <p class="text-xs text-slate-400 mt-0.5"><span id="sleepScoreNumber">84</span> из 100</p>
           </div>
 
-          <!-- Circular Segmented Gauge (63 in center) -->
+          <!-- Circular Segmented Gauge (in center) -->
           <div class="relative w-16 h-16 flex items-center justify-center">
             <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
               <path class="text-slate-700/50" stroke-width="4" stroke="currentColor" fill="none"
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path class="text-orange-500" stroke-width="4" stroke-dasharray="63, 100" stroke-linecap="round" stroke="currentColor" fill="none"
+              <path id="sleepScoreCirclePath" class="text-orange-500 transition-all duration-700" stroke-width="4" stroke-dasharray="84, 100" stroke-linecap="round" stroke="currentColor" fill="none"
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
-            <span class="absolute font-black text-sm text-white">63</span>
+            <span id="sleepScoreNumberInner" class="absolute font-black text-sm text-white">84</span>
           </div>
         </div>
       </div>
@@ -667,48 +653,19 @@
       <!-- Карточка 5: Средняя продолжительность сна (Screenshots 2 & 3) -->
       <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3.5">
         <div class="text-xs text-slate-400 font-medium">Средняя продолжительность сна</div>
-        <div class="text-2xl font-black text-white" id="avgSleepDurationDisplay">5 ч 46 мин</div>
+        <div class="text-2xl font-black text-white" id="avgSleepDurationDisplay">7 ч 45 мин</div>
 
         <!-- Sleep Duration Chart -->
-        <div class="relative h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between overflow-hidden">
-          <div class="absolute left-3 right-3 top-10 border-b border-dashed border-slate-500/40 pointer-events-none"></div>
-
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-slate-500" style="height: 35px;"></div>
-            <span class="text-[10px] text-slate-400">пн</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-slate-400" style="height: 60px;"></div>
-            <span class="text-[10px] text-slate-400">вт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 rounded-xl bg-slate-300" style="height: 85px;"></div>
-            <span class="text-[10px] text-slate-400">ср</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">чт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">пт</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">сб</span>
-          </div>
-          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
-            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
-            <span class="text-[10px] text-slate-400">вс</span>
-          </div>
+        <div id="statsSleepBarChart" class="relative h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between overflow-hidden">
+          <!-- Populated dynamically via JS -->
         </div>
 
         <!-- Sleep Warning Note -->
         <div class="p-3 rounded-2xl bg-of-subcard border border-of-border/60 flex items-start gap-2.5 text-xs text-slate-300">
-          <span class="text-orange-400 text-sm mt-0.5">❗️</span>
-          <div class="text-[11px] leading-relaxed text-slate-300">
-            <span class="font-bold text-white">2 ночи короче шести часов —</span>
-            В среднем выходит 5,8 ч сна. Когда сна мало, на следующий день труднее держать нагрузку — если с ней сейчас не ладится, начни со сна. Так уже 5 недель.
+          <span class="text-emerald-400 text-sm mt-0.5">💤</span>
+          <div class="text-[11px] leading-relaxed text-slate-300" id="sleepInsightText">
+            <span class="font-bold text-white">Качественное ночное восстановление —</span>
+            Организм успевает восстановить запасы гликогена и ЦНС перед следующей тренировкой.
           </div>
         </div>
       </div>
@@ -1447,29 +1404,46 @@
         <div id="screenshotUploadSection" class="space-y-3">
           <div id="dropScreenshotZone" class="border-2 border-dashed border-of-border hover:border-of-blue/60 rounded-2xl p-6 text-center cursor-pointer transition bg-of-subcard/50 space-y-2">
             <div class="w-12 h-12 mx-auto rounded-2xl bg-of-card border border-of-border text-of-blue flex items-center justify-center text-xl shadow-inner">
-              <i data-lucide="image-plus" class="w-6 h-6"></i>
+              <i data-lucide="images" class="w-6 h-6"></i>
             </div>
-            <div class="font-bold text-white text-xs">Нажмите, чтобы выбрать скриншот</div>
+            <div class="font-bold text-white text-xs">Нажмите, чтобы выбрать скриншоты</div>
             <div class="text-[10px] text-slate-400 leading-relaxed max-w-xs mx-auto">
-              Загрузите скриншот из заметок, Telegram, WhatsApp или другого фитнес-приложения со списком на 3–4 дня
+              Можно выбрать сразу несколько скриншотов (например: День 1–2 и День 3–4) из заметок или мессенджера
             </div>
-            <input type="file" id="workoutScreenshotFileInput" accept="image/*" class="hidden">
+            <input type="file" id="workoutScreenshotFileInput" accept="image/*" multiple class="hidden">
           </div>
 
-          <!-- Preview & OCR Spinner -->
-          <div id="screenshotPreviewWrapper" class="hidden space-y-2.5">
-            <div class="relative w-full h-40 rounded-2xl overflow-hidden bg-of-subcard border border-of-border">
-              <img id="screenshotPreviewImg" src="" alt="Скриншот программы" class="w-full h-full object-contain">
-              <button id="removeScreenshotBtn" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-of-bg/80 text-white flex items-center justify-center hover:bg-red-500/80 transition">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <!-- Multi-Screenshot Preview & Gallery -->
+          <div id="screenshotPreviewWrapper" class="hidden space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-white">Прикреплено скриншотов:</span>
+                <span id="screenshotCountBadge" class="px-2 py-0.5 rounded-full bg-of-blue/20 text-of-blue text-[10px] font-black">0</span>
+              </div>
+              <button id="addMoreScreenshotsBtn" class="px-2.5 py-1 rounded-xl bg-of-subcard hover:bg-of-card border border-of-border text-of-blue text-[11px] font-bold flex items-center gap-1 transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Добавить фото</span>
               </button>
             </div>
+
+            <!-- Thumbnails grid -->
+            <div id="screenshotThumbnailsGrid" class="grid grid-cols-2 gap-2.5 max-h-56 overflow-y-auto p-1">
+              <!-- Rendered via JS -->
+            </div>
             
-            <div id="ocrProgressStatus" class="hidden p-3 rounded-2xl bg-of-subcard border border-of-border flex items-center gap-3">
-              <div class="w-5 h-5 border-2 border-of-blue border-t-transparent rounded-full animate-spin"></div>
-              <div class="text-xs text-slate-300">
-                <span class="font-bold text-white">ИИ распознает дни и упражнения...</span>
-                <div class="text-[10px] text-slate-400" id="ocrProgressDetails">Сканирование текста</div>
+            <!-- Animated OCR Progress Indicator -->
+            <div id="ocrProgressStatus" class="hidden p-3 rounded-2xl bg-of-subcard border border-of-blue/40 flex items-center gap-3">
+              <div class="w-6 h-6 border-2 border-of-blue border-t-transparent rounded-full animate-spin shrink-0"></div>
+              <div class="text-xs text-slate-300 flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white" id="ocrProgressMainTitle">ИИ распознает программу...</span>
+                  <span class="text-[10px] text-of-blue font-mono font-bold" id="ocrProgressPercent">0%</span>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-0.5" id="ocrProgressDetails">Сканирование скриншота 1 из 2...</div>
+                <!-- Progress Bar -->
+                <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                  <div id="ocrProgressBarInner" class="h-full bg-of-blue transition-all duration-300" style="width: 10%;"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -1526,6 +1500,200 @@
         </div>
 
       </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- APPLE HEALTH ACCESS MODAL (iOS HEALTHKIT PERMISSION SHEET) -->
+  <!-- ======================================================== -->
+  <div id="appleHealthAuthModal" class="fixed inset-0 z-50 bg-of-bg/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-of-border flex flex-col items-center text-center bg-of-card relative">
+        <button id="closeHealthAuthModalBtn" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-of-subcard border border-of-border flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Official Apple Health Icon -->
+        <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-red-500/10 mb-3 border border-slate-100">
+          <svg class="w-8 h-8 text-red-500 fill-current" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+
+        <h3 class="text-lg font-black text-white">Доступ к «Здоровье»</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-xs">
+          Приложение <span class="text-white font-bold">OnlyFits</span> запрашивает разрешение на чтение данных о вашей активности:
+        </p>
+      </div>
+
+      <!-- Categories & Toggles -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs">
+        
+        <!-- Toggle All -->
+        <div class="flex items-center justify-between pb-3 border-b border-of-border/60">
+          <div>
+            <span class="font-bold text-white text-xs">Разрешить все категории</span>
+            <div class="text-[10px] text-slate-400">Включить полный обмен данными</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="healthToggleAll" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <div class="text-[10px] text-slate-400 uppercase font-black tracking-wider px-1">
+          Разрешить «OnlyFits» чтение данных:
+        </div>
+
+        <!-- 1. Steps -->
+        <div class="bg-of-subcard p-3 rounded-2xl border border-of-border flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center font-bold">
+              🚶‍♂️
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-xs">Шаги (Steps)</h4>
+              <p class="text-[10px] text-slate-400">Ежедневный подсчет и недельная норма</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="healthPermSteps" class="health-perm-toggle sr-only peer" checked>
+            <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- 2. Sleep -->
+        <div class="bg-of-subcard p-3 rounded-2xl border border-of-border flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center font-bold">
+              😴
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-xs">Анализ сна (Sleep)</h4>
+              <p class="text-[10px] text-slate-400">Часы сна и оценка восстановления</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="healthPermSleep" class="health-perm-toggle sr-only peer" checked>
+            <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- 3. Active Energy -->
+        <div class="bg-of-subcard p-3 rounded-2xl border border-of-border flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center font-bold">
+              🔥
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-xs">Активная энергия (Active Energy)</h4>
+              <p class="text-[10px] text-slate-400">Затраченные калории в движении</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="healthPermCalories" class="health-perm-toggle sr-only peer" checked>
+            <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- 4. Weight -->
+        <div class="bg-of-subcard p-3 rounded-2xl border border-of-border flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center font-bold">
+              ⚖️
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-xs">Масса тела (Weight)</h4>
+              <p class="text-[10px] text-slate-400">Синхронизация с умных весов</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="healthPermWeight" class="health-perm-toggle sr-only peer" checked>
+            <div class="w-10 h-5 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Privacy footnote -->
+        <div class="p-3 rounded-xl bg-of-subcard/50 border border-of-border/40 text-[10px] text-slate-400 leading-relaxed">
+          🔒 OnlyFits использует данные строго на устройстве для построения графиков и персональной рекомендации тренировок.
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="space-y-2 pt-2">
+          <button id="grantHealthAccessBtn" class="w-full py-3.5 rounded-full bg-of-blue hover:bg-white text-of-bg font-black text-xs transition active:scale-98 shadow-xl flex items-center justify-center gap-2">
+            <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+            <span>Предоставить доступ к данным</span>
+          </button>
+          <button id="cancelHealthAccessBtn" class="w-full py-2.5 rounded-full text-slate-400 hover:text-white font-bold text-xs transition">
+            Не сейчас
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- APPLE SHORTCUTS AUTOMATION GUIDE MODAL                    -->
+  <!-- ======================================================== -->
+  <div id="appleShortcutModal" class="fixed inset-0 z-50 bg-of-bg/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up flex flex-col max-h-[92vh]">
+      
+      <div class="p-5 border-b border-of-border flex items-center justify-between bg-of-card">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-of-blue/15 text-of-blue flex items-center justify-center font-bold">
+            <i data-lucide="zap" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white">Быстрая команда Apple</h3>
+            <p class="text-[10px] text-slate-400">Автоматическая передача данных из iPhone</p>
+          </div>
+        </div>
+        <button id="closeShortcutModalBtn" class="w-8 h-8 rounded-full bg-of-subcard border border-of-border flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="p-3.5 rounded-2xl bg-of-subcard border border-of-border space-y-2">
+          <div class="font-bold text-white text-xs flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Как это работает на iOS:</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Приложение Apple «Быстрые команды» (Shortcuts) считывает точные шаги, фазы сна и активные калории напрямую из системного HealthKit и передает их в OnlyFits раз в день или по нажатию виджета.
+          </p>
+        </div>
+
+        <div class="space-y-2.5">
+          <div class="flex items-start gap-3 p-3 rounded-2xl bg-of-subcard/50 border border-of-border">
+            <span class="w-6 h-6 rounded-lg bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[11px] shrink-0">1</span>
+            <div class="text-[11px] text-slate-300">
+              <span class="font-bold text-white">Автоматическое чтение данных:</span>
+              Приложение периодически обновляет показатели активности за день.
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 rounded-2xl bg-of-subcard/50 border border-of-border">
+            <span class="w-6 h-6 rounded-lg bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[11px] shrink-0">2</span>
+            <div class="text-[11px] text-slate-300">
+              <span class="font-bold text-white">Фоновая синхронизация:</span>
+              Все ключевые графики и кольца активности заполняются актуальными данными из HealthKit.
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 space-y-2">
+          <button id="triggerLiveHealthSyncBtn" class="w-full py-3.5 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-extrabold text-xs transition active:scale-98 flex items-center justify-center gap-2 shadow-lg shadow-of-blue/15">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>Синхронизировать показатели прямо сейчас</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
