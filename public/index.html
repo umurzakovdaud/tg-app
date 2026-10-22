@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>OnlyFits — Тренировки и Питание</title>
+  <title>OnlyFits — Тренировки и Статистика</title>
   
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -16,18 +16,18 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              400: '#34d399',
-              500: '#10b981',
-              600: '#059669',
-              neon: '#22c55e'
-            },
-            dark: {
-              950: '#090d16',
-              900: '#0f172a',
-              850: '#151f38',
-              800: '#1e293b',
-              700: '#334155'
+            of: {
+              bg: '#101620',
+              card: '#19222f',
+              cardHover: '#1f2b3b',
+              subcard: '#131b26',
+              border: '#243042',
+              blue: '#7dd3fc',
+              blueDim: '#38bdf8',
+              orange: '#f97316',
+              orangeLight: '#fb923c',
+              emerald: '#10b981',
+              pill: '#2b3a4d'
             }
           }
         }
@@ -40,386 +40,808 @@
   
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-dark-950 text-slate-100 antialiased min-h-screen flex flex-col font-sans select-none pb-24">
+<body class="bg-of-bg text-slate-100 antialiased min-h-screen flex flex-col font-sans select-none pb-28">
   
-  <!-- Top Navigation Header -->
-  <header class="sticky top-0 z-40 bg-dark-900/90 backdrop-blur-md border-b border-dark-700/60 px-4 py-3">
+  <!-- ==================== TOP NAVIGATION HEADER ==================== -->
+  <header class="sticky top-0 z-40 bg-of-bg/95 backdrop-blur-md px-4 py-3 border-b border-of-border/40">
     <div class="max-w-md mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-green-400 flex items-center justify-center text-dark-950 font-black shadow-lg shadow-emerald-500/20">
-          <i data-lucide="zap" class="w-5 h-5 fill-current"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-1.5">
-            <h1 class="text-base font-extrabold tracking-tight text-white">OnlyFits</h1>
-            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Free</span>
-          </div>
-          <p class="text-[11px] text-slate-400" id="headerSubtitle">Тренировки & КБЖУ</p>
-        </div>
+      <!-- Onlyfits Logo -->
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-black tracking-wider text-orange-500 uppercase drop-shadow">ONLYFITS</span>
       </div>
       
-      <!-- Серия дней (Streak) и профиль -->
+      <!-- Top Action Icons -->
       <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold text-xs">
-          <span>🔥</span>
-          <span id="streakCount">3</span>
-          <span class="text-[10px] font-normal text-amber-300/80">дня</span>
-        </div>
-        <button id="profileBtn" class="w-8 h-8 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center text-slate-300 hover:text-white transition">
-          <i data-lucide="user" class="w-4 h-4"></i>
+        <!-- Active Workout / Timer Badge -->
+        <button id="topTimerBtn" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-of-card border border-of-border text-slate-300 hover:text-white text-xs font-bold transition active:scale-95">
+          <i data-lucide="timer" class="w-4 h-4 text-of-blue"></i>
+          <span id="topTimerBadge">3</span>
+        </button>
+
+        <!-- Calendar Button -->
+        <button id="topCalendarBtn" class="w-9 h-9 rounded-full bg-of-card border border-of-border flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Hamburger / Settings Menu -->
+        <button id="topMenuBtn" class="w-9 h-9 rounded-full bg-of-card border border-of-border flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95">
+          <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
   <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
     
-    <!-- ==================== TAB 1: ТРЕНИРОВКИ ==================== -->
-    <section id="tab-workouts" class="tab-content space-y-4 animate-fade-in">
+    <!-- ======================================================== -->
+    <!-- TAB 1: ГЛАВНАЯ (HOME)                                     -->
+    <!-- ======================================================== -->
+    <section id="tab-home" class="tab-content space-y-4 animate-fade-in">
       
-      <!-- Баннер активной / сегодняшней тренировки -->
-      <div class="relative overflow-hidden p-4 rounded-3xl bg-gradient-to-br from-dark-850 to-dark-900 border border-dark-700/80 shadow-xl">
-        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="flex items-start justify-between relative z-10">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                Сегодняшняя сессия
-              </span>
-              <span id="workoutDayLabel" class="text-xs text-slate-400">День 1 из 3</span>
-            </div>
-            <h2 id="currentWorkoutTitle" class="text-lg font-black text-white mt-1">Грудь + Трицепс</h2>
-            <p id="currentWorkoutSubtitle" class="text-xs text-slate-400 mt-0.5">5 упражнений • ~50 минут • Зал</p>
-          </div>
-          <button id="changeProgramBtn" class="p-2 rounded-xl bg-dark-800/80 border border-dark-700 text-slate-400 hover:text-white transition" title="Сменить программу">
-            <i data-lucide="sliders" class="w-4 h-4"></i>
-          </button>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-dark-700/60 flex items-center justify-between relative z-10">
-          <div class="flex items-center gap-3 text-xs text-slate-300">
-            <div class="flex items-center gap-1">
-              <i data-lucide="dumbbell" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>18 подходов</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <i data-lucide="flame" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>~380 ккал</span>
-            </div>
-          </div>
-          <button id="startWorkoutBtn" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-dark-950 font-black text-xs shadow-lg shadow-emerald-500/25 transition active:scale-95 flex items-center gap-1.5">
-            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-            <span>Начать</span>
-          </button>
-        </div>
+      <!-- Date Switcher: Вчера | Сегодня | Завтра -->
+      <div class="flex items-center justify-around border-b border-of-border/40 pb-2 text-sm font-bold">
+        <button class="day-filter-btn text-slate-400 hover:text-white transition pb-1" data-day="yesterday">Вчера</button>
+        <button class="day-filter-btn text-white border-b-2 border-white pb-1" data-day="today">Сегодня</button>
+        <button class="day-filter-btn text-slate-400 hover:text-white transition pb-1" data-day="tomorrow">Завтра</button>
       </div>
 
-      <!-- Расписание сплита на неделю -->
-      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
+      <!-- Карточка: Активность (Hourly Activity + Pulse) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i>
-            План тренировок на неделю
-          </h3>
-          <span class="text-[10px] text-emerald-400 font-semibold" id="programGoalBadge">Набор массы</span>
+          <h2 class="text-sm font-bold text-white">Активность</h2>
+          <button class="text-xs text-slate-400 hover:text-white flex items-center gap-0.5">
+            <span>Подробнее</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
 
-        <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar" id="weekScheduleGrid">
-          <!-- Генерируется через JS: Верх A, Низ A, Верх B, Низ B... -->
+        <!-- Hourly SVG Chart (Bars + Pulse curve) -->
+        <div class="relative w-full h-36 bg-of-subcard/60 rounded-2xl p-2.5 flex flex-col justify-between overflow-hidden">
+          <svg class="w-full h-24 overflow-visible" viewBox="0 0 320 80" preserveAspectRatio="none">
+            <!-- Movement Bars (Hourly) -->
+            <rect x="20" y="55" width="6" height="25" rx="3" fill="#64748b" opacity="0.4"/>
+            <rect x="29" y="45" width="6" height="35" rx="3" fill="#64748b" opacity="0.5"/>
+            <rect x="38" y="50" width="6" height="30" rx="3" fill="#64748b" opacity="0.4"/>
+            
+            <rect x="110" y="30" width="6" height="50" rx="3" fill="#94a3b8" opacity="0.6"/>
+            <rect x="119" y="15" width="6" height="65" rx="3" fill="#94a3b8" opacity="0.7"/>
+            <rect x="128" y="20" width="6" height="60" rx="3" fill="#94a3b8" opacity="0.8"/>
+            <rect x="137" y="38" width="6" height="42" rx="3" fill="#94a3b8" opacity="0.6"/>
+
+            <rect x="155" y="48" width="6" height="32" rx="3" fill="#64748b" opacity="0.5"/>
+
+            <rect x="180" y="22" width="6" height="58" rx="3" fill="#94a3b8" opacity="0.75"/>
+            <rect x="189" y="12" width="6" height="68" rx="3" fill="#cbd5e1" opacity="0.9"/>
+            <rect x="198" y="35" width="6" height="45" rx="3" fill="#94a3b8" opacity="0.7"/>
+
+            <rect x="250" y="52" width="6" height="28" rx="3" fill="#64748b" opacity="0.4"/>
+            <rect x="259" y="44" width="6" height="36" rx="3" fill="#64748b" opacity="0.5"/>
+
+            <!-- Pulse Curve (Red/Pink Line) -->
+            <path d="M 15 48 Q 25 35, 35 55 T 60 50" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+
+          <!-- Timeline X-Axis -->
+          <div class="flex justify-between text-[10px] text-slate-500 font-medium px-1">
+            <span>0:00</span>
+            <span>4:00</span>
+            <span>8:00</span>
+            <span>12:00</span>
+            <span>16:00</span>
+            <span>20:00</span>
+            <span>0:00</span>
+          </div>
+        </div>
+
+        <!-- Chart Legend -->
+        <div class="flex items-center gap-4 text-xs text-slate-300 pt-1">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+            <span>Движение</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-0.5 bg-rose-500 rounded-full"></span>
+            <span>Пульс</span>
+          </div>
         </div>
       </div>
 
-      <!-- Упражнения текущего дня -->
-      <div class="space-y-2">
+      <!-- Карточка: Зал (Текущая программа: Верх/низ) -->
+      <div id="homeGymCard" class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3.5 cursor-pointer hover:border-of-blue/40 transition">
+        <div class="flex items-center justify-between">
+          <div class="text-[11px] text-slate-400 font-medium">Текущая программа</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-black text-white tracking-tight" id="homeProgramTitle">Верх/низ</h2>
+        </div>
+
+        <!-- Badges Row -->
+        <div class="flex items-center gap-1.5 flex-wrap text-xs">
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-of-subcard text-slate-300 border border-of-border/60">
+            <span>🧍</span>
+            <span>Равномерно</span>
+          </div>
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-of-subcard text-slate-300 border border-of-border/60">
+            <span>🏋️</span>
+            <span>4</span>
+          </div>
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-of-subcard text-slate-300 border border-of-border/60">
+            <span>🦅</span>
+            <span>Эксперт</span>
+          </div>
+          <div class="p-1 rounded-xl bg-of-subcard text-slate-400 border border-of-border/60">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          </div>
+        </div>
+
+        <!-- Weekdays Status Strip -->
+        <div class="pt-2 flex items-center justify-between">
+          <div class="flex items-center gap-2" id="homeWeekdaysList">
+            <!-- Generated via JS: ПН (dumbbell), ВТ (zzz), СР (dumbbell), ЧТ (today ring), ПТ, СБ, ВС -->
+          </div>
+          <div class="px-2.5 py-1 rounded-xl bg-of-pill text-slate-200 text-xs font-bold flex items-center gap-1">
+            <span>Неделя</span>
+            <i data-lucide="calendar" class="w-3 h-3"></i>
+            <span>43</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Кнопка: Настроить главный экран -->
+      <button id="customizeHomeBtn" class="w-full py-3.5 rounded-2xl bg-of-card hover:bg-of-cardHover border border-of-border/70 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
+        <i data-lucide="layout-grid" class="w-4 h-4 text-slate-400"></i>
+        <span>Настроить главный экран</span>
+      </button>
+
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: ТРЕНИРОВКИ (WORKOUTS / PROGRAM SCREEN)             -->
+    <!-- ======================================================== -->
+    <section id="tab-workouts" class="tab-content hidden space-y-4 animate-fade-in">
+      
+      <!-- Top Program Card -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Текущая программа</span>
+          <button id="switchProgramModalBtn" class="text-of-blue hover:text-white flex items-center gap-0.5 font-bold">
+            <span>Сменить</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <h2 class="text-xl font-black text-white" id="programDetailTitle">Верх/низ</h2>
+
+        <!-- Program Badges -->
+        <div class="flex items-center gap-1.5 flex-wrap text-xs">
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-of-subcard text-slate-300 border border-of-border/60">
+            <span>🧍</span>
+            <span>Равномерно</span>
+          </div>
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-of-subcard text-slate-300 border border-of-border/60">
+            <span>🏋️</span>
+            <span>4</span>
+          </div>
+          <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-of-subcard text-slate-300 border border-of-border/60">
+            <span>🦅</span>
+            <span>Эксперт</span>
+          </div>
+          <div class="p-1 rounded-xl bg-of-subcard text-slate-400 border border-of-border/60">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          </div>
+        </div>
+
+        <!-- Weekdays Strip -->
+        <div class="pt-2 flex items-center justify-between">
+          <div class="flex items-center gap-2" id="programWeekdaysList">
+            <!-- Dynamic weekdays from JS -->
+          </div>
+          <div class="px-2.5 py-1 rounded-xl bg-of-pill text-slate-200 text-xs font-bold flex items-center gap-1">
+            <span>Неделя</span>
+            <i data-lucide="calendar" class="w-3 h-3"></i>
+            <span>43</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Workout Card with Muscle Radar (Carousel) -->
+      <div class="bg-of-card p-5 rounded-3xl border border-of-border/70 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-white" id="dayWorkoutTitle">Верх B</h3>
+          <button id="workoutDetailLinkBtn" class="text-xs text-slate-400 hover:text-white flex items-center gap-0.5">
+            <span>Подробнее</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Muscle Radar Visualizer (Signature Onlyfits Anatomy Wheel) -->
+        <div class="relative w-full h-56 flex items-center justify-center py-2" id="muscleRadarContainer">
+          <!-- Central Concentric Segmented Rings SVG -->
+          <svg class="w-48 h-48 overflow-visible radar-animate" viewBox="0 0 200 200">
+            <!-- Inner Rings (Grey / Inactive) -->
+            <circle cx="100" cy="100" r="24" fill="none" stroke="#222f3e" stroke-width="7" stroke-dasharray="14 4"/>
+            <circle cx="100" cy="100" r="36" fill="none" stroke="#2a3b4c" stroke-width="7" stroke-dasharray="22 5"/>
+            <circle cx="100" cy="100" r="48" fill="none" stroke="#33475b" stroke-width="7" stroke-dasharray="30 6"/>
+            <circle cx="100" cy="100" r="60" fill="none" stroke="#3d546b" stroke-width="7" stroke-dasharray="36 6"/>
+            <circle cx="100" cy="100" r="72" fill="none" stroke="#48627d" stroke-width="7" stroke-dasharray="42 7"/>
+
+            <!-- Active Target Segments (Highlighting muscle loads for current workout) -->
+            <!-- Top / Back: 7 sets -->
+            <path d="M 90 28 A 72 72 0 0 1 110 28" fill="none" stroke="#7dd3fc" stroke-width="7.5" stroke-linecap="round"/>
+            <path d="M 92 40 A 60 60 0 0 1 108 40" fill="none" stroke="#7dd3fc" stroke-width="7.5" stroke-linecap="round"/>
+            
+            <!-- Right / Chest: 4 sets -->
+            <path d="M 148 76 A 60 60 0 0 1 158 98" fill="none" stroke="#cbd5e1" stroke-width="7.5" stroke-linecap="round"/>
+            
+            <!-- Bottom-Right / Arms: 6 sets -->
+            <path d="M 142 128 A 60 60 0 0 1 120 148" fill="none" stroke="#cbd5e1" stroke-width="7.5" stroke-linecap="round"/>
+            <path d="M 132 118 A 48 48 0 0 1 114 134" fill="none" stroke="#7dd3fc" stroke-width="7.5" stroke-linecap="round"/>
+            
+            <!-- Bottom / Shoulders: 6 sets -->
+            <path d="M 88 172 A 72 72 0 0 1 112 172" fill="none" stroke="#7dd3fc" stroke-width="7.5" stroke-linecap="round"/>
+            <path d="M 90 160 A 60 60 0 0 1 110 160" fill="none" stroke="#cbd5e1" stroke-width="7.5" stroke-linecap="round"/>
+          </svg>
+
+          <!-- 6 Anatomical Muscle Target Nodes Around Wheel -->
+          <!-- 1. Top: Back (Спина) -->
+          <div class="absolute top-0 flex flex-col items-center">
+            <div class="flex items-center gap-1 bg-of-subcard/90 px-2 py-0.5 rounded-full border border-of-border text-[11px] font-bold text-slate-200">
+              <span class="text-xs">🔙</span>
+              <span id="radarBackSets">7</span>
+            </div>
+          </div>
+
+          <!-- 2. Top-Right: Chest (Грудь) -->
+          <div class="absolute top-6 right-2 flex flex-col items-center">
+            <div class="flex items-center gap-1 bg-of-subcard/90 px-2 py-0.5 rounded-full border border-of-border text-[11px] font-bold text-slate-200">
+              <span class="text-xs">👕</span>
+              <span id="radarChestSets">4</span>
+            </div>
+          </div>
+
+          <!-- 3. Bottom-Right: Arms (Руки) -->
+          <div class="absolute bottom-6 right-2 flex flex-col items-center">
+            <div class="flex items-center gap-1 bg-of-subcard/90 px-2 py-0.5 rounded-full border border-of-border text-[11px] font-bold text-slate-200">
+              <span class="text-xs">💪</span>
+              <span id="radarArmsSets">6</span>
+            </div>
+          </div>
+
+          <!-- 4. Bottom: Shoulders (Плечи) -->
+          <div class="absolute bottom-0 flex flex-col items-center">
+            <div class="flex items-center gap-1 bg-of-subcard/90 px-2 py-0.5 rounded-full border border-of-border text-[11px] font-bold text-slate-200">
+              <span class="text-xs">🛡️</span>
+              <span id="radarShouldersSets">6</span>
+            </div>
+          </div>
+
+          <!-- 5. Bottom-Left: Legs (Ноги) -->
+          <div class="absolute bottom-6 left-2 flex flex-col items-center">
+            <div class="flex items-center gap-1 bg-of-subcard/90 px-2 py-0.5 rounded-full border border-of-border text-[11px] font-bold text-slate-400">
+              <span class="text-xs">🦵</span>
+              <span id="radarLegsSets">0</span>
+            </div>
+          </div>
+
+          <!-- 6. Top-Left: Core / Abs (Пресс) -->
+          <div class="absolute top-6 left-2 flex flex-col items-center">
+            <div class="flex items-center gap-1 bg-of-subcard/90 px-2 py-0.5 rounded-full border border-of-border text-[11px] font-bold text-slate-200">
+              <span class="text-xs">⚡</span>
+              <span id="radarCoreSets">2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Pills Row (⏱️ 70 мин | 📋 8 упражнений | 🔄 25 сетов) -->
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="bg-of-subcard py-2 px-1.5 rounded-2xl border border-of-border/60 flex items-center justify-center gap-1 text-slate-300">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-of-blue"></i>
+            <span id="workoutDurationPill">70 мин</span>
+          </div>
+          <div class="bg-of-subcard py-2 px-1.5 rounded-2xl border border-of-border/60 flex items-center justify-center gap-1 text-slate-300">
+            <i data-lucide="list" class="w-3.5 h-3.5 text-of-blue"></i>
+            <span id="workoutExCountPill">8 упр.</span>
+          </div>
+          <div class="bg-of-subcard py-2 px-1.5 rounded-2xl border border-of-border/60 flex items-center justify-center gap-1 text-slate-300">
+            <i data-lucide="repeat" class="w-3.5 h-3.5 text-of-blue"></i>
+            <span id="workoutSetsCountPill">25 сетов</span>
+          </div>
+        </div>
+
+        <!-- Big CTA Button: Начать тренировку -->
+        <button id="startWorkoutPrimaryBtn" class="w-full py-4 rounded-full bg-slate-100 hover:bg-white text-of-bg font-extrabold text-sm transition active:scale-98 shadow-lg shadow-white/5 flex items-center justify-center gap-2">
+          <span>Начать тренировку</span>
+        </button>
+
+        <!-- Carousel Pagination Dots -->
+        <div class="flex items-center justify-center gap-2 pt-1" id="workoutCarouselDots">
+          <button class="w-2 h-2 rounded-full bg-slate-600 transition" data-idx="0"></button>
+          <button class="w-2 h-2 rounded-full bg-slate-600 transition" data-idx="1"></button>
+          <button class="w-2.5 h-2.5 rounded-full bg-white transition" data-idx="2"></button>
+          <button class="w-2 h-2 rounded-full bg-slate-600 transition" data-idx="3"></button>
+        </div>
+      </div>
+
+      <!-- Exercise List of Selected Day -->
+      <div class="space-y-2.5">
         <div class="flex items-center justify-between px-1">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Упражнения дня</h3>
-          <button id="openCatalogBtn" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1">
-            <i data-lucide="book-open" class="w-3 h-3"></i>
-            База упражнений
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">План упражнений</h3>
+          <button id="openLibraryCatalogBtn" class="text-xs text-of-blue hover:text-white font-semibold flex items-center gap-1">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            <span>Библиотека</span>
           </button>
         </div>
 
         <div id="dayExercisesList" class="space-y-2">
-          <!-- Карточки упражнений генерируются через JS -->
+          <!-- Generated via JS -->
         </div>
       </div>
 
     </section>
 
 
-    <!-- ==================== TAB 2: ПИТАНИЕ & КБЖУ ==================== -->
-    <section id="tab-nutrition" class="tab-content hidden space-y-4 animate-fade-in">
+    <!-- ======================================================== -->
+    <!-- TAB 3: СТАТИСТИКА (STATS SCREEN)                          -->
+    <!-- ======================================================== -->
+    <section id="tab-stats" class="tab-content hidden space-y-4 animate-fade-in">
       
-      <!-- Кольцо / Сводка калорий -->
-      <div class="p-4 rounded-3xl bg-dark-900 border border-dark-700/80 shadow-lg space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Дневной баланс</span>
-            <h2 class="text-xl font-black text-white mt-0.5">
-              <span id="eatenCalories">1 420</span> <span class="text-xs text-slate-400 font-normal">/ <span id="targetCalories">2 250</span> ккал</span>
-            </h2>
-          </div>
-          <div class="text-right">
-            <div class="text-[10px] text-slate-400">Осталось</div>
-            <div id="remainingCalories" class="text-lg font-black text-emerald-400">830 ккал</div>
-          </div>
-        </div>
-
-        <!-- Прогресс-бар калорий -->
-        <div class="w-full bg-dark-800 h-2.5 rounded-full overflow-hidden">
-          <div id="caloriesBar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-full transition-all duration-300 rounded-full" style="width: 63%"></div>
-        </div>
-
-        <!-- БЖУ (Макронутриенты) -->
-        <div class="grid grid-cols-3 gap-2 pt-1 text-center">
-          <div class="bg-dark-850/80 p-2.5 rounded-2xl border border-dark-700/60">
-            <div class="text-[10px] text-slate-400 uppercase font-semibold">Белки</div>
-            <div class="text-xs font-bold text-white mt-0.5"><span id="proteinCurrent">95</span> / <span id="proteinTarget">140</span>г</div>
-            <div class="w-full bg-dark-800 h-1 rounded-full mt-1.5 overflow-hidden">
-              <div id="proteinBar" class="bg-blue-400 h-full rounded-full" style="width: 68%"></div>
-            </div>
-          </div>
-          <div class="bg-dark-850/80 p-2.5 rounded-2xl border border-dark-700/60">
-            <div class="text-[10px] text-slate-400 uppercase font-semibold">Жиры</div>
-            <div class="text-xs font-bold text-white mt-0.5"><span id="fatsCurrent">45</span> / <span id="fatsTarget">70</span>г</div>
-            <div class="w-full bg-dark-800 h-1 rounded-full mt-1.5 overflow-hidden">
-              <div id="fatsBar" class="bg-amber-400 h-full rounded-full" style="width: 64%"></div>
-            </div>
-          </div>
-          <div class="bg-dark-850/80 p-2.5 rounded-2xl border border-dark-700/60">
-            <div class="text-[10px] text-slate-400 uppercase font-semibold">Углеводы</div>
-            <div class="text-xs font-bold text-white mt-0.5"><span id="carbsCurrent">160</span> / <span id="carbsTarget">250</span>г</div>
-            <div class="w-full bg-dark-800 h-1 rounded-full mt-1.5 overflow-hidden">
-              <div id="carbsBar" class="bg-emerald-400 h-full rounded-full" style="width: 64%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- AI Сканер еды по фото (Фирменная фишка Onlyfits) -->
-      <div class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/70 to-dark-900 border border-emerald-500/40 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
-            📸
-          </div>
-          <div>
-            <div class="text-xs font-bold text-white flex items-center gap-1.5">
-              <span>ИИ-сканер тарелки</span>
-              <span class="text-[9px] bg-emerald-500 text-dark-950 font-black px-1 rounded">AI</span>
-            </div>
-            <div class="text-[10px] text-slate-400">Сфоткайте еду для мгновенного расчета КБЖУ</div>
-          </div>
-        </div>
-        <button id="aiPhotoBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-dark-950 font-black text-xs hover:bg-emerald-400 transition active:scale-95">
-          Скан
+      <!-- Top Title -->
+      <div class="flex items-center justify-between px-1">
+        <h1 class="text-2xl font-black text-white">Статистика</h1>
+        <button class="w-9 h-9 rounded-full bg-of-card border border-of-border flex items-center justify-center text-slate-300">
+          <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Трекер воды -->
-      <div class="bg-dark-900 p-3.5 rounded-2xl border border-dark-700/80 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-            <i data-lucide="droplet" class="w-4 h-4 fill-current"></i>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-white">Водный баланс</div>
-            <div class="text-[10px] text-slate-400"><span id="waterCurrent">1 500</span> / 2 500 мл</div>
+      <!-- Карточка 1: Зал (Screenshot 1) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3.5">
+        <div class="flex items-center justify-between">
+          <div class="text-xs font-bold text-white">Зал</div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-400 bg-of-subcard px-2 py-0.5 rounded-md border border-of-border/60">19 октября — 25 октября · четверг</span>
+            <button class="text-xs text-slate-400 hover:text-white flex items-center">
+              <span>Подробнее</span>
+              <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            </button>
           </div>
         </div>
-        <button id="addWaterBtn" class="px-3 py-1.5 rounded-xl bg-dark-800 border border-dark-700 hover:border-cyan-500/40 text-cyan-400 font-bold text-xs flex items-center gap-1 transition active:scale-95">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          <span>250 мл</span>
-        </button>
-      </div>
 
-      <!-- Приемы пищи (Завтрак, Обед, Ужин, Перекус) -->
-      <div class="space-y-2.5" id="mealsTrackerList">
-        <!-- Блоки приемов пищи генерируются через JS -->
-      </div>
-
-    </section>
-
-
-    <!-- ==================== TAB 3: ТЕЛО & ПРОГРЕСС ==================== -->
-    <section id="tab-progress" class="tab-content hidden space-y-4 animate-fade-in">
-      
-      <!-- Карточка веса -->
-      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Текущий вес</span>
-            <div class="flex items-baseline gap-1 mt-0.5">
-              <span id="currentWeightDisplay" class="text-2xl font-black text-white">74.5</span>
-              <span class="text-xs text-slate-400 font-semibold">кг</span>
-              <span id="weightDiffDisplay" class="text-xs font-bold text-emerald-400 ml-2">↓ -1.8 кг за месяц</span>
-            </div>
+        <!-- Metric Dropdown Header -->
+        <div class="space-y-0.5">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-black text-white" id="statsGymMetricCount">53</span>
+            <button class="flex items-center gap-1 text-xs font-bold text-slate-300 bg-of-subcard px-2 py-1 rounded-xl border border-of-border/60">
+              <span>Сетов</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            </button>
           </div>
-          <button id="logWeightBtn" class="px-3 py-2 rounded-xl bg-dark-800 border border-dark-700 text-emerald-400 hover:bg-dark-700 font-bold text-xs flex items-center gap-1 transition">
+          <div class="text-xs text-slate-400">2 тренировки из 4</div>
+        </div>
+
+        <!-- Gym Bar Chart (ПН 26, СР 27) in Sky Blue -->
+        <div class="h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-around">
+          <div class="flex flex-col items-center gap-1.5 h-full justify-end">
+            <span class="text-[11px] font-bold text-slate-300">26</span>
+            <div class="w-8 h-16 rounded-xl bg-of-blue shadow-sm"></div>
+            <span class="text-[10px] text-slate-400 font-medium">пн</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 h-full justify-end">
+            <span class="text-[11px] font-bold text-slate-300">27</span>
+            <div class="w-8 h-17 rounded-xl bg-of-blue shadow-sm" style="height: 68px;"></div>
+            <span class="text-[10px] text-slate-400 font-medium">ср</span>
+          </div>
+        </div>
+
+        <!-- Insight Pill -->
+        <div class="p-3 rounded-2xl bg-of-subcard border border-of-border/60 flex items-start gap-2.5 text-xs text-slate-300">
+          <span class="text-emerald-400 text-sm mt-0.5">💡</span>
+          <div class="text-[11px] leading-relaxed text-slate-300">
+            <span class="font-bold text-white">До плана на неделю — ещё 2 тренировки, а впереди 4 дня —</span>
+            Сравниваем с сегодняшней программой: 4 тренировки в неделю.
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточка 2: Активность (Screenshot 1) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="text-xs font-bold text-white">Активность</div>
+          <button class="text-xs text-slate-400 hover:text-white flex items-center">
+            <span>Подробнее</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <div>
+          <span class="text-2xl font-black text-white">972</span>
+          <span class="text-xs text-slate-400 font-medium ml-1">ккал затрачено</span>
+        </div>
+
+        <!-- Activity Bar Chart (Пн - Вс) -->
+        <div class="h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between">
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-18 rounded-xl bg-of-blue" style="height: 72px;"></div>
+            <span class="text-[10px] text-slate-400">пн</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">вт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-14 rounded-xl bg-of-blue" style="height: 56px;"></div>
+            <span class="text-[10px] text-slate-400">ср</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">чт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">пт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">сб</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">вс</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-xs text-slate-300">
+          <span class="w-2.5 h-2.5 rounded-full bg-of-blue"></span>
+          <span>Спорт</span>
+        </div>
+      </div>
+
+      <!-- Карточка 3: Шаги (Screenshot 2) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3.5">
+        <div class="flex items-center justify-between">
+          <div class="text-xs font-bold text-white">Шаги</div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-400 bg-of-subcard px-2 py-0.5 rounded-md border border-of-border/60">19 октября — 25 октября · четверг</span>
+            <button class="text-xs text-slate-400 hover:text-white flex items-center">
+              <span>Подробнее</span>
+              <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-baseline justify-between">
+          <div>
+            <span class="text-2xl font-black text-white" id="stepsTodayCount">8 266</span>
+            <span class="text-xs text-slate-400 ml-1">/ 6 000 шагов в день</span>
+          </div>
+          <span class="text-[10px] text-slate-300 bg-of-subcard px-2 py-1 rounded-xl border border-of-border/60">В среднем 8 266</span>
+        </div>
+
+        <!-- Steps Bar Chart (Orange bars with target line) -->
+        <div class="relative h-32 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between overflow-hidden">
+          <!-- Target Average Dashed Line -->
+          <div class="absolute left-3 right-3 top-12 border-b border-dashed border-slate-500/50 pointer-events-none"></div>
+
+          <!-- Days bars in orange -->
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-orange-600/90" style="height: 55px;"></div>
+            <span class="text-[10px] text-slate-400">пн</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-orange-500 shadow-md shadow-orange-500/20" style="height: 90px;"></div>
+            <span class="text-[10px] text-slate-400 font-bold text-orange-400">вт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-orange-600/90" style="height: 52px;"></div>
+            <span class="text-[10px] text-slate-400">ср</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-orange-700/80" style="height: 25px;"></div>
+            <span class="text-[10px] text-slate-400">чт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">пт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">сб</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">вс</span>
+          </div>
+        </div>
+
+        <!-- Motivational Inner Card: "Уже неплохо" -->
+        <div class="p-3.5 rounded-2xl bg-of-subcard border border-of-border/70 space-y-2 text-xs">
+          <div class="font-bold text-white text-sm">Уже неплохо</div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Добавим немного — этого хватит, чтобы сдвинуться, и не хватит, чтобы бросить. Дни с занятием тоже считаются: разминка и ходьба по квартире — те же шаги.
+          </p>
+          <div class="text-center pt-1">
+            <button class="px-5 py-1.5 rounded-xl bg-of-card hover:bg-of-cardHover text-slate-200 font-bold text-xs border border-of-border transition active:scale-95">
+              Понятно!
+            </button>
+          </div>
+        </div>
+
+        <!-- Steps Insight Pill -->
+        <div class="p-3 rounded-2xl bg-of-subcard border border-of-border/60 flex items-start gap-2.5 text-xs text-slate-300">
+          <span class="text-emerald-400 text-sm mt-0.5">💡</span>
+          <div class="text-[11px] leading-relaxed">
+            <span class="font-bold text-white">Шаги выше цели: 8 266 в день —</span>
+            Цель 6 000, в среднем 8 266. Лучший день — вт, 12 683.
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточка 4: Оценка сна (Screenshot 2) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="text-xs font-bold text-white">Оценка сна</div>
+          <button class="text-xs text-slate-400 hover:text-white flex items-center">
+            <span>Подробнее</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <div>
+            <h3 class="text-xl font-black text-white">Нормально</h3>
+            <p class="text-xs text-slate-400 mt-0.5"><span id="sleepScoreNumber">63</span> из 100</p>
+          </div>
+
+          <!-- Circular Segmented Gauge (63 in center) -->
+          <div class="relative w-16 h-16 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+              <path class="text-slate-700/50" stroke-width="4" stroke="currentColor" fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="text-orange-500" stroke-width="4" stroke-dasharray="63, 100" stroke-linecap="round" stroke="currentColor" fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <span class="absolute font-black text-sm text-white">63</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточка 5: Средняя продолжительность сна (Screenshots 2 & 3) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3.5">
+        <div class="text-xs text-slate-400 font-medium">Средняя продолжительность сна</div>
+        <div class="text-2xl font-black text-white" id="avgSleepDurationDisplay">5 ч 46 мин</div>
+
+        <!-- Sleep Duration Chart -->
+        <div class="relative h-28 w-full bg-of-subcard/50 rounded-2xl p-3 flex items-end justify-between overflow-hidden">
+          <div class="absolute left-3 right-3 top-10 border-b border-dashed border-slate-500/40 pointer-events-none"></div>
+
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-slate-500" style="height: 35px;"></div>
+            <span class="text-[10px] text-slate-400">пн</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-slate-400" style="height: 60px;"></div>
+            <span class="text-[10px] text-slate-400">вт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 rounded-xl bg-slate-300" style="height: 85px;"></div>
+            <span class="text-[10px] text-slate-400">ср</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">чт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">пт</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">сб</span>
+          </div>
+          <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
+            <div class="w-7 h-1 rounded-full bg-slate-700/50"></div>
+            <span class="text-[10px] text-slate-400">вс</span>
+          </div>
+        </div>
+
+        <!-- Sleep Warning Note -->
+        <div class="p-3 rounded-2xl bg-of-subcard border border-of-border/60 flex items-start gap-2.5 text-xs text-slate-300">
+          <span class="text-orange-400 text-sm mt-0.5">❗️</span>
+          <div class="text-[11px] leading-relaxed text-slate-300">
+            <span class="font-bold text-white">2 ночи короче шести часов —</span>
+            В среднем выходит 5,8 ч сна. Когда сна мало, на следующий день труднее держать нагрузку — если с ней сейчас не ладится, начни со сна. Так уже 5 недель.
+          </div>
+        </div>
+      </div>
+
+      <!-- Карточка 6: Замеры (Screenshot 3) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-bold text-white">Замеры</div>
+          <button id="addMeasurementBtn" class="text-xs text-of-blue hover:text-white font-bold flex items-center gap-1">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
             <span>Записать</span>
           </button>
         </div>
 
-        <!-- Мини-график веса (SVG) -->
-        <div class="h-28 w-full pt-2">
-          <svg class="w-full h-full overflow-visible" viewBox="0 0 300 80">
-            <defs>
-              <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
-                <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
-              </linearGradient>
-            </defs>
-            <path d="M 10 30 Q 80 45, 150 35 T 290 20 L 290 80 L 10 80 Z" fill="url(#weightGrad)"/>
-            <path d="M 10 30 Q 80 45, 150 35 T 290 20" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="290" cy="20" r="4" fill="#34d399" stroke="#090d16" stroke-width="2"/>
-          </svg>
-          <div class="flex justify-between text-[10px] text-slate-500 pt-1">
-            <span>3 нед назад</span>
-            <span>2 нед</span>
-            <span>Неделю назад</span>
-            <span class="text-emerald-400 font-bold">Сегодня</span>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between p-2.5 rounded-2xl bg-of-subcard border border-of-border/60">
+            <div>
+              <div class="font-bold text-white text-sm">Вес</div>
+              <div class="text-[10px] text-slate-400">19 окт.</div>
+            </div>
+            <div class="text-lg font-black text-white">
+              <span id="statsWeightDisplay">77,0</span> <span class="text-xs text-slate-400 font-normal">кг</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-2.5 rounded-2xl bg-of-subcard border border-of-border/60">
+            <div>
+              <div class="font-bold text-white text-sm">Процент жира</div>
+              <div class="text-[10px] text-slate-400">по фото</div>
+            </div>
+            <div class="text-lg font-black text-white">
+              <span id="statsFatDisplay">14,0</span> <span class="text-xs text-slate-400 font-normal">%</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Замеры обхватов тела -->
-      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Обхваты тела (см)</h3>
-          <button id="editMeasurementsBtn" class="text-xs text-emerald-400 font-semibold hover:text-emerald-300">
-            Обновить
-          </button>
+      <!-- Карточка 7: Разбор недели (Screenshot 3) -->
+      <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-2.5">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-of-subcard border border-of-border flex items-center justify-center text-of-blue">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <div class="text-sm font-bold text-white">Разбор недели</div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
-            <span class="text-slate-400">Талия</span>
-            <span id="waistDisplay" class="font-bold text-white">78 см</span>
-          </div>
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
-            <span class="text-slate-400">Грудь</span>
-            <span id="chestDisplay" class="font-bold text-white">102 см</span>
-          </div>
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
-            <span class="text-slate-400">Бедра</span>
-            <span id="hipsDisplay" class="font-bold text-white">96 см</span>
-          </div>
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 flex items-center justify-between">
-            <span class="text-slate-400">Бицепс</span>
-            <span id="armDisplay" class="font-bold text-white">36.5 см</span>
-          </div>
-        </div>
-      </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          <span class="font-bold text-white">Шаги выше цели: 8 266 в день.</span> Цель 6 000, в среднем 8 266. Лучший день — вт, 12 683.
+        </p>
 
-      <!-- Достижения и статистика -->
-      <div class="bg-dark-900 p-4 rounded-3xl border border-dark-700/80 space-y-3">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Общая статистика</h3>
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60">
-            <div class="text-base font-black text-white" id="totalWorkoutsCount">14</div>
-            <div class="text-[10px] text-slate-400 mt-0.5">Тренировок</div>
-          </div>
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60">
-            <div class="text-base font-black text-emerald-400" id="totalTonnageCount">42.5 т</div>
-            <div class="text-[10px] text-slate-400 mt-0.5">Тоннаж</div>
-          </div>
-          <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60">
-            <div class="text-base font-black text-amber-400" id="bestStreakCount">12</div>
-            <div class="text-[10px] text-slate-400 mt-0.5">Рекорд дней</div>
-          </div>
-        </div>
+        <button class="text-xs text-slate-400 hover:text-white font-bold flex items-center gap-1 pt-1">
+          <span>Читать весь отчёт</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
       </div>
 
     </section>
 
   </main>
 
-  <!-- ==================== ACTIVE WORKOUT OVERLAY / MODAL ==================== -->
-  <div id="activeWorkoutModal" class="fixed inset-0 z-50 bg-dark-950 flex flex-col hidden animate-fade-in">
-    <!-- Шапка активной тренировки -->
-    <div class="p-4 bg-dark-900 border-b border-dark-700 flex items-center justify-between">
+
+  <!-- ======================================================== -->
+  <!-- FLOATING QUICK ADD BUTTON (+)                             -->
+  <!-- ======================================================== -->
+  <button id="floatingAddBtn" class="fixed right-5 bottom-24 z-40 w-12 h-12 rounded-full bg-of-subcard border border-of-border hover:border-of-blue text-white shadow-2xl flex items-center justify-center transition active:scale-95 group">
+    <i data-lucide="plus" class="w-6 h-6 transition group-hover:rotate-90"></i>
+  </button>
+
+
+  <!-- ======================================================== -->
+  <!-- BOTTOM TAB BAR (3 TABS: ГЛАВНАЯ / ТРЕНИРОВКИ / СТАТИСТИКА)-->
+  <!-- ======================================================== -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-of-bg/95 backdrop-blur-md border-t border-of-border/50 py-3 px-6 shadow-2xl">
+    <div class="max-w-md mx-auto flex items-center justify-around">
+      <!-- Tab 1: Главная -->
+      <button data-tab="tab-home" class="bottom-nav-btn tab-active-pill px-5 py-2 rounded-full flex items-center gap-1.5 text-xs font-bold transition">
+        <i data-lucide="home" class="w-4 h-4"></i>
+        <span>Главная</span>
+      </button>
+
+      <!-- Tab 2: Тренировки -->
+      <button data-tab="tab-workouts" class="bottom-nav-btn text-slate-400 hover:text-white px-5 py-2 rounded-full flex items-center gap-1.5 text-xs font-bold transition">
+        <i data-lucide="dumbbell" class="w-4 h-4"></i>
+        <span>Тренировки</span>
+      </button>
+
+      <!-- Tab 3: Статистика -->
+      <button data-tab="tab-stats" class="bottom-nav-btn text-slate-400 hover:text-white px-5 py-2 rounded-full flex items-center gap-1.5 text-xs font-bold transition">
+        <i data-lucide="pie-chart" class="w-4 h-4"></i>
+        <span>Статистика</span>
+      </button>
+    </div>
+  </nav>
+
+
+  <!-- ======================================================== -->
+  <!-- ACTIVE WORKOUT MODAL                                      -->
+  <!-- ======================================================== -->
+  <div id="activeWorkoutModal" class="fixed inset-0 z-50 bg-of-bg flex flex-col hidden animate-fade-in">
+    <!-- Header -->
+    <div class="p-4 bg-of-card border-b border-of-border flex items-center justify-between">
       <div>
-        <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Идет тренировка
+        <div class="text-[10px] font-bold uppercase tracking-wider text-of-blue flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-of-blue animate-pulse"></span>
+          Сессия идет
         </div>
-        <h2 id="activeModalTitle" class="text-base font-black text-white mt-0.5">Грудь + Трицепс</h2>
+        <h2 id="activeModalTitle" class="text-base font-black text-white mt-0.5">Верх B</h2>
       </div>
       <div class="flex items-center gap-2">
-        <div id="workoutTimer" class="font-mono text-sm font-bold text-slate-300 bg-dark-800 px-2.5 py-1 rounded-xl border border-dark-700">
-          00:00
-        </div>
-        <button id="finishWorkoutBtn" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-dark-950 font-black text-xs transition">
-          Завершить
+        <div id="workoutTimer" class="font-mono text-sm font-bold text-slate-200 bg-of-subcard px-2.5 py-1 rounded-xl border border-of-border">00:00</div>
+        <button id="minimizeWorkoutBtn" class="p-2 rounded-xl bg-of-subcard text-slate-400 hover:text-white border border-of-border">
+          <i data-lucide="chevron-down" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
 
-    <!-- Список упражнений активной тренировки с подходами -->
-    <div id="activeExercisesContainer" class="flex-1 overflow-y-auto p-4 space-y-4 pb-28">
-      <!-- Динамические карточки с чекбоксами подходов -->
+    <!-- Floating Rest Timer Alert Bar -->
+    <div id="restTimerFloatingBar" class="hidden bg-of-subcard px-4 py-2.5 border-b border-of-border flex items-center justify-between shadow-lg">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-of-blue animate-ping"></div>
+        <div class="text-xs font-bold text-white">
+          Отдых: <span id="restTimerFloatingCountdown" class="text-of-blue font-mono">01:30</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button id="restAdd30FloatingBtn" class="px-2 py-1 rounded-lg bg-of-card border border-of-border text-[11px] font-bold text-slate-300 hover:text-white">+30с</button>
+        <button id="restSkipFloatingBtn" class="px-2 py-1 rounded-lg bg-of-blue text-of-bg font-extrabold text-[11px] hover:bg-white">Пропуск</button>
+      </div>
     </div>
 
-    <!-- Всплывающий таймер отдыха (Rest Timer) -->
-    <div id="restTimerBar" class="fixed bottom-0 left-0 right-0 p-4 bg-dark-900/95 backdrop-blur-md border-t border-dark-700 flex items-center justify-between hidden shadow-2xl z-50">
+    <!-- Workout Body (Exercises list with sets) -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-4" id="activeExercisesList">
+      <!-- Dynamic Exercise Cards with Checkboxes -->
+    </div>
+
+    <!-- Footer Action -->
+    <div class="p-4 bg-of-card border-t border-of-border flex items-center justify-between">
       <div>
-        <div class="text-[10px] uppercase font-bold text-slate-400">Отдых между подходами</div>
-        <div id="restTimerDisplay" class="font-mono text-2xl font-black text-emerald-400">01:30</div>
+        <div class="text-[10px] text-slate-400">Общий тоннаж</div>
+        <div class="text-sm font-bold text-of-blue" id="activeTonnageCounter">0 кг</div>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="add30sBtn" class="px-3 py-2 rounded-xl bg-dark-800 border border-dark-700 text-xs font-bold text-slate-200 hover:text-white">
-          +30с
-        </button>
-        <button id="skipRestBtn" class="px-4 py-2 rounded-xl bg-emerald-500 text-dark-950 text-xs font-black hover:bg-emerald-400">
-          Пропустить
-        </button>
-      </div>
+      <button id="finishWorkoutBtn" class="px-5 py-2.5 rounded-full bg-of-blue hover:bg-white text-of-bg font-black text-xs shadow-lg transition active:scale-95">
+        Завершить тренировку
+      </button>
     </div>
   </div>
 
 
-  <!-- ==================== EXERCISE VIDEO & TECHNIQUE MODAL ==================== -->
-  <div id="exerciseVideoModal" class="fixed inset-0 z-50 bg-dark-950/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col border border-dark-700 overflow-hidden shadow-2xl animate-slide-up">
+  <!-- ======================================================== -->
+  <!-- EXERCISE TECHNIQUE MODAL (2-PHASE MOTION + YOUTUBE)       -->
+  <!-- ======================================================== -->
+  <div id="exerciseVideoModal" class="fixed inset-0 z-50 bg-of-bg/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up flex flex-col max-h-[92vh]">
+      
       <!-- Modal Header -->
-      <div class="p-4 border-b border-dark-700/80 flex items-center justify-between">
+      <div class="p-4 border-b border-of-border flex items-center justify-between bg-of-card">
         <div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span id="videoExerciseMuscle" class="text-[10px] uppercase font-bold text-emerald-400">Грудь</span>
-          </div>
-          <h3 id="videoExerciseTitle" class="text-base font-black text-white mt-0.5">Жим штанги лежа</h3>
+          <span id="videoExerciseMuscle" class="text-[10px] font-bold uppercase tracking-wider text-of-blue">Спина</span>
+          <h3 id="videoExerciseTitle" class="text-base font-extrabold text-white mt-0.5">Подтягивания широким хватом</h3>
         </div>
-        <button id="closeVideoModalBtn" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-dark-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button onclick="closeExerciseVideoModal()" class="w-8 h-8 rounded-full bg-of-subcard border border-of-border flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
       <!-- Modal Body (Scrollable) -->
       <div class="p-4 overflow-y-auto space-y-3.5 text-xs">
         <!-- Motion Player / Visual Technique Card -->
-        <div class="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden bg-dark-950 border border-dark-700/80 shadow-inner group flex items-center justify-center p-2">
+        <div class="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden bg-of-subcard border border-of-border shadow-inner group flex items-center justify-center p-2">
           <!-- Animated Phase Image -->
           <img id="exercisePhaseImage" src="" alt="Техника упражнения" class="w-full h-full object-contain transition-opacity duration-200">
           
           <!-- Phase Indicator Pills (Phase 1 / Phase 2) -->
           <div class="absolute top-2 left-2 flex items-center gap-1.5 z-10">
-            <button id="phaseBtn0" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500 text-dark-950 shadow-sm transition">
+            <button id="phaseBtn0" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-of-blue text-of-bg shadow-sm transition">
               1. Исходная точка
             </button>
-            <button id="phaseBtn1" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-dark-800/90 text-slate-400 hover:text-white border border-dark-700/50 transition">
+            <button id="phaseBtn1" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-of-card text-slate-400 hover:text-white border border-of-border transition">
               2. Сокращение
             </button>
           </div>
 
           <!-- Video / Link Overlay Bar -->
-          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between px-3 py-1.5 rounded-xl bg-dark-900/90 backdrop-blur-md border border-dark-700/60 text-[10px] text-slate-300 z-10">
+          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between px-3 py-1.5 rounded-xl bg-of-card/90 backdrop-blur-md border border-of-border text-[10px] text-slate-300 z-10">
             <div class="flex items-center gap-1.5">
-              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="videoEquipmentTag">Штанга</span>
+              <span class="inline-block w-2 h-2 rounded-full bg-of-blue animate-pulse"></span>
+              <span id="videoEquipmentTag">Турник</span>
             </div>
-            <a id="youtubeVideoLink" href="#" target="_blank" class="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold">
+            <a id="youtubeVideoLink" href="#" target="_blank" class="text-of-blue hover:text-white flex items-center gap-1 font-bold">
               <i data-lucide="video" class="w-3.5 h-3.5"></i>
               <span>Видео на YouTube</span>
             </a>
@@ -427,123 +849,137 @@
         </div>
 
         <!-- Пошаговая техника -->
-        <div class="bg-dark-850 p-3.5 rounded-2xl border border-dark-700/60 space-y-2">
-          <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-            Правильная техника выполнения:
-          </h4>
-          <ol id="exerciseStepsList" class="space-y-1.5 list-decimal list-inside text-slate-300 leading-relaxed text-[11px]">
-            <!-- Шаги -->
+        <div class="space-y-1.5 bg-of-subcard p-3.5 rounded-2xl border border-of-border">
+          <div class="font-bold text-white text-xs flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-of-blue"></i>
+            <span>Пошаговое выполнение</span>
+          </div>
+          <ol id="exerciseStepsList" class="list-decimal list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
+            <!-- Dynamically populated -->
           </ol>
         </div>
 
-        <!-- Частые ошибки (Топ ошибок) -->
-        <div class="bg-rose-950/20 p-3.5 rounded-2xl border border-rose-500/30 space-y-2">
-          <h4 class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
-            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
-            Частые ошибки (избегайте травм):
-          </h4>
-          <ul id="exerciseMistakesList" class="space-y-1 list-disc list-inside text-rose-200/90 text-[11px] leading-relaxed">
-            <!-- Ошибки -->
+        <!-- Частые ошибки -->
+        <div class="space-y-1.5 bg-of-subcard p-3.5 rounded-2xl border border-of-border">
+          <div class="font-bold text-amber-400 text-xs flex items-center gap-1.5">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+            <span>Частые ошибки</span>
+          </div>
+          <ul id="exerciseMistakesList" class="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
+            <!-- Dynamically populated -->
           </ul>
         </div>
 
-        <!-- Мышечные группы и дыхание -->
-        <div class="bg-dark-850 p-3 rounded-2xl border border-dark-700/60 space-y-1.5 text-[11px]">
-          <div class="flex items-center justify-between">
-            <span class="text-slate-400">Целевая группа (таргет):</span>
-            <span id="targetMusclesLabel" class="font-bold text-emerald-400">Большая грудная</span>
+        <!-- Мышцы и дыхание -->
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="bg-of-subcard p-2.5 rounded-xl border border-of-border">
+            <div class="text-[10px] text-slate-400 font-semibold">Целевые мышцы</div>
+            <div id="targetMusclesLabel" class="font-bold text-white mt-0.5">Широчайшие</div>
+            <div id="synergistMusclesLabel" class="text-[10px] text-slate-400 mt-0.5">Бицепс, ромбовидные</div>
           </div>
-          <div class="flex items-center justify-between border-t border-dark-700/40 pt-1.5">
-            <span class="text-slate-400">Вспомогательные мышцы:</span>
-            <span id="synergistMusclesLabel" class="font-semibold text-slate-300">Трицепс, дельты</span>
-          </div>
-          <div class="flex items-center justify-between border-t border-dark-700/40 pt-1.5">
-            <span class="text-slate-400">Дыхание:</span>
-            <span id="breathingLabel" class="font-semibold text-slate-300">Вдох при опускании, выдох на усилии</span>
+          <div class="bg-of-subcard p-2.5 rounded-xl border border-of-border">
+            <div class="text-[10px] text-slate-400 font-semibold">Дыхание</div>
+            <div id="breathingLabel" class="font-bold text-white mt-0.5">Выдох на усилии, вдох на возврате</div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-
-  <!-- ==================== EXERCISE CATALOG MODAL ==================== -->
-  <div id="catalogModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col border border-dark-700 overflow-hidden shadow-2xl animate-slide-up">
-      <div class="p-4 border-b border-dark-700 flex items-center justify-between">
-        <div>
-          <h3 class="text-base font-bold text-white">База упражнений</h3>
-          <p class="text-xs text-slate-400">Техника выполнения и советы</p>
-        </div>
-        <button id="closeCatalogBtn" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-dark-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Фильтр мышечных групп -->
-      <div class="flex gap-1.5 p-3 overflow-x-auto border-b border-dark-700/60 no-scrollbar" id="muscleFilterBtns">
-        <button data-muscle="all" class="muscle-filter active px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500 text-dark-950">Все</button>
-        <button data-muscle="chest" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Грудь</button>
-        <button data-muscle="back" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Спина</button>
-        <button data-muscle="legs" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Ноги</button>
-        <button data-muscle="shoulders" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Плечи</button>
-        <button data-muscle="arms" class="muscle-filter px-3 py-1 rounded-xl text-xs font-bold bg-dark-800 text-slate-400 hover:text-white">Руки</button>
-      </div>
-
-      <!-- Список упражнений -->
-      <div id="catalogList" class="flex-1 overflow-y-auto p-4 space-y-2.5">
-        <!-- Генерируется через JS -->
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ==================== AI FOOD SCANNER MODAL ==================== -->
-  <div id="aiModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-dark-700 overflow-hidden shadow-2xl animate-slide-up p-5 space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">📸</span>
-          <h3 class="text-base font-bold text-white">ИИ-распознавание блюда</h3>
-        </div>
-        <button id="closeAiModalBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="border-2 border-dashed border-dark-700 rounded-2xl p-6 text-center space-y-2 hover:border-emerald-500/50 transition cursor-pointer" id="dropPhotoZone">
-        <div class="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-          <i data-lucide="camera" class="w-6 h-6"></i>
-        </div>
-        <div class="text-xs font-bold text-white">Сделайте фото или выберите из галереи</div>
-        <div class="text-[10px] text-slate-400">Нейросеть определит блюдо и рассчитает КБЖУ</div>
-        <input type="file" id="mealPhotoInput" accept="image/*" class="hidden">
-      </div>
-
-      <div id="aiAnalysisResult" class="hidden bg-dark-850 p-3.5 rounded-2xl border border-dark-700 space-y-2 text-xs">
-        <div class="flex items-center justify-between font-bold text-white">
-          <span id="aiResultTitle">Куриная грудка с рисом и овощами</span>
-          <span class="text-emerald-400" id="aiResultCalories">~480 ккал</span>
-        </div>
-        <div class="text-[11px] text-slate-400">Б: 42г • Ж: 8г • У: 55г • Порция: ~320г</div>
-        <button id="aiAddMealBtn" class="w-full py-2.5 rounded-xl bg-emerald-500 text-dark-950 font-black hover:bg-emerald-400 transition mt-2">
-          Добавить в дневник питания
+      <!-- Modal Footer -->
+      <div class="p-3 bg-of-card border-t border-of-border">
+        <button onclick="closeExerciseVideoModal()" class="w-full py-2.5 rounded-xl bg-of-subcard hover:bg-of-pill text-white font-bold text-xs border border-of-border transition">
+          Закрыть
         </button>
       </div>
     </div>
   </div>
 
 
-  <!-- ==================== PROFILE / SETTINGS MODAL ==================== -->
-  <div id="profileModal" class="fixed inset-0 z-50 bg-dark-950/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-dark-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-dark-700 overflow-hidden shadow-2xl animate-slide-up p-5 space-y-4 max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-dark-700/80 pb-3">
+  <!-- ======================================================== -->
+  <!-- QUICK LOG MODAL (+)                                      -->
+  <!-- ======================================================== -->
+  <div id="quickLogModal" class="fixed inset-0 z-50 bg-of-bg/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-of-border pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
-          Профиль и Цели
+          <i data-lucide="plus-circle" class="w-4 h-4 text-of-blue"></i>
+          Быстрая запись показателя
         </h3>
-        <button id="closeProfileBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
+        <button id="closeQuickLogBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Вес тела (кг)</label>
+          <input type="number" step="0.1" id="quickInputWeight" value="77.0" class="w-full bg-of-subcard border border-of-border rounded-xl px-3 py-2 text-white outline-none focus:border-of-blue">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Шаги за день</label>
+          <input type="number" id="quickInputSteps" value="8266" class="w-full bg-of-subcard border border-of-border rounded-xl px-3 py-2 text-white outline-none focus:border-of-blue">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Сон (часов и минут)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="number" id="quickInputSleepHours" value="5" placeholder="Часы" class="w-full bg-of-subcard border border-of-border rounded-xl px-3 py-2 text-white outline-none focus:border-of-blue">
+            <input type="number" id="quickInputSleepMinutes" value="46" placeholder="Минуты" class="w-full bg-of-subcard border border-of-border rounded-xl px-3 py-2 text-white outline-none focus:border-of-blue">
+          </div>
+        </div>
+
+        <button id="saveQuickLogBtn" class="w-full py-3 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-black text-xs transition active:scale-95 mt-2">
+          Сохранить изменения
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- EXERCISE CATALOG / LIBRARY MODAL                         -->
+  <!-- ======================================================== -->
+  <div id="catalogModal" class="fixed inset-0 z-50 bg-of-bg/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up flex flex-col max-h-[85vh]">
+      <div class="p-4 border-b border-of-border flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="book" class="w-4 h-4 text-of-blue"></i>
+          Библиотека упражнений
+        </h3>
+        <button id="closeCatalogBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Muscle Filter Pills -->
+      <div class="p-3 border-b border-of-border flex gap-1.5 overflow-x-auto no-scrollbar text-xs">
+        <button data-cat="all" class="cat-pill active px-3 py-1 rounded-full bg-of-blue text-of-bg font-bold whitespace-nowrap">Все</button>
+        <button data-cat="chest" class="cat-pill px-3 py-1 rounded-full bg-of-subcard text-slate-300 font-bold whitespace-nowrap border border-of-border">Грудь</button>
+        <button data-cat="back" class="cat-pill px-3 py-1 rounded-full bg-of-subcard text-slate-300 font-bold whitespace-nowrap border border-of-border">Спина</button>
+        <button data-cat="legs" class="cat-pill px-3 py-1 rounded-full bg-of-subcard text-slate-300 font-bold whitespace-nowrap border border-of-border">Ноги</button>
+        <button data-cat="shoulders" class="cat-pill px-3 py-1 rounded-full bg-of-subcard text-slate-300 font-bold whitespace-nowrap border border-of-border">Плечи</button>
+        <button data-cat="arms" class="cat-pill px-3 py-1 rounded-full bg-of-subcard text-slate-300 font-bold whitespace-nowrap border border-of-border">Руки</button>
+        <button data-cat="core" class="cat-pill px-3 py-1 rounded-full bg-of-subcard text-slate-300 font-bold whitespace-nowrap border border-of-border">Пресс</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-2 flex-1" id="catalogExercisesList">
+        <!-- Populated via JS -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- PROGRAM / SETTINGS MODAL                                 -->
+  <!-- ======================================================== -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-of-bg/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up p-5 space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-of-border pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="settings" class="w-4 h-4 text-of-blue"></i>
+          Настройки программы
+        </h3>
+        <button id="closeSettingsBtn" class="p-1 rounded-lg text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -551,84 +987,33 @@
       <div class="space-y-3 text-xs">
         <div>
           <label class="block text-slate-400 font-semibold mb-1">Сплит тренировок</label>
-          <select id="userSplitSelect" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500">
-            <option value="upper_lower" selected>🔥 Верх / Низ (Upper / Lower) — Стиль Onlyfits</option>
-            <option value="push_pull_legs">Push / Pull / Legs (Жим / Тяга / Ноги)</option>
-            <option value="full_body">Full Body (Все тело за тренировку)</option>
+          <select id="userSplitSelect" class="w-full bg-of-subcard border border-of-border rounded-xl px-3 py-2 text-white outline-none focus:border-of-blue">
+            <option value="upper_lower_gym_4" selected>🔥 Верх / Низ (4 дня, Зал) — Только Onlyfits</option>
+            <option value="upper_lower_gym_3">Верх / Низ (3 дня, Зал)</option>
+            <option value="push_pull_legs">Push / Pull / Legs (3 дня)</option>
+            <option value="full_body">Full Body (3 дня)</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-slate-400 font-semibold mb-1">Главная цель</label>
-          <select id="userGoalSelect" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white outline-none focus:border-emerald-500">
-            <option value="weight_loss">Снижение веса (дефицит калорий)</option>
-            <option value="muscle_gain" selected>Набор мышечной массы (профицит)</option>
-            <option value="maintenance">Рельеф и поддержание формы</option>
+          <label class="block text-slate-400 font-semibold mb-1">Уровень подготовки</label>
+          <select id="userLevelSelect" class="w-full bg-of-subcard border border-of-border rounded-xl px-3 py-2 text-white outline-none focus:border-of-blue">
+            <option value="expert" selected>🦅 Эксперт</option>
+            <option value="intermediate">Средний уровень</option>
+            <option value="beginner">Начинающий</option>
           </select>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">Вес (кг)</label>
-            <input type="number" id="inputWeight" value="74.5" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white">
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">Рост (см)</label>
-            <input type="number" id="inputHeight" value="180" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white">
-          </div>
-          <div>
-            <label class="block text-slate-400 font-semibold mb-1">Возраст</label>
-            <input type="number" id="inputAge" value="25" class="w-full bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-white">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold mb-1">Локация тренировок</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" data-loc="gym" class="loc-btn active p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold">Тренажерный зал</button>
-            <button type="button" data-loc="home" class="loc-btn p-2.5 rounded-xl border border-dark-700 bg-dark-800 text-slate-400 font-bold">Дома / Гантели</button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 font-semibold mb-1">Тренировок в неделю</label>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" data-days="2" class="days-btn p-2 rounded-xl border border-dark-700 text-slate-400 font-bold">2 дня</button>
-            <button type="button" data-days="3" class="days-btn active p-2 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold">3 дня</button>
-            <button type="button" data-days="4" class="days-btn p-2 rounded-xl border border-dark-700 text-slate-400 font-bold">4 дня</button>
-          </div>
-        </div>
-
-        <button id="saveProfileBtn" class="w-full py-3 rounded-2xl bg-emerald-500 text-dark-950 font-black text-sm hover:bg-emerald-400 transition mt-2">
-          Сохранить параметры
+        <button id="saveSettingsBtn" class="w-full py-3 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-black text-sm transition mt-2">
+          Применить настройки
         </button>
       </div>
     </div>
   </div>
 
 
-  <!-- ==================== BOTTOM TAB BAR ==================== -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-md border-t border-dark-700/80 py-2.5 px-6 shadow-2xl">
-    <div class="max-w-md mx-auto flex items-center justify-around">
-      <button data-tab="tab-workouts" class="bottom-tab active flex flex-col items-center gap-1 text-emerald-400 font-bold transition">
-        <i data-lucide="dumbbell" class="w-5 h-5"></i>
-        <span class="text-[10px]">Тренировки</span>
-      </button>
-
-      <button data-tab="tab-nutrition" class="bottom-tab flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 font-semibold transition">
-        <i data-lucide="utensils" class="w-5 h-5"></i>
-        <span class="text-[10px]">Питание</span>
-      </button>
-
-      <button data-tab="tab-progress" class="bottom-tab flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 font-semibold transition">
-        <i data-lucide="line-chart" class="w-5 h-5"></i>
-        <span class="text-[10px]">Прогресс</span>
-      </button>
-    </div>
-  </nav>
-
   <!-- Toast Notification -->
-  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-dark-950 font-bold text-xs px-4 py-2.5 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none flex items-center gap-2">
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-of-blue text-of-bg font-bold text-xs px-4 py-2 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none flex items-center gap-2">
     <span>✓</span>
     <span id="toastMsg">Успешно!</span>
   </div>

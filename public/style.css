@@ -1,13 +1,28 @@
-/* OnlyFits Dark Athletic Design */
+/* OnlyFits iOS Athletic Dark Theme */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --of-bg: #101620;
+  --of-card: #19222f;
+  --of-card-hover: #1e2837;
+  --of-subcard: #131b26;
+  --of-border: #243042;
+  --of-blue: #7dd3fc;
+  --of-blue-dim: #38bdf8;
+  --of-orange: #f97316;
+  --of-orange-light: #fb923c;
+  --of-emerald: #10b981;
+  --of-pill-active: #2b3a4d;
+}
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
-  background-color: var(--tg-theme-bg-color, #090d16);
-  color: var(--tg-theme-text-color, #f8fafc);
+  background-color: var(--of-bg);
+  color: #f1f5f9;
 }
 
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -29,14 +44,14 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.25s ease-out forwards;
+  animation: fadeIn 0.22s ease-out forwards;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Hide scrollbar */
+/* Scrollbar reset */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -45,18 +60,29 @@ body {
   scrollbar-width: none;
 }
 
-/* Checkbox custom athletic style */
+/* Active tab capsule */
+.tab-active-pill {
+  background-color: var(--of-pill-active);
+  color: #ffffff !important;
+}
+
+/* Onlyfits custom checkboxes */
 input[type="checkbox"] {
-  accent-color: #10b981;
+  accent-color: #38bdf8;
 }
 
-/* Glow effects */
-.glow-emerald {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
-}
-
-/* Set completed strikethrough */
+/* Set completed state */
 .set-completed {
-  background-color: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
+  background-color: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+/* Radar pulse */
+@keyframes radarPulse {
+  0% { transform: scale(0.98); opacity: 0.9; }
+  50% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(0.98); opacity: 0.9; }
+}
+.radar-animate {
+  animation: radarPulse 4s ease-in-out infinite;
 }
