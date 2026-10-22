@@ -35,6 +35,43 @@ _users_lock = threading.Lock()
 
 USERS_FILE = os.path.join(os.path.dirname(__file__), "data", "users.json")
 PROGRAMS_FILE = os.path.join(os.path.dirname(__file__), "data", "programs.json")
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "data", "config.json")
+
+
+def get_gemini_key():
+    """Возвращает ключ Gemini API из переменной окружения или data/config.json"""
+    env_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if env_key:
+        return env_key
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                return (cfg.get("gemini_api_key") or "").strip()
+        except Exception:
+            pass
+    return ""
+
+
+def set_gemini_key(key):
+    """Сохраняет ключ Gemini API в data/config.json и в os.environ"""
+    try:
+        os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+        cfg = {}
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+            except Exception:
+                cfg = {}
+        cfg["gemini_api_key"] = key.strip()
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+        os.environ["GEMINI_API_KEY"] = key.strip()
+        return True
+    except Exception as e:
+        print(f"[Config Save Error]: {e}", file=sys.stderr)
+        return False
 
 
 # --- Хранилище программ и пользователей (JSON Database) ---
@@ -168,10 +205,40 @@ def get_sunday_info():
 
 # --- Маршруты веб-сервера & REST API ---
 
+@app.after_request
+def add_cache_headers(response):
+    """Предотвращает агрессивное кэширование HTML, JS и CSS в Telegram WebApp (WKWebView)"""
+    path = request.path or ""
+    if path.endswith(".html") or path.endswith(".js") or path.endswith(".css") or path == "/":
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 @app.route("/")
 def index():
     """Главная страница OnlyFits Mini App"""
     return send_from_directory("public", "index.html")
+
+
+@app.route("/api/gemini-status", methods=["GET", "POST"])
+def api_gemini_status():
+    """Проверка и сохранение ключа Gemini Vision API"""
+    if request.method == "POST":
+        data = request.get_json() or {}
+        new_key = (data.get("api_key") or "").strip()
+        if new_key and len(new_key) > 8:
+            set_gemini_key(new_key)
+            return jsonify({"status": "ok", "has_key": True, "message": "Ключ Gemini сохранен"})
+        return jsonify({"status": "error", "message": "Некорректный ключ"}), 400
+
+    curr_key = get_gemini_key()
+    return jsonify({
+        "status": "ok",
+        "has_key": bool(curr_key),
+        "preview": f"{curr_key[:6]}...{curr_key[-4:]}" if len(curr_key) > 10 else ""
+    })
 
 
 @app.route("/health")
@@ -301,11 +368,16 @@ def api_log_sunday_weight(user_id):
 def api_parse_workout_photo():
     """
     Принимает одно или несколько изображений (скриншотов) программы тренировок.
-    Если задан GEMINI_API_KEY, использует Gemini Vision для извлечения структурированного плана.
+    Если задан GEMINI_API_KEY (в env, data/config.json или в теле запроса),
+    использует Gemini Vision для извлечения структурированного плана с 100% точностью.
     Иначе возвращает указание на клиентский OCR (Tesseract.js).
     """
-    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
     data = request.get_json() or {}
+    client_key = (data.get("api_key") or "").strip()
+    if client_key and len(client_key) > 8:
+        set_gemini_key(client_key)
+
+    gemini_key = client_key or get_gemini_key()
     
     # Поддерживаем как одиночное фото, так и массив скриншотов
     images = []
@@ -798,6 +870,36 @@ def handle_bot_message(msg):
             "text": reply,
             "parse_mode": "HTML",
             "reply_markup": markup
+        })
+        return
+
+    # Команда /key или /gemini для сохранения бесплатного ключа Gemini Vision
+    if text.startswith("/key") or text.startswith("/gemini") or text.startswith("/setkey"):
+        parts = text.split(maxsplit=1)
+        if len(parts) > 1 and len(parts[1].strip()) > 10:
+            new_key = parts[1].strip()
+            set_gemini_key(new_key)
+            reply_key = (
+                "⚡️ <b>Ключ Gemini Vision успешно сохранен!</b>\n\n"
+                "Теперь распознавание скриншотов из <b>FitNotes, Strong, Hevy</b>, заметок и мессенджеров работает через ИИ с максимальной точностью."
+            )
+        else:
+            curr = get_gemini_key()
+            has_str = f"✅ <i>Текущий ключ: {curr[:6]}...{curr[-4:]}</i>\n\n" if curr else "❌ <i>Ключ пока не установлен.</i>\n\n"
+            reply_key = (
+                f"ℹ️ <b>Подключение ИИ для скриншотов (Gemini Vision):</b>\n\n"
+                f"{has_str}"
+                "1. Перейдите на <a href='https://aistudio.google.com/'>aistudio.google.com</a>\n"
+                "2. Нажмите <b>«Get API key»</b> и скопируйте ключ\n"
+                "3. Отправьте в этот чат команду:\n"
+                "<code>/key ВАШ_КЛЮЧ</code>\n\n"
+                "<i>Ключ предоставляется Google бесплатно (до 15 запросов в минуту).</i>"
+            )
+        call_telegram("sendMessage", {
+            "chat_id": chat_id,
+            "text": reply_key,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True
         })
         return
 

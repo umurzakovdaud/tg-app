@@ -3617,6 +3617,7 @@ function openCustomProgramModal() {
   if (!modal) return;
   modal.classList.remove("hidden");
   setCustomImportMode("screenshot");
+  checkGeminiStatus();
   triggerHaptic("light");
   lucide.createIcons();
 }
@@ -3624,6 +3625,84 @@ function openCustomProgramModal() {
 function closeCustomProgramModal() {
   const modal = document.getElementById("customProgramModal");
   if (modal) modal.classList.add("hidden");
+}
+
+function openGeminiKeyModal() {
+  const modal = document.getElementById("geminiKeyModal");
+  const input = document.getElementById("geminiKeyInput");
+  if (input) {
+    input.value = localStorage.getItem("onlyfits_gemini_key") || "";
+  }
+  if (modal) modal.classList.remove("hidden");
+  triggerHaptic("light");
+  lucide.createIcons();
+}
+
+function closeGeminiKeyModal() {
+  const modal = document.getElementById("geminiKeyModal");
+  if (modal) modal.classList.add("hidden");
+  triggerHaptic("light");
+}
+
+async function saveGeminiApiKey() {
+  const input = document.getElementById("geminiKeyInput");
+  const key = (input ? input.value : "").trim();
+  if (!key) {
+    showToast("Введите ключ API");
+    return;
+  }
+
+  localStorage.setItem("onlyfits_gemini_key", key);
+
+  try {
+    const resp = await fetch("/api/gemini-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ api_key: key })
+    });
+    const res = await resp.json();
+    if (res.status === "ok") {
+      updateGeminiKeyBanner(true);
+      closeGeminiKeyModal();
+      showToast("⚡️ Gemini Vision активирован!");
+      triggerHaptic("success");
+      return;
+    }
+  } catch (e) {
+    console.log("[Save Gemini Key Error]:", e);
+  }
+
+  updateGeminiKeyBanner(true);
+  closeGeminiKeyModal();
+  showToast("⚡️ Ключ сохранен локально!");
+  triggerHaptic("success");
+}
+
+async function checkGeminiStatus() {
+  try {
+    const localKey = localStorage.getItem("onlyfits_gemini_key");
+    if (localKey && localKey.length > 8) {
+      updateGeminiKeyBanner(true);
+      return;
+    }
+    const resp = await fetch("/api/gemini-status");
+    const data = await resp.json();
+    updateGeminiKeyBanner(Boolean(data && data.has_key));
+  } catch (e) {
+    updateGeminiKeyBanner(false);
+  }
+}
+
+function updateGeminiKeyBanner(isActive) {
+  const activeBanner = document.getElementById("geminiActiveBanner");
+  const setupBanner = document.getElementById("geminiSetupBanner");
+  if (isActive) {
+    if (activeBanner) activeBanner.classList.remove("hidden");
+    if (setupBanner) setupBanner.classList.add("hidden");
+  } else {
+    if (activeBanner) activeBanner.classList.add("hidden");
+    if (setupBanner) setupBanner.classList.remove("hidden");
+  }
 }
 
 function setCustomImportMode(mode) {
@@ -3870,12 +3949,14 @@ async function processAllScreenshots() {
   }));
 
   // Step A: Attempt server-side Gemini Vision OCR with multiple images
+  let geminiSuccess = false;
+  const clientKey = localStorage.getItem("onlyfits_gemini_key") || "";
   try {
-    if (ocrDetails) ocrDetails.textContent = "Сквозной анализ всех скриншотов через ИИ...";
+    if (ocrDetails) ocrDetails.textContent = "Анализ скриншота через ИИ Vision...";
     const resp = await fetch("/api/parse-workout-photo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ images_b64: rawDataUrls })
+      body: JSON.stringify({ images_b64: rawDataUrls, api_key: clientKey })
     });
     const data = await resp.json();
     if (data && data.status === "ok" && data.program && Array.isArray(data.program.days) && data.program.days.length > 0) {
@@ -3884,13 +3965,16 @@ async function processAllScreenshots() {
       setTimeout(() => {
         applyStructuredProgram(data.program);
         if (ocrStatus) ocrStatus.classList.add("hidden");
-        showToast(`Распознано: ${data.program.days.length} дн. из ${customScreenshotFiles.length} скриншотов! ⚡️`);
+        showToast(`Распознано через ИИ: ${data.program.days.length} дн. из ${customScreenshotFiles.length} скриншотов! ⚡️`);
       }, 300);
+      geminiSuccess = true;
       return;
     }
   } catch (err) {
-    console.log("[Backend parse error, falling back to local Tesseract]:", err);
+    console.log("[Backend parse error, falling back to local OCR]:", err);
   }
+
+  if (geminiSuccess) return;
 
   // Step B: Sequential local Tesseract.js OCR with Canvas Preprocessing
   if (window.Tesseract) {
@@ -3898,13 +3982,25 @@ async function processAllScreenshots() {
       let combinedText = "";
       const total = rawDataUrls.length;
 
+      if (ocrDetails) ocrDetails.textContent = "Загрузка языкового модуля OCR (рус+eng)...";
       const worker = await Tesseract.createWorker("rus+eng", 1, {
-        logger: m => {}
+        logger: m => {
+          if (m.status === "loading tesseract core" || m.status === "initializing tesseract") {
+            if (ocrDetails) ocrDetails.textContent = "Инициализация движка OCR...";
+          }
+        }
+      });
+
+      // Set Tesseract parameters for better fitness app OCR
+      await worker.setParameters({
+        tessedit_pageseg_mode: "6",       // Assume uniform block of text
+        preserve_interword_spaces: "1",
+        tessedit_char_whitelist: ""        // Allow all chars
       });
 
       for (let i = 0; i < total; i++) {
         const currentNum = i + 1;
-        if (ocrDetails) ocrDetails.textContent = `Оптимизация скриншота ${currentNum} из ${total} (Canvas, инверсия)...`;
+        if (ocrDetails) ocrDetails.textContent = `Оптимизация скриншота ${currentNum} из ${total}...`;
         const pctBase = Math.round((i / total) * 100);
         if (ocrPercent) ocrPercent.textContent = `${pctBase}%`;
         if (ocrBar) ocrBar.style.width = `${Math.max(10, pctBase)}%`;
@@ -3928,16 +4024,28 @@ async function processAllScreenshots() {
 
       const parsed = parseWorkoutTextToProgram(combinedText);
       applyStructuredProgram(parsed);
-      showToast(`Объединено ${parsed.days.length} дн. из ${total} скриншотов! ⚡️`);
+
+      const exCount = parsed.days.reduce((s, d) => s + d.exercises.length, 0);
+      if (exCount < 2) {
+        // OCR produced too little - guide user to text mode
+        if (ocrStatus) ocrStatus.classList.add("hidden");
+        setCustomImportMode("text");
+        showToast("OCR не смог распознать упражнения. Введи программу текстом!");
+      } else {
+        showToast(`Объединено ${parsed.days.length} дн. из ${total} скриншотов! ⚡️`);
+      }
     } catch (ocrErr) {
       console.error("[Tesseract Multi-OCR Error]:", ocrErr);
-      showToast("Не удалось оптически прочесть текст скриншотов. Попробуйте вкладку «Текстом»!");
+      if (ocrStatus) ocrStatus.classList.add("hidden");
+      setCustomImportMode("text");
+      showToast("Ошибка OCR. Введи программу текстом!");
     } finally {
       if (ocrStatus) ocrStatus.classList.add("hidden");
     }
   } else {
     if (ocrStatus) ocrStatus.classList.add("hidden");
-    showToast("Модуль OCR недоступен. Переключитесь на вкладку «Текстом».");
+    setCustomImportMode("text");
+    showToast("💡 Введи список упражнений текстом!");
   }
 }
 
