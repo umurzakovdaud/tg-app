@@ -389,10 +389,12 @@ def api_parse_workout_photo():
     if gemini_key and images:
         try:
             prompt_text = (
-                "Ты — опытный фитнес-тренер. Проанализируй прикрепленные скриншоты или фото программы тренировок.\n"
-                "Если скриншотов несколько, объедини их в одну цельную тренировочную программу на 3-4 дня (или сколько указано на изображениях).\n"
-                "Выдели тренировочные дни (День 1, День 2, День 3, День 4 и т.д.) и список упражнений в каждом дне с точным числом подходов и повторений.\n"
-                "Верни ответ ТОЛЬКО в формате валидного JSON без markdown кавычек:\n"
+                "Ты — профессиональный фитнес-тренер. Проанализируй прикрепленный скриншот или фото программы тренировок (из приложений Strong, FitNotes, Hevy, заметок или переписки).\n"
+                "СТРОГО ИГНОРИРУЙ системный интерфейс телефона: время (например 15:43, 23:28), уровень заряда батареи (52%, 43%), значки сети/LTE/Wi-Fi, заголовок Telegram, служебные кнопки («Назад», «Готово», «Добавить упражнение», «Скриншот 1»).\n"
+                "Извлекай ТОЛЬКО реальные физические упражнения (жим, тяга, приседания, подтягивания, махи, сгибания и т.д.) с количеством подходов и повторений.\n"
+                "Названия упражнений пиши на правильном русском языке с заглавной буквы (например: «Жим гантелей на наклонной скамье», «Тяга верхнего блока к груди», «Приседания со штангой»).\n"
+                "Сгруппируй упражнения по дням (День 1, День 2, День 3, День 4...). Если на скриншоте дни не разделены, а упражнений много (более 6), логично разбей их на 2-4 дня (Верх тела, Низ тела или Толкай, Тяни, Ноги).\n"
+                "Верни ответ СТРОГО в формате валидного JSON без markdown кавычек:\n"
                 "{\n"
                 '  "title": "Моя программа",\n'
                 '  "days": [\n'
@@ -409,17 +411,41 @@ def api_parse_workout_photo():
 
             parts = [{"text": prompt_text}]
             for img in images:
+                mime_type = "image/jpeg"
+                if "data:image/png" in img:
+                    mime_type = "image/png"
+                elif "data:image/webp" in img:
+                    mime_type = "image/webp"
                 if "," in img:
                     img = img.split(",", 1)[1]
                 parts.append({
                     "inline_data": {
-                        "mime_type": "image/jpeg",
+                        "mime_type": mime_type,
                         "data": img
                     }
                 })
 
-            models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+            models_to_try = [
+                "gemini-3.5-flash-lite",
+                "gemini-3.5-flash",
+                "gemini-3.8-flash",
+                "gemini-3.1-flash-lite",
+                "gemini-flash-latest",
+                "gemini-2.5-flash"
+            ]
             parsed = None
+            
+            # Создаем SSL context с надежным fallback для любых окружений (Render, macOS, Docker)
+            ssl_ctx = None
+            try:
+                import ssl
+                try:
+                    ssl_ctx = ssl.create_default_context()
+                except Exception:
+                    ssl_ctx = ssl._create_unverified_context()
+            except Exception:
+                pass
+
             for model_name in models_to_try:
                 try:
                     gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
@@ -432,13 +458,29 @@ def api_parse_workout_photo():
                         data=json.dumps(payload).encode("utf-8"),
                         headers={"Content-Type": "application/json"}
                     )
-                    with urllib.request.urlopen(req, timeout=35) as resp:
+                    urlopen_kwargs = {"timeout": 35}
+                    if ssl_ctx:
+                        urlopen_kwargs["context"] = ssl_ctx
+                    
+                    try:
+                        resp = urllib.request.urlopen(req, **urlopen_kwargs)
+                    except Exception as conn_err:
+                        # Если на сервере проблема с системными сертификатами SSL, пробуем unverified context
+                        if "certificate" in str(conn_err).lower() or "ssl" in str(conn_err).lower():
+                            import ssl
+                            urlopen_kwargs["context"] = ssl._create_unverified_context()
+                            resp = urllib.request.urlopen(req, **urlopen_kwargs)
+                        else:
+                            raise conn_err
+
+                    with resp:
                         resp_json = json.loads(resp.read().decode("utf-8"))
                         text_out = resp_json["candidates"][0]["content"]["parts"][0]["text"].strip()
                         if text_out.startswith("```"):
                             text_out = text_out.strip("`").replace("json", "", 1).strip()
                         parsed = json.loads(text_out)
                         if parsed and "days" in parsed:
+                            print(f"[Gemini Vision] Успешно распознано моделью {model_name}!", file=sys.stderr)
                             return jsonify({"status": "ok", "program": parsed})
                 except Exception as m_err:
                     print(f"[Gemini model {model_name} error]: {m_err}", file=sys.stderr)
