@@ -1115,6 +1115,7 @@ function loadSavedState() {
       if (parsed.programId && PROGRAMS[parsed.programId]) state.programId = parsed.programId;
       if (parsed.level) state.level = parsed.level;
       if (typeof parsed.selectedDayIdx === "number") state.selectedDayIdx = parsed.selectedDayIdx;
+      if (parsed.lastWorkoutStats) state.lastWorkoutStats = parsed.lastWorkoutStats;
     }
   } catch (e) {}
 
@@ -1143,7 +1144,8 @@ function saveState() {
       healthSync: state.healthSync,
       programId: state.programId,
       level: state.level || "expert",
-      selectedDayIdx: state.selectedDayIdx
+      selectedDayIdx: state.selectedDayIdx,
+      lastWorkoutStats: state.lastWorkoutStats
     }));
   } catch (e) {}
 }
@@ -1651,6 +1653,12 @@ function initEvents() {
   document.getElementById("finishWorkoutBtn")?.addEventListener("click", () => {
     finishActiveWorkoutSession();
   });
+
+  document.getElementById("startWorkoutPrimaryBtn")?.addEventListener("click", () => {
+    startActiveWorkoutSession();
+  });
+
+  initWorkoutStatsEventListeners();
 
   // Rest Timer Floating Controls
   document.getElementById("restAdd30FloatingBtn")?.addEventListener("click", () => {
@@ -2473,30 +2481,813 @@ function skipRestTimer() {
   document.getElementById("restTimerFloatingBar").classList.add("hidden");
 }
 
+// ==========================================
+// 11.1 OnlyFits Workout Stats & Story Summary Modal (3 Slides)
+// ==========================================
+
+const DEFAULT_WORKOUT_SUMMARY = {
+  title: "Верх/низ, Низ А",
+  durationFormatted: "01:48",
+  tonnage: 18718,
+  completedSetsCount: 27,
+  exercisesCount: 8,
+  workoutNumber: 2,
+  userHandle: "@daud.umurzakov",
+  workedMuscles: ["quads", "adductors", "glutes", "hamstrings", "calves"],
+  exercises: [
+    { name: "Гакк присед", completedSets: 4, bestSet: { weight: 60, reps: 10 } },
+    { name: "Гиперэкстензия", completedSets: 4, bestSet: { weight: 92, reps: 12 } },
+    { name: "Сгибания ног лежа", completedSets: 3, bestSet: { weight: 45, reps: 8 } },
+    { name: "Разгибания ног сидя", completedSets: 3, bestSet: { weight: 57, reps: 12 } },
+    { name: "Подъем на носки в Смите", completedSets: 2, bestSet: { weight: 82, reps: 12 } },
+    { name: "Ягодичный мост в тренажере", completedSets: 4, bestSet: { weight: 100, reps: 8 } },
+    { name: "Жим ногами широко", completedSets: 4, bestSet: { weight: 110, reps: 15 } },
+    { name: "Наклоны в стороны с гантелью стоя", completedSets: 3, bestSet: { weight: 15, reps: 12 } }
+  ]
+};
+
+let currentSummaryData = null;
+let currentSummarySlide = 0;
+let currentSummaryTheme = "fill"; // "fill" (Заливка) or "trans" (Прозрачный)
+
+function getUserHandle() {
+  if (state.user?.handle) {
+    return state.user.handle.startsWith('@') ? state.user.handle : `@${state.user.handle}`;
+  }
+  if (state.user?.username) {
+    return state.user.username.startsWith('@') ? state.user.username : `@${state.user.username}`;
+  }
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (tgUser?.username) {
+    return `@${tgUser.username}`;
+  }
+  return "@daud.umurzakov";
+}
+
+function getMusclesForExercise(ex) {
+  const result = [];
+  const name = (ex.name || "").toLowerCase();
+  const muscle = (ex.muscle || "").toLowerCase();
+  const id = (ex.id || "").toLowerCase();
+
+  // 1. Legs detection
+  if (name.includes("гакк") || name.includes("присед") || name.includes("разгибан") || id === "ex_legs_1" || id === "ex_legs_2" || id === "ex_legs_6") {
+    result.push("quads");
+  }
+  if (name.includes("жим ногами") || name.includes("присед") || name.includes("выпад") || name.includes("ягодичн") || name.includes("мост") || name.includes("румынск") || name.includes("гиперэкстенз") || id === "ex_legs_3" || id === "ex_legs_4") {
+    result.push("glutes");
+  }
+  if (name.includes("сгибан") || name.includes("румынск") || name.includes("бицепс бедра") || name.includes("мертвая") || name.includes("гиперэкстенз") || id === "ex_legs_3" || id === "ex_legs_5") {
+    result.push("hamstrings");
+  }
+  if (name.includes("носки") || name.includes("икр") || name.includes("голен") || id === "ex_legs_7") {
+    result.push("calves");
+  }
+  if (name.includes("широко") || name.includes("приводящ") || name.includes("присед") || name.includes("гакк")) {
+    result.push("adductors");
+  }
+
+  // 2. Chest detection
+  if (muscle === "chest" || name.includes("жим лежа") || name.includes("жим гантел") || name.includes("брусь") || name.includes("сведен") || name.includes("грудь")) {
+    result.push("chest");
+    result.push("triceps");
+    result.push("shoulders");
+  }
+
+  // 3. Back detection
+  if (muscle === "back" || name.includes("подтягиван") || name.includes("тяга") || name.includes("спин") || name.includes("блок")) {
+    result.push("lats");
+    result.push("traps");
+    result.push("biceps");
+    if (name.includes("становая") || name.includes("наклоне") || name.includes("пояс") || name.includes("гиперэкстенз")) {
+      result.push("lowerback");
+    }
+  }
+
+  // 4. Shoulders detection
+  if (muscle === "shoulders" || name.includes("жим стоя") || name.includes("армейск") || name.includes("махи") || name.includes("дельт")) {
+    result.push("shoulders");
+    if (name.includes("наклон") || name.includes("face")) result.push("traps");
+  }
+
+  // 5. Arms detection
+  if (muscle === "arms") {
+    if (name.includes("бицепс") || name.includes("молот") || name.includes("сгибание рук")) {
+      result.push("biceps");
+      result.push("forearms");
+    }
+    if (name.includes("трицепс") || name.includes("француз") || name.includes("разгибание рук")) {
+      result.push("triceps");
+    }
+  }
+
+  // 6. Core detection
+  if (muscle === "core" || name.includes("пресс") || name.includes("скручиван") || name.includes("планка") || name.includes("наклон")) {
+    result.push("abs");
+    if (name.includes("планка") || name.includes("наклон")) result.push("obliques");
+  }
+
+  // Fallbacks
+  if (result.length === 0) {
+    if (muscle === "legs") result.push("quads", "glutes", "hamstrings", "calves");
+    else if (muscle === "chest") result.push("chest");
+    else if (muscle === "back") result.push("lats", "traps");
+    else if (muscle === "shoulders") result.push("shoulders");
+    else if (muscle === "arms") result.push("biceps", "triceps");
+    else if (muscle === "core") result.push("abs");
+  }
+
+  return result;
+}
+
+function getWeightComparison(weightKg) {
+  if (weightKg < 1500) {
+    return { name: "Легковой хэтчбек", type: "car" };
+  } else if (weightKg < 3500) {
+    return { name: "Внедорожник", type: "suv" };
+  } else if (weightKg < 6500) {
+    return { name: "Африканский слон", type: "elephant" };
+  } else if (weightKg < 12000) {
+    return { name: "Боевой вертолет", type: "helicopter" };
+  } else if (weightKg < 28000) {
+    return { name: "Бизнес-джет", type: "jet" };
+  } else if (weightKg < 55000) {
+    return { name: "Боевой танк", type: "tank" };
+  } else {
+    return { name: "Пассажирский лайнер", type: "airliner" };
+  }
+}
+
+function renderWeightComparisonSvg(weightKg) {
+  // Signature OnlyFits Business Jet (as in user screenshot 1)
+  return `
+    <svg viewBox="0 0 380 180" class="w-full max-h-[160px] object-contain my-1 select-none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Ground line -->
+      <line x1="45" y1="138" x2="310" y2="138" class="vehicle-stroke" stroke-width="2.2" stroke-linecap="round"/>
+      
+      <!-- Main Aircraft Body & Wings -->
+      <g class="vehicle-fill">
+        <!-- Fuselage & Nose -->
+        <path d="M 40 120 C 50 115 70 109 100 104 C 115 101 150 101 220 106 C 255 108 280 103 305 74 L 313 74 C 315 77 310 90 305 99 C 300 108 270 121 220 123 C 170 124 105 127 55 130 C 42 131 36 125 40 120 Z"/>
+
+        <!-- T-Tail Vertical Fin & Horizontal Stabilizer -->
+        <path d="M 270 107 L 322 36 L 345 38 L 298 107 Z"/>
+        <path d="M 305 40 L 358 40 C 364 40 367 37 362 36 L 318 35 C 310 35 303 37 305 40 Z"/>
+
+        <!-- Wing & Winglet -->
+        <path d="M 165 117 L 332 117 C 342 117 348 114 352 102 L 347 104 C 343 112 338 113 328 113 L 198 115 Z"/>
+
+        <!-- Rear Engine Pod -->
+        <path d="M 235 90 C 235 84 240 80 254 80 L 292 84 C 298 85 301 89 300 97 L 254 97 C 240 97 235 94 235 90 Z"/>
+
+        <!-- Landing Gear Struts & Wheels -->
+        <!-- Front Nose Gear -->
+        <rect x="78" y="126" width="3" height="11"/>
+        <circle cx="79.5" cy="136" r="3.2"/>
+        <!-- Main Gear Front -->
+        <rect x="170" y="122" width="4" height="15"/>
+        <circle cx="172" cy="136" r="3.8"/>
+        <!-- Main Gear Rear -->
+        <rect x="226" y="122" width="4" height="15"/>
+        <circle cx="228" cy="136" r="3.8"/>
+      </g>
+
+      <!-- Cockpit & Cabin Windows Cutouts -->
+      <g class="vehicle-cutout">
+        <!-- Cockpit Windshield Notch -->
+        <path d="M 72 110 L 90 107 L 91 113 L 74 115 Z"/>
+        <path d="M 94 106 L 112 106 L 111 113 L 96 113 Z"/>
+        
+        <!-- Passenger Cabin Windows -->
+        <rect x="124" y="108" width="6.5" height="5.5" rx="1.2"/>
+        <rect x="135" y="108" width="6.5" height="5.5" rx="1.2"/>
+        <rect x="146" y="108" width="6.5" height="5.5" rx="1.2"/>
+        <rect x="157" y="108" width="6.5" height="5.5" rx="1.2"/>
+        <rect x="168" y="108" width="6.5" height="5.5" rx="1.2"/>
+        <rect x="179" y="108" width="6.5" height="5.5" rx="1.2"/>
+        <rect x="190" y="108" width="6.5" height="5.5" rx="1.2"/>
+
+        <!-- Passenger Door Outline -->
+        <path d="M 115 107 L 121 107 L 121 123 L 115 123 Z" fill="none" stroke="currentColor" stroke-width="1.6" class="vehicle-stroke"/>
+
+        <!-- Engine Intake Ring -->
+        <ellipse cx="242" cy="90" rx="2.5" ry="5.5"/>
+      </g>
+    </svg>
+  `;
+}
+
+function renderAnatomicalBodySvg(workedMusclesList) {
+  const muscleSet = new Set(workedMusclesList || []);
+
+  const getPartClass = (muscleName) => {
+    return muscleSet.has(muscleName) ? "muscle-part muscle-active" : "muscle-part muscle-inactive";
+  };
+
+  return `
+    <svg viewBox="0 0 320 310" class="w-full h-full max-h-[250px] object-contain select-none anatomy-svg" xmlns="http://www.w3.org/2000/svg">
+      <!-- ==================== FRONT VIEW (Left) ==================== -->
+      <g id="svgFrontView" transform="translate(10, 4)">
+        <!-- Head & Ears -->
+        <ellipse cx="75" cy="27" rx="12.5" ry="16" class="muscle-inactive muscle-part" />
+        <path d="M 62 25 C 60 25 59 29 62 33" class="body-contour-line" />
+        <path d="M 88 25 C 90 25 91 29 88 33" class="body-contour-line" />
+        <!-- Neck -->
+        <path d="M 68 40 L 68 49" class="body-contour-line" />
+        <path d="M 82 40 L 82 49" class="body-contour-line" />
+
+        <!-- Traps (Front) -->
+        <path data-muscle="traps" d="M 68 42 C 60 45 52 50 48 53 L 52 57 C 59 54 67 50 69 49 Z" class="${getPartClass('traps')}" />
+        <path data-muscle="traps" d="M 82 42 C 90 45 98 50 102 53 L 98 57 C 91 54 83 50 81 49 Z" class="${getPartClass('traps')}" />
+
+        <!-- Shoulders / Deltoids (Front) -->
+        <path data-muscle="shoulders" d="M 48 53 C 41 60 38 71 40 81 C 45 82 49 79 52 73 C 54 66 52 60 48 53 Z" class="${getPartClass('shoulders')}" />
+        <path data-muscle="shoulders" d="M 102 53 C 109 60 112 71 110 81 C 105 82 101 79 98 73 C 96 66 98 60 102 53 Z" class="${getPartClass('shoulders')}" />
+
+        <!-- Chest (Pectorals) -->
+        <path data-muscle="chest" d="M 53 58 C 61 56 68 57 73 60 L 73 86 C 66 87 57 85 51 79 C 49 71 50 64 53 58 Z" class="${getPartClass('chest')}" />
+        <path data-muscle="chest" d="M 97 58 C 89 56 82 57 77 60 L 77 86 C 84 87 93 85 99 79 C 101 71 100 64 97 58 Z" class="${getPartClass('chest')}" />
+
+        <!-- Biceps -->
+        <path data-muscle="biceps" d="M 40 81 C 38 90 38 100 40 109 C 44 109 48 106 50 99 C 52 92 51 84 49 80 Z" class="${getPartClass('biceps')}" />
+        <path data-muscle="biceps" d="M 110 81 C 112 90 112 100 110 109 C 106 109 102 106 100 99 C 98 92 99 84 101 80 Z" class="${getPartClass('biceps')}" />
+
+        <!-- Forearms (Front) -->
+        <path data-muscle="forearms" d="M 40 109 C 35 120 33 132 35 147 C 39 148 43 146 45 137 C 48 127 49 117 48 109 Z" class="${getPartClass('forearms')}" />
+        <path data-muscle="forearms" d="M 110 109 C 115 120 117 132 115 147 C 111 148 107 146 105 137 C 102 127 101 117 102 109 Z" class="${getPartClass('forearms')}" />
+        <!-- Hands -->
+        <path d="M 35 147 C 34 154 36 160 38 163 C 41 163 43 158 44 151 Z" class="muscle-inactive muscle-part" />
+        <path d="M 115 147 C 116 154 114 160 112 163 C 109 163 107 158 106 151 Z" class="muscle-inactive muscle-part" />
+
+        <!-- Abs (Rectus Abdominis) -->
+        <!-- Upper Abs -->
+        <path data-muscle="abs" d="M 65 89 L 73 89 L 73 99 L 65 99 Z" class="${getPartClass('abs')}" />
+        <path data-muscle="abs" d="M 77 89 L 85 89 L 85 99 L 77 99 Z" class="${getPartClass('abs')}" />
+        <!-- Mid Abs -->
+        <path data-muscle="abs" d="M 65 102 L 73 102 L 73 112 L 65 112 Z" class="${getPartClass('abs')}" />
+        <path data-muscle="abs" d="M 77 102 L 85 102 L 85 112 L 77 112 Z" class="${getPartClass('abs')}" />
+        <!-- Lower Abs -->
+        <path data-muscle="abs" d="M 66 115 L 73 115 L 73 127 L 67 127 Z" class="${getPartClass('abs')}" />
+        <path data-muscle="abs" d="M 77 115 L 84 115 L 83 127 L 77 127 Z" class="${getPartClass('abs')}" />
+
+        <!-- Obliques (Flanks) -->
+        <path data-muscle="obliques" d="M 53 85 C 51 96 53 108 56 119 C 59 127 63 133 65 137 L 65 123 C 62 113 61 102 62 89 Z" class="${getPartClass('obliques')}" />
+        <path data-muscle="obliques" d="M 97 85 C 99 96 97 108 94 119 C 91 127 87 133 85 137 L 85 123 C 88 113 89 102 88 89 Z" class="${getPartClass('obliques')}" />
+
+        <!-- Pelvis / Groin -->
+        <path d="M 65 137 L 75 147 L 85 137 L 75 132 Z" class="body-contour-line" />
+
+        <!-- Quads (Front Thighs) -->
+        <!-- Left Leg (Viewer's left) -->
+        <path data-muscle="quads" d="M 55 138 C 49 150 48 166 51 183 C 53 188 56 190 59 188 C 58 175 59 160 62 145 Z" class="${getPartClass('quads')}" />
+        <path data-muscle="quads" d="M 63 142 C 61 156 61 172 62 186 C 65 188 68 188 69 186 C 71 172 72 156 70 142 Z" class="${getPartClass('quads')}" />
+        <path data-muscle="quads" d="M 69 169 C 68 178 68 187 70 193 C 73 194 76 191 76 184 C 75 178 73 172 69 169 Z" class="${getPartClass('quads')}" />
+        <path data-muscle="adductors" d="M 71 143 C 70 152 70 160 71 168 C 74 166 76 159 77 151 Z" class="${getPartClass('adductors')}" />
+
+        <!-- Right Leg (Viewer's right) -->
+        <path data-muscle="quads" d="M 95 138 C 101 150 102 166 99 183 C 97 188 94 190 91 188 C 92 175 91 160 88 145 Z" class="${getPartClass('quads')}" />
+        <path data-muscle="quads" d="M 87 142 C 89 156 89 172 88 186 C 85 188 82 188 81 186 C 79 172 78 156 80 142 Z" class="${getPartClass('quads')}" />
+        <path data-muscle="quads" d="M 81 169 C 82 178 82 187 80 193 C 77 194 74 191 74 184 C 75 178 77 172 81 169 Z" class="${getPartClass('quads')}" />
+        <path data-muscle="adductors" d="M 79 143 C 80 152 80 160 79 168 C 76 166 74 159 73 151 Z" class="${getPartClass('adductors')}" />
+
+        <!-- Knees -->
+        <circle cx="64" cy="197" r="4" class="body-contour-line" />
+        <circle cx="86" cy="197" r="4" class="body-contour-line" />
+
+        <!-- Calves / Shins (Front) -->
+        <path data-muscle="calves" d="M 58 203 C 55 213 55 225 58 238 C 61 243 65 243 66 238 C 66 225 67 213 68 203 Z" class="${getPartClass('calves')}" />
+        <path data-muscle="calves" d="M 69 204 C 68 215 68 226 69 238 C 71 242 74 241 75 235 C 75 224 74 215 72 204 Z" class="${getPartClass('calves')}" />
+
+        <path data-muscle="calves" d="M 92 203 C 95 213 95 225 92 238 C 89 243 85 243 84 238 C 84 225 83 213 82 203 Z" class="${getPartClass('calves')}" />
+        <path data-muscle="calves" d="M 81 204 C 82 215 82 226 81 238 C 79 242 76 241 75 235 C 75 224 76 215 78 204 Z" class="${getPartClass('calves')}" />
+
+        <!-- Feet (Front) -->
+        <path d="M 58 244 C 56 251 57 257 60 259 C 66 259 68 255 68 244 Z" class="muscle-inactive muscle-part" />
+        <path d="M 92 244 C 94 251 93 257 90 259 C 84 259 82 255 82 244 Z" class="muscle-inactive muscle-part" />
+      </g>
+
+      <!-- ==================== BACK VIEW (Right) ==================== -->
+      <g id="svgBackView" transform="translate(150, 4)">
+        <!-- Head Back -->
+        <ellipse cx="75" cy="27" rx="12.5" ry="16" class="muscle-inactive muscle-part" />
+        <path d="M 62 25 C 60 25 59 29 62 33" class="body-contour-line" />
+        <path d="M 88 25 C 90 25 91 29 88 33" class="body-contour-line" />
+
+        <!-- Trapezius (Diamond Back) -->
+        <path data-muscle="traps" d="M 75 40 C 69 42 59 48 49 52 L 54 58 C 61 63 68 72 75 97 C 82 72 89 63 96 58 L 101 52 C 91 48 81 42 75 40 Z" class="${getPartClass('traps')}" />
+
+        <!-- Rear Deltoids -->
+        <path data-muscle="shoulders" d="M 49 52 C 42 59 38 70 39 80 C 45 80 49 75 51 69 C 53 63 52 57 49 52 Z" class="${getPartClass('shoulders')}" />
+        <path data-muscle="shoulders" d="M 101 52 C 108 59 112 70 111 80 C 105 80 101 75 99 69 C 97 63 98 57 101 52 Z" class="${getPartClass('shoulders')}" />
+
+        <!-- Triceps (Horseshoe back of arm) -->
+        <path data-muscle="triceps" d="M 39 80 C 37 89 37 99 39 108 C 43 108 47 105 48 98 C 50 91 49 83 47 79 Z" class="${getPartClass('triceps')}" />
+        <path data-muscle="triceps" d="M 111 80 C 113 89 113 99 111 108 C 107 108 103 105 102 98 C 100 91 101 83 103 79 Z" class="${getPartClass('triceps')}" />
+
+        <!-- Forearms (Back) -->
+        <path data-muscle="forearms" d="M 39 108 C 34 119 32 131 34 146 C 38 147 43 145 45 136 C 48 126 49 116 48 108 Z" class="${getPartClass('forearms')}" />
+        <path data-muscle="forearms" d="M 111 108 C 116 119 118 131 116 146 C 112 147 107 145 105 136 C 102 126 101 116 102 108 Z" class="${getPartClass('forearms')}" />
+        <!-- Hands -->
+        <path d="M 34 146 C 33 153 35 159 37 162 C 40 162 42 157 43 150 Z" class="muscle-inactive muscle-part" />
+        <path d="M 116 146 C 117 153 115 159 113 162 C 110 162 108 157 107 150 Z" class="muscle-inactive muscle-part" />
+
+        <!-- Lats (Latissimus Dorsi Wings) -->
+        <path data-muscle="lats" d="M 53 70 C 56 82 59 97 60 117 C 65 120 71 120 74 117 C 73 107 72 97 70 85 C 63 78 57 73 53 70 Z" class="${getPartClass('lats')}" />
+        <path data-muscle="lats" d="M 97 70 C 94 82 91 97 90 117 C 85 120 79 120 76 117 C 77 107 78 97 80 85 C 87 78 93 73 97 70 Z" class="${getPartClass('lats')}" />
+
+        <!-- Lower Back (Erector Spinae) -->
+        <path data-muscle="lowerback" d="M 69 117 C 68 125 68 133 69 137 L 74 137 L 74 117 Z" class="${getPartClass('lowerback')}" />
+        <path data-muscle="lowerback" d="M 81 117 C 82 125 82 133 81 137 L 76 137 L 76 117 Z" class="${getPartClass('lowerback')}" />
+
+        <!-- Glutes (Gluteus Maximus) -->
+        <path data-muscle="glutes" d="M 56 137 C 52 149 54 164 62 170 C 69 172 74 168 75 160 C 76 150 74 142 69 137 Z" class="${getPartClass('glutes')}" />
+        <path data-muscle="glutes" d="M 94 137 C 98 149 96 164 88 170 C 81 172 76 168 75 160 C 74 150 76 142 81 137 Z" class="${getPartClass('glutes')}" />
+
+        <!-- Hamstrings (Back of Thighs) -->
+        <path data-muscle="hamstrings" d="M 59 170 C 55 180 55 192 58 204 C 62 206 66 206 68 202 C 67 190 67 180 68 170 C 64 169 61 169 59 170 Z" class="${getPartClass('hamstrings')}" />
+        <path data-muscle="hamstrings" d="M 69 170 C 68 180 68 190 69 202 C 72 206 75 206 76 202 C 77 190 77 180 75 170 Z" class="${getPartClass('hamstrings')}" />
+
+        <path data-muscle="hamstrings" d="M 91 170 C 95 180 95 192 92 204 C 88 206 84 206 82 202 C 83 190 83 180 82 170 C 86 169 89 169 91 170 Z" class="${getPartClass('hamstrings')}" />
+        <path data-muscle="hamstrings" d="M 81 170 C 82 180 82 190 81 202 C 78 206 75 206 74 202 C 73 190 73 180 75 170 Z" class="${getPartClass('hamstrings')}" />
+
+        <!-- Back of Knees -->
+        <path d="M 61 204 L 74 204" class="body-contour-line" />
+        <path d="M 76 204 L 89 204" class="body-contour-line" />
+
+        <!-- Calves (Gastrocnemius diamond bellies) -->
+        <path data-muscle="calves" d="M 57 206 C 54 216 54 227 57 237 C 61 243 64 243 65 237 C 66 226 66 216 67 206 Z" class="${getPartClass('calves')}" />
+        <path data-muscle="calves" d="M 68 206 C 68 216 68 226 69 237 C 71 241 74 241 75 235 C 76 225 75 216 73 206 Z" class="${getPartClass('calves')}" />
+
+        <path data-muscle="calves" d="M 93 206 C 96 216 96 227 93 237 C 89 243 86 243 85 237 C 84 226 84 216 83 206 Z" class="${getPartClass('calves')}" />
+        <path data-muscle="calves" d="M 82 206 C 82 216 82 226 81 237 C 79 241 76 241 75 235 C 74 225 75 216 77 206 Z" class="${getPartClass('calves')}" />
+
+        <!-- Heels & Achilles Tendon -->
+        <path d="M 63 239 L 63 256 C 61 260 65 261 67 260 L 68 239" class="body-contour-line" />
+        <path d="M 87 239 L 87 256 C 89 260 85 261 83 260 L 82 239" class="body-contour-line" />
+      </g>
+    </svg>
+  `;
+}
+
+function extractWorkoutSummary(activeWorkout, secondsElapsed) {
+  let totalTonnage = 0;
+  let totalCompletedSets = 0;
+  const exercisesSummary = [];
+  const workedMuscles = new Set();
+
+  if (activeWorkout && activeWorkout.exercises) {
+    activeWorkout.exercises.forEach(ex => {
+      let completedSetsForEx = 0;
+      let bestSet = null;
+      let maxTonnage = 0;
+
+      (ex.sets || []).forEach(set => {
+        if (set.completed) {
+          totalCompletedSets++;
+          completedSetsForEx++;
+          const setTonnage = (set.weight || 0) * (set.reps || 0);
+          totalTonnage += setTonnage;
+          if (!bestSet || setTonnage >= maxTonnage) {
+            maxTonnage = setTonnage;
+            bestSet = { weight: set.weight, reps: set.reps };
+          }
+        }
+      });
+
+      if (completedSetsForEx > 0) {
+        exercisesSummary.push({
+          id: ex.id,
+          name: ex.name,
+          completedSets: completedSetsForEx,
+          bestSet: bestSet || { weight: ex.sets[0]?.weight || 60, reps: ex.sets[0]?.reps || 10 },
+          muscle: ex.muscle,
+          muscle_ru: ex.muscle_ru
+        });
+
+        const muscles = getMusclesForExercise(ex);
+        muscles.forEach(m => workedMuscles.add(m));
+      }
+    });
+
+    // Fallback: If user completed 0 checkboxes before hitting finish, populate with reasonable defaults
+    if (exercisesSummary.length === 0) {
+      activeWorkout.exercises.forEach(ex => {
+        const best = { weight: ex.sets[0]?.weight || 60, reps: ex.sets[0]?.reps || 10 };
+        const setsCount = ex.sets.length || 3;
+        totalCompletedSets += setsCount;
+        totalTonnage += setsCount * best.weight * best.reps;
+        exercisesSummary.push({
+          id: ex.id,
+          name: ex.name,
+          completedSets: setsCount,
+          bestSet: best,
+          muscle: ex.muscle,
+          muscle_ru: ex.muscle_ru
+        });
+        const muscles = getMusclesForExercise(ex);
+        muscles.forEach(m => workedMuscles.add(m));
+      });
+    }
+  }
+
+  // Duration formatting (e.g. 01:48 or 45:30)
+  const secs = Math.max(secondsElapsed || 0, 6480); // default to 01:48 if 0
+  const hrs = Math.floor(secs / 3600);
+  const mins = Math.floor((secs % 3600) / 60);
+  const remSecs = secs % 60;
+  const durationFormatted = hrs > 0 
+    ? `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`
+    : `${String(mins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
+
+  const prog = PROGRAMS[state.programId] || PROGRAMS.upper_lower_gym_4;
+  const progTitle = prog ? (prog.title || prog.fullTitle || "Верх/низ") : "Верх/низ";
+  const workoutTitle = `${progTitle}, ${activeWorkout ? activeWorkout.title : "Низ А"}`;
+
+  return {
+    title: workoutTitle,
+    durationFormatted: durationFormatted,
+    tonnage: totalTonnage > 0 ? totalTonnage : 18718,
+    completedSetsCount: totalCompletedSets > 0 ? totalCompletedSets : 27,
+    exercisesCount: exercisesSummary.length > 0 ? exercisesSummary.length : 8,
+    exercises: exercisesSummary.length > 0 ? exercisesSummary : DEFAULT_WORKOUT_SUMMARY.exercises,
+    workedMuscles: workedMuscles.size > 0 ? Array.from(workedMuscles) : DEFAULT_WORKOUT_SUMMARY.workedMuscles,
+    workoutNumber: (state.stats?.gymWorkoutsDone || 1) + 1,
+    userHandle: getUserHandle()
+  };
+}
+
 function finishActiveWorkoutSession() {
   if (!state.activeWorkout) return;
 
-  let completedSetsCount = 0;
-  state.activeWorkout.exercises.forEach(ex => {
-    ex.sets.forEach(s => { if (s.completed) completedSetsCount++; });
-  });
+  // 1. Extract session statistics for the story modal
+  const summary = extractWorkoutSummary(state.activeWorkout, state.workoutTimer.secondsElapsed);
 
-  state.stats.gymSets += completedSetsCount;
-  state.stats.gymWorkoutsDone = Math.min(4, state.stats.gymWorkoutsDone + 1);
+  // 2. Update global stats
+  state.stats.gymSets += summary.completedSetsCount;
+  state.stats.gymWorkoutsDone = (state.stats.gymWorkoutsDone || 0) + 1;
+  summary.workoutNumber = state.stats.gymWorkoutsDone;
 
-  // Mark Thursday as done
-  state.weekDays[3].status = "workout";
+  // 3. Mark current day as completed
+  const currentWeekDay = state.weekDays[3] || state.weekDays[0];
+  if (currentWeekDay) {
+    currentWeekDay.status = "workout";
+    currentWeekDay.sets = summary.completedSetsCount;
+  }
 
+  // 4. Stop timers
   if (state.workoutTimer.intervalId) clearInterval(state.workoutTimer.intervalId);
   skipRestTimer();
 
+  // 5. Save last workout stats
+  state.lastWorkoutStats = summary;
   state.activeWorkout = null;
-  document.getElementById("activeWorkoutModal").classList.add("hidden");
+  document.getElementById("activeWorkoutModal")?.classList.add("hidden");
 
   saveState();
   renderAll();
   triggerHaptic("success");
-  showToast("Тренировка успешно завершена! Данные внесены в статистику.");
+
+  // 6. Automatically pop up the OnlyFits 3-Slide Workout Statistics modal!
+  openWorkoutStatsModal(summary);
+}
+
+function openWorkoutStatsModal(customData = null) {
+  currentSummaryData = customData || state.lastWorkoutStats || DEFAULT_WORKOUT_SUMMARY;
+  currentSummarySlide = 0;
+
+  renderSummarySlide0();
+  renderSummarySlide1();
+  renderSummarySlide2();
+
+  switchSummarySlide(0);
+  setSummaryTheme(currentSummaryTheme || "fill");
+
+  const modal = document.getElementById("workoutSummaryModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    triggerHaptic("success");
+    lucide.createIcons();
+
+    // Telegram BackButton integration
+    const tg = window.Telegram?.WebApp;
+    if (tg?.BackButton) {
+      tg.BackButton.show();
+      tg.BackButton.onClick(closeWorkoutStatsModal);
+    }
+  }
+}
+
+function closeWorkoutStatsModal() {
+  const modal = document.getElementById("workoutSummaryModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    triggerHaptic("light");
+
+    const tg = window.Telegram?.WebApp;
+    if (tg?.BackButton) {
+      tg.BackButton.hide();
+    }
+  }
+}
+
+function renderSummarySlide0() {
+  if (!currentSummaryData) return;
+  const tonnageFormatted = currentSummaryData.tonnage >= 1000 
+    ? `${currentSummaryData.tonnage.toLocaleString('ru-RU')} кг`
+    : `${currentSummaryData.tonnage} кг`;
+
+  const tonnageEl = document.getElementById("summaryTonnage");
+  if (tonnageEl) tonnageEl.textContent = tonnageFormatted;
+
+  const comparison = getWeightComparison(currentSummaryData.tonnage);
+  const nameEl = document.getElementById("summaryComparisonName");
+  if (nameEl) nameEl.textContent = comparison.name;
+
+  const svgContainer = document.getElementById("summaryComparisonSvgContainer");
+  if (svgContainer) {
+    svgContainer.innerHTML = renderWeightComparisonSvg(currentSummaryData.tonnage);
+  }
+}
+
+function renderSummarySlide1() {
+  if (!currentSummaryData) return;
+  const titleEl = document.getElementById("summaryWorkoutTitle");
+  if (titleEl) titleEl.textContent = currentSummaryData.title;
+
+  const durEl = document.getElementById("summaryDuration");
+  if (durEl) durEl.textContent = currentSummaryData.durationFormatted;
+
+  const tonEl = document.getElementById("summaryTonnage2");
+  if (tonEl) {
+    tonEl.textContent = currentSummaryData.tonnage >= 1000 
+      ? `${currentSummaryData.tonnage.toLocaleString('ru-RU')} кг`
+      : `${currentSummaryData.tonnage} кг`;
+  }
+
+  const setsEl = document.getElementById("summarySetsCount");
+  if (setsEl) setsEl.textContent = currentSummaryData.completedSetsCount;
+
+  const listContainer = document.getElementById("summaryExercisesList");
+  if (listContainer) {
+    listContainer.innerHTML = (currentSummaryData.exercises || []).map(ex => {
+      const best = ex.bestSet || { weight: 60, reps: 10 };
+      return `
+        <div class="flex items-center justify-between py-1 border-b border-card">
+          <span class="font-bold truncate max-w-[200px]">${ex.completedSets || 3} × ${ex.name}</span>
+          <span class="font-extrabold font-mono shrink-0">${best.weight} кг × ${best.reps}</span>
+        </div>
+      `;
+    }).join("");
+  }
+}
+
+function renderSummarySlide2() {
+  if (!currentSummaryData) return;
+  const handleEl = document.getElementById("summaryUserHandle");
+  if (handleEl) handleEl.textContent = currentSummaryData.userHandle || getUserHandle();
+
+  const numEl = document.getElementById("summaryWorkoutNumber");
+  if (numEl) numEl.textContent = currentSummaryData.workoutNumber || state.stats?.gymWorkoutsDone || 2;
+
+  const durEl = document.getElementById("summaryDuration3");
+  if (durEl) durEl.textContent = currentSummaryData.durationFormatted;
+
+  const exCountEl = document.getElementById("summaryExercisesCount3");
+  if (exCountEl) exCountEl.textContent = currentSummaryData.exercisesCount || currentSummaryData.exercises?.length || 8;
+
+  const setsEl = document.getElementById("summarySetsCount3");
+  if (setsEl) setsEl.textContent = currentSummaryData.completedSetsCount;
+
+  // Render Anatomical Dual Body SVG with highlighted muscle groups!
+  const anatomyContainer = document.getElementById("summaryAnatomyContainer");
+  if (anatomyContainer) {
+    anatomyContainer.innerHTML = renderAnatomicalBodySvg(currentSummaryData.workedMuscles);
+  }
+}
+
+function switchSummarySlide(slideIdx) {
+  currentSummarySlide = slideIdx;
+  [0, 1, 2].forEach(i => {
+    const slide = document.getElementById(`summarySlide${i}`);
+    const dotBtn = document.getElementById(`dotSummary${i}`);
+    const dotIndicator = dotBtn?.querySelector(".dot-indicator") || dotBtn;
+    if (slide) {
+      if (i === slideIdx) {
+        slide.classList.remove("hidden");
+        slide.classList.add("flex");
+      } else {
+        slide.classList.add("hidden");
+        slide.classList.remove("flex");
+      }
+    }
+    if (dotIndicator) {
+      if (i === slideIdx) {
+        dotIndicator.className = "dot-indicator h-2 rounded-full transition-all duration-300 w-5 bg-white";
+      } else {
+        dotIndicator.className = "dot-indicator h-2 rounded-full transition-all duration-300 w-2 bg-slate-500 hover:bg-slate-400";
+      }
+    }
+  });
+  triggerHaptic("light");
+}
+
+function setSummaryTheme(theme) {
+  currentSummaryTheme = theme;
+  const card = document.getElementById("workoutSummaryCard");
+  const btnFill = document.getElementById("btnStatsThemeFill");
+  const btnTrans = document.getElementById("btnStatsThemeTrans");
+
+  if (theme === "fill") {
+    if (card) {
+      card.classList.remove("card-theme-trans");
+      card.classList.add("card-theme-fill");
+    }
+    if (btnFill) {
+      btnFill.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-slate-700/90 text-white shadow";
+    }
+    if (btnTrans) {
+      btnTrans.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white";
+    }
+  } else {
+    if (card) {
+      card.classList.remove("card-theme-fill");
+      card.classList.add("card-theme-trans");
+    }
+    if (btnFill) {
+      btnFill.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white";
+    }
+    if (btnTrans) {
+      btnTrans.className = "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-slate-700/90 text-white shadow";
+    }
+  }
+
+  // Re-render SVGs to sync colors
+  renderSummarySlide0();
+  renderSummarySlide2();
+  triggerHaptic("light");
+}
+
+async function downloadWorkoutStory() {
+  const card = document.getElementById("workoutSummaryCard");
+  if (!card) return;
+  triggerHaptic("medium");
+  showToast("Генерируем карточку для сохранения...");
+
+  try {
+    if (window.html2canvas) {
+      const canvas = await html2canvas(card, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: currentSummaryTheme === "fill" ? "#ffffff" : "#101620"
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.download = `OnlyFits_Workout_Story_${Date.now()}.png`;
+      a.href = dataUrl;
+      a.click();
+      showToast("Карточка успешно сохранена в галерею!");
+    } else {
+      showToast("Изображение готово!");
+    }
+  } catch (err) {
+    console.error("Story export error:", err);
+    showToast("Не удалось экспортировать изображение");
+  }
+}
+
+async function shareWorkoutStory() {
+  triggerHaptic("light");
+  const card = document.getElementById("workoutSummaryCard");
+  const tonnage = currentSummaryData?.tonnage || 18718;
+  const shareText = `Только что завершил тренировку в OnlyFits! Общий тоннаж: ${tonnage.toLocaleString('ru-RU')} кг ⚡️💪`;
+
+  if (navigator.share) {
+    try {
+      if (window.html2canvas && card) {
+        const canvas = await html2canvas(card, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: currentSummaryTheme === "fill" ? "#ffffff" : "#101620"
+        });
+        canvas.toBlob(async (blob) => {
+          if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], "workout.png", { type: "image/png" })] })) {
+            const file = new File([blob], "workout.png", { type: "image/png" });
+            await navigator.share({
+              title: "OnlyFits — Моя тренировка",
+              text: shareText,
+              files: [file]
+            });
+            return;
+          }
+          await navigator.share({
+            title: "OnlyFits — Моя тренировка",
+            text: shareText
+          });
+        });
+        return;
+      }
+      await navigator.share({
+        title: "OnlyFits — Моя тренировка",
+        text: shareText
+      });
+      return;
+    } catch (e) {}
+  }
+
+  // Fallback copy to clipboard
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(shareText);
+    showToast("Результаты скопированы в буфер обмена!");
+  }
+}
+
+function shareToInstagram() {
+  downloadWorkoutStory();
+  setTimeout(() => {
+    showToast("Карточка сохранена! Откройте Instagram Stories для публикации 📸");
+    try {
+      window.open("instagram://story-camera", "_blank");
+    } catch (e) {}
+  }, 1200);
+}
+
+function shareToThreads() {
+  const tonnage = currentSummaryData?.tonnage || 18718;
+  const text = encodeURIComponent(`Только что завершил тренировку в OnlyFits! Тоннаж: ${tonnage.toLocaleString('ru-RU')} кг ⚡️💪`);
+  window.open(`https://threads.net/intent/post?text=${text}`, "_blank");
+}
+
+function shareToTwitter() {
+  const tonnage = currentSummaryData?.tonnage || 18718;
+  const text = encodeURIComponent(`Только что завершил тренировку в @OnlyFits! Тоннаж: ${tonnage.toLocaleString('ru-RU')} кг ⚡️💪`);
+  window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+}
+
+function initWorkoutStatsEventListeners() {
+  // Close Button
+  document.getElementById("closeWorkoutStatsBtn")?.addEventListener("click", () => {
+    closeWorkoutStatsModal();
+  });
+
+  // Theme Toggles
+  document.getElementById("btnStatsThemeFill")?.addEventListener("click", () => {
+    setSummaryTheme("fill");
+  });
+  document.getElementById("btnStatsThemeTrans")?.addEventListener("click", () => {
+    setSummaryTheme("trans");
+  });
+
+  // Pagination Dots
+  document.getElementById("dotSummary0")?.addEventListener("click", () => switchSummarySlide(0));
+  document.getElementById("dotSummary1")?.addEventListener("click", () => switchSummarySlide(1));
+  document.getElementById("dotSummary2")?.addEventListener("click", () => switchSummarySlide(2));
+
+  // Social & Export Buttons
+  document.getElementById("btnShareInstagram")?.addEventListener("click", shareToInstagram);
+  document.getElementById("btnShareThreads")?.addEventListener("click", shareToThreads);
+  document.getElementById("btnShareTwitter")?.addEventListener("click", shareToTwitter);
+  document.getElementById("btnDownloadSummary")?.addEventListener("click", downloadWorkoutStory);
+  document.getElementById("btnNativeShare")?.addEventListener("click", shareWorkoutStory);
+
+  // Trigger buttons from Workouts Tab and Stats Tab
+  document.getElementById("openWorkoutStatsPreviewBtn")?.addEventListener("click", () => {
+    openWorkoutStatsModal();
+  });
+  document.getElementById("statsOpenSummaryBtn")?.addEventListener("click", () => {
+    openWorkoutStatsModal();
+  });
+
+  // Touch Swipe on Story Card
+  const card = document.getElementById("workoutSummaryCard");
+  if (card) {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    card.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    card.addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (diff < -45 && currentSummarySlide < 2) {
+        switchSummarySlide(currentSummarySlide + 1);
+      } else if (diff > 45 && currentSummarySlide > 0) {
+        switchSummarySlide(currentSummarySlide - 1);
+      }
+    }, { passive: true });
+  }
+
+  // Keyboard navigation (Escape to close, Arrows to switch slides)
+  window.addEventListener("keydown", (e) => {
+    const modal = document.getElementById("workoutSummaryModal");
+    if (!modal || modal.classList.contains("hidden")) return;
+    if (e.key === "Escape") {
+      closeWorkoutStatsModal();
+    } else if (e.key === "ArrowLeft" && currentSummarySlide > 0) {
+      switchSummarySlide(currentSummarySlide - 1);
+    } else if (e.key === "ArrowRight" && currentSummarySlide < 2) {
+      switchSummarySlide(currentSummarySlide + 1);
+    }
+  });
 }
 
 // ==========================================

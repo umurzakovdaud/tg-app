@@ -41,6 +41,9 @@
   <!-- Tesseract.js OCR for Workout Screenshot Recognition -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   
+  <!-- HTML2Canvas for Story Export & Sharing -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-of-bg text-slate-100 antialiased min-h-screen flex flex-col font-sans select-none pb-28">
@@ -413,6 +416,12 @@
           <span>Начать тренировку</span>
         </button>
 
+        <!-- Button: Итоги тренировки (Story) -->
+        <button id="openWorkoutStatsPreviewBtn" class="w-full mt-2 py-3 rounded-full bg-of-subcard hover:bg-of-card border border-of-border text-slate-300 hover:text-white font-bold text-xs transition active:scale-98 flex items-center justify-center gap-2">
+          <i data-lucide="share-2" class="w-4 h-4 text-of-blue"></i>
+          <span>Итоги тренировки (Story)</span>
+        </button>
+
         <!-- Carousel Pagination Dots -->
         <div class="flex items-center justify-center gap-2 pt-1" id="workoutCarouselDots">
           <button class="w-2 h-2 rounded-full bg-slate-600 transition" data-idx="0"></button>
@@ -545,6 +554,20 @@
           </div>
         </div>
       </div>
+
+      <!-- Story Share Banner -->
+      <button id="statsOpenSummaryBtn" class="w-full py-3.5 px-4 rounded-3xl bg-gradient-to-r from-of-card to-of-subcard border border-of-border hover:border-of-blue/50 text-white font-bold text-xs transition active:scale-98 flex items-center justify-between shadow-lg group">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-of-blue/15 flex items-center justify-center text-of-blue">
+            <i data-lucide="share-2" class="w-4 h-4"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-xs font-black text-white group-hover:text-of-blue transition">Итоги тренировки (Story)</div>
+            <div class="text-[10px] text-slate-400">Тоннаж, таблица сетов и карта мышц</div>
+          </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-white transition"></i>
+      </button>
 
       <!-- Карточка 2: Активность (Screenshot 1) -->
       <div class="bg-of-card p-4 rounded-3xl border border-of-border/70 space-y-3">
@@ -856,6 +879,213 @@
         Завершить тренировку
       </button>
     </div>
+  </div>
+
+
+  <!-- ======================================================== -->
+  <!-- WORKOUT SUMMARY & STORY STATS MODAL (OnlyFits 3 Slides)  -->
+  <!-- ======================================================== -->
+  <div id="workoutSummaryModal" class="fixed inset-0 z-50 bg-[#0d131f]/95 backdrop-blur-xl hidden flex flex-col justify-between items-center py-4 px-3 sm:px-6 overflow-y-auto animate-fade-in select-none">
+    
+    <!-- Top Bar with Close & Header -->
+    <div class="w-full max-w-md relative flex flex-col items-center pt-1 pb-1">
+      <!-- Close Button (Top Right) -->
+      <button id="closeWorkoutStatsBtn" class="absolute right-0 top-0 w-9 h-9 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700/60 transition active:scale-95 shadow-md">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Center Title -->
+      <h2 class="text-xl sm:text-2xl font-black text-white text-center tracking-tight">Отличная работа!</h2>
+      <p class="text-xs sm:text-sm text-slate-400 text-center mt-0.5">Не забудь поделиться результатами</p>
+
+      <!-- Pill Theme Switcher: [ Заливка | Прозрачный ] -->
+      <div class="inline-flex p-1 rounded-full bg-slate-900/90 border border-slate-700/70 mt-3 shadow-inner">
+        <button id="btnStatsThemeFill" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 bg-slate-700/90 text-white shadow">
+          Заливка
+        </button>
+        <button id="btnStatsThemeTrans" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 text-slate-400 hover:text-white">
+          Прозрачный
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Card Container (Slides 1, 2, 3) -->
+    <div class="w-full max-w-[340px] sm:max-w-[360px] my-auto py-2">
+      <div id="workoutSummaryCard" class="card-theme-fill rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 transition-all duration-300 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[470px] sm:min-h-[500px]">
+        
+        <!-- Slide 1: Tonnage & Comparison Illustration -->
+        <div id="summarySlide0" class="summary-slide flex flex-col justify-between h-full space-y-3">
+          <!-- Logo -->
+          <div class="flex items-center justify-center gap-2 pt-1">
+            <svg class="w-6 h-6 icon-card" viewBox="0 0 40 40" fill="currentColor">
+              <path d="M 20 6 C 18 6 16 7 14 8 C 11 4 7 4 5 7 C 4 10 7 13 9 15 C 6 17 5 21 6 25 C 7 29 10 32 14 34 C 17 35 23 35 26 34 C 30 32 33 29 34 25 C 35 21 34 17 31 15 C 33 13 36 10 35 7 C 33 4 29 4 26 8 C 24 7 22 6 20 6 Z M 13 14 C 14 11 17 10 20 10 C 23 10 26 11 27 14 C 28 17 29 20 27 23 C 25 26 23 27 20 27 C 17 27 15 26 13 23 C 11 20 12 17 13 14 Z M 15 20 A 1.5 1.5 0 1 0 15 19.9 Z M 25 20 A 1.5 1.5 0 1 0 25 19.9 Z M 18 25 C 19 26 21 26 22 25 Z"/>
+            </svg>
+            <span class="text-base font-black tracking-wider text-card-main uppercase">ONLYFITS</span>
+          </div>
+
+          <!-- Weight Heading -->
+          <div class="text-center pt-1">
+            <div class="text-xs sm:text-sm text-card-sub font-medium">Общий поднятый вес за тренировку</div>
+            <div id="summaryTonnage" class="text-2xl sm:text-3xl font-black text-card-main tracking-tight mt-0.5">18 718 кг</div>
+          </div>
+
+          <!-- Comparison Illustration (Jet or other vehicle) -->
+          <div id="summaryComparisonSvgContainer" class="flex-1 flex items-center justify-center py-1">
+            <!-- Dynamic SVG inserted here -->
+          </div>
+
+          <!-- Comparison Text -->
+          <div class="text-center pb-1">
+            <div class="text-[11px] sm:text-xs text-card-sub font-medium">Примерно столько весит</div>
+            <div id="summaryComparisonName" class="text-base sm:text-lg font-black text-card-main tracking-tight mt-0.5">Бизнес-джет</div>
+          </div>
+        </div>
+
+        <!-- Slide 2: Exercise Table & Best Sets -->
+        <div id="summarySlide1" class="summary-slide hidden flex-col justify-between h-full space-y-2.5">
+          <!-- Top Row -->
+          <div>
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 icon-card" viewBox="0 0 40 40" fill="currentColor">
+                <path d="M 20 6 C 18 6 16 7 14 8 C 11 4 7 4 5 7 C 4 10 7 13 9 15 C 6 17 5 21 6 25 C 7 29 10 32 14 34 C 17 35 23 35 26 34 C 30 32 33 29 34 25 C 35 21 34 17 31 15 C 33 13 36 10 35 7 C 33 4 29 4 26 8 C 24 7 22 6 20 6 Z M 13 14 C 14 11 17 10 20 10 C 23 10 26 11 27 14 C 28 17 29 20 27 23 C 25 26 23 27 20 27 C 17 27 15 26 13 23 C 11 20 12 17 13 14 Z M 15 20 A 1.5 1.5 0 1 0 15 19.9 Z M 25 20 A 1.5 1.5 0 1 0 25 19.9 Z M 18 25 C 19 26 21 26 22 25 Z"/>
+              </svg>
+              <span class="text-sm font-black tracking-wider text-card-main uppercase">ONLYFITS</span>
+            </div>
+            <div id="summaryWorkoutTitle" class="text-sm sm:text-base font-extrabold text-card-main mt-1">Верх/низ, Низ А</div>
+
+            <!-- Stats row -->
+            <div class="flex items-center gap-4 text-xs font-bold text-card-main mt-2 border-b border-card pb-2">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-card-sub"></i>
+                <span id="summaryDuration">01:48</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="dumbbell" class="w-3.5 h-3.5 text-card-sub"></i>
+                <span id="summaryTonnage2">18 718 кг</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="repeat" class="w-3.5 h-3.5 text-card-sub"></i>
+                <span id="summarySetsCount">27</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exercises Table -->
+          <div class="flex-1 overflow-y-auto no-scrollbar space-y-2 py-1 max-h-[260px]">
+            <div class="flex items-center justify-between text-[11px] font-bold text-card-sub uppercase tracking-wider px-1">
+              <span>Упражнения</span>
+              <span>Лучший сет</span>
+            </div>
+            <div id="summaryExercisesList" class="space-y-1.5 text-xs text-card-main">
+              <!-- Dynamically rendered exercise rows -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Muscle Anatomy Diagram & Metrics -->
+        <div id="summarySlide2" class="summary-slide hidden flex-col justify-between h-full space-y-1.5">
+          <!-- Top Row: Logo + Handle on Left, Workout # on Right -->
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <svg class="w-5 h-5 icon-card" viewBox="0 0 40 40" fill="currentColor">
+                  <path d="M 20 6 C 18 6 16 7 14 8 C 11 4 7 4 5 7 C 4 10 7 13 9 15 C 6 17 5 21 6 25 C 7 29 10 32 14 34 C 17 35 23 35 26 34 C 30 32 33 29 34 25 C 35 21 34 17 31 15 C 33 13 36 10 35 7 C 33 4 29 4 26 8 C 24 7 22 6 20 6 Z M 13 14 C 14 11 17 10 20 10 C 23 10 26 11 27 14 C 28 17 29 20 27 23 C 25 26 23 27 20 27 C 17 27 15 26 13 23 C 11 20 12 17 13 14 Z M 15 20 A 1.5 1.5 0 1 0 15 19.9 Z M 25 20 A 1.5 1.5 0 1 0 25 19.9 Z M 18 25 C 19 26 21 26 22 25 Z"/>
+                </svg>
+                <span class="text-sm font-black tracking-wider text-card-main uppercase">ONLYFITS</span>
+              </div>
+              <div id="summaryUserHandle" class="text-[11px] font-semibold text-card-sub mt-0.5">@daud.umurzakov</div>
+            </div>
+            <div class="text-right">
+              <div id="summaryWorkoutNumber" class="text-2xl sm:text-3xl font-black text-card-main leading-none">2</div>
+              <div class="text-[10px] font-bold text-card-sub uppercase tracking-wider mt-0.5">Тренировка</div>
+            </div>
+          </div>
+
+          <!-- Center: Dual Anatomical Body Diagram (Front & Back) -->
+          <div class="flex-1 flex items-center justify-center py-1 overflow-hidden" id="summaryAnatomyContainer">
+            <!-- Anatomical Dual Body SVG will be placed here -->
+          </div>
+
+          <!-- Bottom: 3-column stats -->
+          <div class="grid grid-cols-3 text-center border-t border-card pt-2 mt-auto">
+            <div>
+              <div class="text-[10px] text-card-sub font-medium">Длительность</div>
+              <div id="summaryDuration3" class="text-sm sm:text-base font-black text-card-main mt-0.5">01:48</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-card-sub font-medium">Упражнения</div>
+              <div id="summaryExercisesCount3" class="text-sm sm:text-base font-black text-card-main mt-0.5">8</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-card-sub font-medium">Подходы</div>
+              <div id="summarySetsCount3" class="text-sm sm:text-base font-black text-card-main mt-0.5">27</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom Controls: Pagination Dots & Action Buttons -->
+    <div class="w-full max-w-md flex flex-col items-center space-y-3 pb-2">
+      <!-- 3 Pagination Dots (Accessible Touch Targets) -->
+      <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/60 shadow-md">
+        <button id="dotSummary0" class="p-1.5 flex items-center justify-center focus:outline-none" aria-label="Слайд 1: Тоннаж">
+          <span class="dot-indicator h-2 rounded-full transition-all duration-300 w-5 bg-white"></span>
+        </button>
+        <button id="dotSummary1" class="p-1.5 flex items-center justify-center focus:outline-none" aria-label="Слайд 2: Упражнения">
+          <span class="dot-indicator h-2 rounded-full transition-all duration-300 w-2 bg-slate-500 hover:bg-slate-400"></span>
+        </button>
+        <button id="dotSummary2" class="p-1.5 flex items-center justify-center focus:outline-none" aria-label="Слайд 3: Мышцы">
+          <span class="dot-indicator h-2 rounded-full transition-all duration-300 w-2 bg-slate-500 hover:bg-slate-400"></span>
+        </button>
+      </div>
+
+      <!-- 5 Social & Action Buttons -->
+      <div class="flex items-center justify-center gap-3 sm:gap-4">
+        <!-- 1. Instagram -->
+        <button id="btnShareInstagram" class="w-12 h-12 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95 shadow-md" title="Instagram">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current stroke-2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </button>
+
+        <!-- 2. Threads -->
+        <button id="btnShareThreads" class="w-12 h-12 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95 shadow-md" title="Threads">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current">
+            <path d="M12.001 2C6.48 2 2 6.48 2 12s4.48 10 10.001 10c2.47 0 4.74-.9 6.49-2.4l-1.38-1.48c-1.39 1.18-3.19 1.88-5.11 1.88-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8c0 2.21-.8 4.22-2.12 5.54-1.12 1.12-2.58 1.46-3.88 1.46-2.14 0-4-1.42-4-4 0-2.36 1.86-4 4-4 .93 0 1.77.34 2.45.89.28-.62.55-1.55.55-2.89 0-3.31-2.69-6-6-6zm0 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+        </button>
+
+        <!-- 3. X (Twitter) -->
+        <button id="btnShareTwitter" class="w-12 h-12 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95 shadow-md" title="X (Twitter)">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </button>
+
+        <!-- 4. Download Card -->
+        <button id="btnDownloadSummary" class="w-12 h-12 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95 shadow-md" title="Скачать карточку">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current stroke-2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+
+        <!-- 5. Native Share -->
+        <button id="btnNativeShare" class="w-12 h-12 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95 shadow-md" title="Поделиться">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current stroke-2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+            <polyline points="16 6 12 2 8 6"></polyline>
+            <line x1="12" y1="2" x2="12" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
   </div>
 
 

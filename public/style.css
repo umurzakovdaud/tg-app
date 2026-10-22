@@ -86,3 +86,116 @@ input[type="checkbox"] {
 .radar-animate {
   animation: radarPulse 4s ease-in-out infinite;
 }
+
+/* ======================================================== */
+/* WORKOUT STORY CARD & MUSCLE ANATOMY STYLES               */
+/* ======================================================== */
+
+.card-theme-fill {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+.card-theme-fill .text-card-sub {
+  color: #64748b !important;
+}
+.card-theme-fill .text-card-main {
+  color: #0f172a !important;
+}
+.card-theme-fill .border-card {
+  border-color: #f1f5f9 !important;
+}
+.card-theme-fill .icon-card {
+  color: #0f172a !important;
+}
+
+.card-theme-trans {
+  background: rgba(25, 34, 47, 0.76) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.card-theme-trans .text-card-sub {
+  color: #94a3b8 !important;
+}
+.card-theme-trans .text-card-main {
+  color: #ffffff !important;
+}
+.card-theme-trans .border-card {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.card-theme-trans .icon-card {
+  color: #ffffff !important;
+}
+
+/* Anatomical Muscle Styles */
+.anatomy-svg {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
+}
+.body-contour-line {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none !important;
+}
+.muscle-part {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* Fill theme (White Card) */
+.card-theme-fill .muscle-inactive {
+  fill: #ffffff !important;
+  stroke: #18181b !important;
+  stroke-width: 1.8 !important;
+}
+.card-theme-fill .muscle-active {
+  fill: #787d77 !important;
+  stroke: #18181b !important;
+  stroke-width: 1.8 !important;
+}
+.card-theme-fill .body-contour-line {
+  stroke: #18181b !important;
+  stroke-width: 1.8 !important;
+}
+
+/* Transparent theme (Dark Glass Card) */
+.card-theme-trans .muscle-inactive {
+  fill: rgba(255, 255, 255, 0.05) !important;
+  stroke: rgba(255, 255, 255, 0.45) !important;
+  stroke-width: 1.8 !important;
+}
+.card-theme-trans .muscle-active {
+  fill: #38bdf8 !important;
+  stroke: #e2e8f0 !important;
+  stroke-width: 2 !important;
+}
+.card-theme-trans .body-contour-line {
+  stroke: rgba(255, 255, 255, 0.5) !important;
+  stroke-width: 1.8 !important;
+}
+
+/* Vehicle Silhouette in Fill vs Transparent */
+.card-theme-fill .vehicle-fill {
+  fill: #0f172a !important;
+  color: #0f172a !important;
+}
+.card-theme-fill .vehicle-stroke {
+  stroke: #0f172a !important;
+}
+.card-theme-fill .vehicle-cutout {
+  fill: #ffffff !important;
+}
+
+.card-theme-trans .vehicle-fill {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+.card-theme-trans .vehicle-stroke {
+  stroke: #ffffff !important;
+}
+.card-theme-trans .vehicle-cutout {
+  fill: #19222f !important;
+}
