@@ -593,12 +593,153 @@ const EXERCISES_DB = [
 ];
 
 // ==========================================
-// 2. Programs Catalog (Upper/Lower Split)
+// 2. Programs Catalog (Split, Push/Pull, Upper/Lower, Full Body)
 // ==========================================
 const PROGRAMS = {
+  classic_split_3: {
+    id: "classic_split_3",
+    type: "split",
+    categoryTitle: "Сплит",
+    title: "Сплит",
+    fullTitle: "Классический сплит (3 дня)",
+    daysPerWeek: 3,
+    days: [
+      {
+        dayNum: 1,
+        title: "Грудь и Трицепс",
+        subtitle: "Жимовая группа, верх груди и трицепс",
+        durationMin: 65,
+        exercises: ["ex_chest_1", "ex_chest_2", "ex_chest_4", "ex_arms_2", "ex_arms_4", "ex_core_1"]
+      },
+      {
+        dayNum: 2,
+        title: "Спина и Бицепс",
+        subtitle: "Широчайшие, толщина спины и бицепс",
+        durationMin: 65,
+        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_arms_1", "ex_arms_3", "ex_core_3"]
+      },
+      {
+        dayNum: 3,
+        title: "Ноги и Плечи",
+        subtitle: "Приседания, квадрицепс, дельты и икры",
+        durationMin: 70,
+        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_shoulders_1", "ex_shoulders_2", "ex_legs_7"]
+      }
+    ]
+  },
+  classic_split_4: {
+    id: "classic_split_4",
+    type: "split",
+    categoryTitle: "Сплит",
+    title: "Сплит 4D",
+    fullTitle: "Сплит по мышечным группам (4 дня)",
+    daysPerWeek: 4,
+    days: [
+      {
+        dayNum: 1,
+        title: "Грудь и Пресс",
+        subtitle: "Горизонтальный и наклонный жим, брусья, сведение",
+        durationMin: 60,
+        exercises: ["ex_chest_1", "ex_chest_2", "ex_chest_3", "ex_chest_4", "ex_core_1", "ex_core_2"]
+      },
+      {
+        dayNum: 2,
+        title: "Спина и Задняя дельта",
+        subtitle: "Подтягивания, тяга штанги, тяга блока, Face Pulls",
+        durationMin: 65,
+        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_back_4", "ex_shoulders_3", "ex_core_3"]
+      },
+      {
+        dayNum: 3,
+        title: "Плечи и Руки",
+        subtitle: "Жим сидя, махи в стороны, бицепс и трицепс",
+        durationMin: 60,
+        exercises: ["ex_shoulders_1", "ex_shoulders_2", "ex_arms_1", "ex_arms_2", "ex_arms_3", "ex_arms_4"]
+      },
+      {
+        dayNum: 4,
+        title: "Ноги и Икры",
+        subtitle: "Приседания со штангой, жим платформы, румынская тяга",
+        durationMin: 65,
+        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_legs_5", "ex_legs_6", "ex_legs_7"]
+      }
+    ]
+  },
+  push_pull_legs: {
+    id: "push_pull_legs",
+    type: "push_pull",
+    categoryTitle: "Тяни/Толкай",
+    title: "Тяни/толкай",
+    fullTitle: "Тяни / Толкай / Ноги (3 дня)",
+    daysPerWeek: 3,
+    days: [
+      {
+        dayNum: 1,
+        title: "Толкай (Push)",
+        subtitle: "Грудь, передняя и средняя дельта, трицепс",
+        durationMin: 60,
+        exercises: ["ex_chest_1", "ex_chest_2", "ex_shoulders_1", "ex_shoulders_2", "ex_arms_4"]
+      },
+      {
+        dayNum: 2,
+        title: "Тяни (Pull)",
+        subtitle: "Спина, задняя дельта, бицепс",
+        durationMin: 60,
+        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_shoulders_3", "ex_arms_1", "ex_arms_3"]
+      },
+      {
+        dayNum: 3,
+        title: "Ноги (Legs)",
+        subtitle: "Квадрицепсы, бицепс бедра, голень, кор",
+        durationMin: 65,
+        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_legs_5", "ex_legs_7", "ex_core_1"]
+      }
+    ]
+  },
+  push_pull_4: {
+    id: "push_pull_4",
+    type: "push_pull",
+    categoryTitle: "Тяни/Толкай",
+    title: "Тяни/толкай 4D",
+    fullTitle: "Тяни / Толкай (4 дня)",
+    daysPerWeek: 4,
+    days: [
+      {
+        dayNum: 1,
+        title: "Толкай A (Силовой жим)",
+        subtitle: "Тяжелый жим лежа, брусья, плечи и трицепс",
+        durationMin: 60,
+        exercises: ["ex_chest_1", "ex_chest_3", "ex_shoulders_1", "ex_arms_2", "ex_core_1"]
+      },
+      {
+        dayNum: 2,
+        title: "Тяни A (Силовая тяга)",
+        subtitle: "Тяжелые подтягивания, тяга штанги, бицепс",
+        durationMin: 60,
+        exercises: ["ex_back_1", "ex_back_2", "ex_shoulders_3", "ex_arms_1", "ex_core_3"]
+      },
+      {
+        dayNum: 3,
+        title: "Толкай B (Объем & Дельты)",
+        subtitle: "Наклонный жим гантелей, кроссовер, махи, блок",
+        durationMin: 65,
+        exercises: ["ex_chest_2", "ex_chest_4", "ex_shoulders_2", "ex_arms_4", "ex_core_2"]
+      },
+      {
+        dayNum: 4,
+        title: "Тяни B (Широчайшие & Ноги)",
+        subtitle: "Верхний блок, румынская тяга, сгибания ног, бицепс",
+        durationMin: 65,
+        exercises: ["ex_back_3", "ex_back_4", "ex_legs_3", "ex_arms_3", "ex_legs_5"]
+      }
+    ]
+  },
   upper_lower_gym_4: {
     id: "upper_lower_gym_4",
+    type: "upper_lower",
+    categoryTitle: "Верх/Низ",
     title: "Верх/низ",
+    fullTitle: "Верх / Низ (4 дня, Зал)",
     daysPerWeek: 4,
     days: [
       {
@@ -633,7 +774,10 @@ const PROGRAMS = {
   },
   upper_lower_gym_3: {
     id: "upper_lower_gym_3",
-    title: "Верх / Низ (3 дня)",
+    type: "upper_lower",
+    categoryTitle: "Верх/Низ",
+    title: "Верх/низ 3D",
+    fullTitle: "Верх / Низ (3 дня, Зал)",
     daysPerWeek: 3,
     days: [
       {
@@ -659,71 +803,117 @@ const PROGRAMS = {
       }
     ]
   },
-  push_pull_legs: {
-    id: "push_pull_legs",
-    title: "Push / Pull / Legs",
+  upper_lower_home_3: {
+    id: "upper_lower_home_3",
+    type: "upper_lower",
+    categoryTitle: "Верх/Низ",
+    title: "Верх/низ Дом",
+    fullTitle: "Верх / Низ (3 дня, Дома)",
     daysPerWeek: 3,
     days: [
       {
         dayNum: 1,
-        title: "Push (Жим)",
-        subtitle: "Грудь, плечи, трицепс",
-        durationMin: 60,
-        exercises: ["ex_chest_1", "ex_chest_2", "ex_shoulders_1", "ex_shoulders_2", "ex_arms_4"]
+        title: "Верх тела (Дом)",
+        subtitle: "Отжимания, тяги с гантелями, дельты",
+        durationMin: 55,
+        exercises: ["ex_chest_2", "ex_back_2", "ex_shoulders_1", "ex_arms_1", "ex_arms_4"]
       },
       {
         dayNum: 2,
-        title: "Pull (Тяга)",
-        subtitle: "Спина, задняя дельта, бицепс",
-        durationMin: 60,
-        exercises: ["ex_back_1", "ex_back_2", "ex_back_3", "ex_shoulders_3", "ex_arms_1"]
+        title: "Низ тела (Дом)",
+        subtitle: "Приседания, выпады, пресс",
+        durationMin: 50,
+        exercises: ["ex_legs_1", "ex_legs_4", "ex_legs_3", "ex_core_1", "ex_core_2"]
       },
       {
         dayNum: 3,
-        title: "Legs (Ноги)",
-        subtitle: "Квадрицепсы, бицепс бедра, икры",
-        durationMin: 65,
-        exercises: ["ex_legs_1", "ex_legs_2", "ex_legs_3", "ex_legs_7", "ex_core_1"]
+        title: "Верх B (Дом)",
+        subtitle: "Плечи, спина, отжимания на брусьях",
+        durationMin: 55,
+        exercises: ["ex_chest_3", "ex_shoulders_2", "ex_back_1", "ex_arms_3"]
       }
     ]
   },
   full_body: {
     id: "full_body",
-    title: "Full Body (3 дня)",
+    type: "full_body",
+    categoryTitle: "Фуллбоди",
+    title: "Фуллбоди",
+    fullTitle: "Фуллбоди (3 дня, Все тело)",
     daysPerWeek: 3,
     days: [
       {
         dayNum: 1,
         title: "Full Body A",
-        subtitle: "Грудь, спина, квадрицепс, руки",
-        durationMin: 60,
+        subtitle: "Приседания, жим штанги, тяга в наклоне, плечи",
+        durationMin: 65,
         exercises: ["ex_legs_1", "ex_chest_1", "ex_back_2", "ex_shoulders_2", "ex_arms_1"]
       },
       {
         dayNum: 2,
         title: "Full Body B",
-        subtitle: "Бицепс бедра, плечи, спина",
+        subtitle: "Бицепс бедра, наклонный жим, верхний блок, трицепс",
         durationMin: 60,
         exercises: ["ex_legs_3", "ex_chest_2", "ex_back_3", "ex_shoulders_1", "ex_arms_4"]
       },
       {
         dayNum: 3,
         title: "Full Body C",
-        subtitle: "Выпады, брусья, подтягивания, пресс",
+        subtitle: "Выпады, подтягивания, брусья, молотки, пресс",
         durationMin: 60,
         exercises: ["ex_legs_4", "ex_chest_3", "ex_back_1", "ex_arms_3", "ex_core_1"]
+      }
+    ]
+  },
+  full_body_start_2: {
+    id: "full_body_start_2",
+    type: "full_body",
+    categoryTitle: "Фуллбоди",
+    title: "Фуллбоди Экспресс",
+    fullTitle: "Фуллбоди Экспресс (2 дня)",
+    daysPerWeek: 2,
+    days: [
+      {
+        dayNum: 1,
+        title: "Full Body 1 (Сила)",
+        subtitle: "Приседания, жим лежа, тяга в наклоне, пресс",
+        durationMin: 50,
+        exercises: ["ex_legs_1", "ex_chest_1", "ex_back_2", "ex_shoulders_1", "ex_core_1"]
+      },
+      {
+        dayNum: 2,
+        title: "Full Body 2 (Тонус)",
+        subtitle: "Жим ногами, наклонный жим, подтягивания, руки",
+        durationMin: 50,
+        exercises: ["ex_legs_2", "ex_chest_2", "ex_back_1", "ex_arms_1", "ex_arms_4", "ex_core_2"]
       }
     ]
   }
 };
 
 // ==========================================
-// 3. Application State
+// 3. Application State & Storage
 // ==========================================
 const state = {
   currentTab: "tab-home",
+  isRegistered: false,
+  user: {
+    id: null,
+    name: "Спортсмен",
+    gender: "male",
+    age: 25,
+    height: 178,
+    initialWeight: 75.0,
+    weight: 75.0,
+    goal: "muscle_gain",
+    split: "upper_lower_gym_4",
+    registeredAt: null,
+    lastSundayWeighed: null
+  },
+  weightHistory: [],
   programId: "upper_lower_gym_4",
-  selectedDayIdx: 2, // Default: "Верх B" (matches Screenshot 5!)
+  level: "expert",
+  selectedDayIdx: 2, // "Верх B" по умолчанию
   stats: {
     gymSets: 53,
     gymWorkoutsDone: 2,
@@ -734,7 +924,7 @@ const state = {
     sleepScore: 63,
     sleepHours: 5,
     sleepMinutes: 46,
-    weight: 77.0,
+    weight: 75.0,
     bodyFat: 14.0,
     weekNumber: 43
   },
@@ -745,7 +935,7 @@ const state = {
     { day: "чт", status: "today", label: "today", sets: 0 },
     { day: "пт", status: "scheduled", label: "next", sets: 0 },
     { day: "сб", status: "scheduled", label: "next", sets: 0 },
-    { day: "вс", status: "scheduled", label: "next", sets: 0 }
+    { day: "вс", status: "sunday", label: "weigh_in", sets: 0 }
   ],
   activeWorkout: null,
   restTimer: {
@@ -756,17 +946,84 @@ const state = {
     secondsElapsed: 0,
     intervalId: null
   },
-  exercisePhaseTimer: null
+  exercisePhaseTimer: null,
+  regCurrentStep: 1,
+  regDraft: {
+    name: "",
+    gender: "male",
+    age: 25,
+    height: 178,
+    initialWeight: 75.0,
+    goal: "muscle_gain",
+    split: "upper_lower_gym_4"
+  }
 };
 
 // ==========================================
-// 4. Initialization & LifeCycle
+// 4. Date & Sunday Helpers
+// ==========================================
+function isSundayToday() {
+  return new Date().getDay() === 0;
+}
+
+function getTodayFormatted() {
+  const d = new Date();
+  return d.toISOString().split("T")[0];
+}
+
+function getNextSundayDate() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = (7 - day) % 7;
+  const target = new Date(d);
+  target.setDate(d.getDate() + (diff === 0 ? 7 : diff));
+  return target;
+}
+
+function getNextSundayFormatted() {
+  const target = getNextSundayDate();
+  const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+  return `${target.getDate()} ${months[target.getMonth()]}`;
+}
+
+function formatDateRu(dateStr) {
+  if (!dateStr) return "";
+  try {
+    const parts = dateStr.split("-");
+    if (parts.length === 3) {
+      const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+      const mIdx = parseInt(parts[1], 10) - 1;
+      return `${parseInt(parts[2], 10)} ${months[mIdx] || parts[1]}`;
+    }
+  } catch (e) {}
+  return dateStr;
+}
+
+// ==========================================
+// 5. Initialization & LifeCycle
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   initTelegram();
+  loadCustomExercises();
+  loadCustomPrograms();
   loadSavedState();
   initEvents();
   renderAll();
+
+  // Проверка регистрации: если пользователь новый — открываем онбординг
+  setTimeout(() => {
+    checkRegistration();
+  }, 150);
+
+  // Проверка параметра импорта программы по ссылке или из Telegram бота (?import_custom=1)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("import_custom") === "1") {
+      setTimeout(() => {
+        openCustomProgramModal();
+      }, 250);
+    }
+  } catch (e) {}
 });
 
 function initTelegram() {
@@ -774,6 +1031,17 @@ function initTelegram() {
   if (tg) {
     tg.ready();
     tg.expand();
+
+    // Если есть данные пользователя Telegram
+    const tgUser = tg.initDataUnsafe?.user;
+    if (tgUser) {
+      state.user.id = String(tgUser.id);
+      if (!state.isRegistered && tgUser.first_name) {
+        state.regDraft.name = tgUser.first_name;
+        const nameInput = document.getElementById("regName");
+        if (nameInput) nameInput.value = tgUser.first_name;
+      }
+    }
   }
 }
 
@@ -810,34 +1078,376 @@ function showToast(message) {
   toast.classList.remove("opacity-0", "pointer-events-none");
   setTimeout(() => {
     toast.classList.add("opacity-0", "pointer-events-none");
-  }, 2200);
+  }, 2400);
 }
 
 // LocalStorage helpers
 function loadSavedState() {
   try {
-    const raw = localStorage.getItem("onlyfits_data_v2");
+    const raw = localStorage.getItem("onlyfits_state_v3");
     if (raw) {
       const parsed = JSON.parse(raw);
+      if (parsed.isRegistered !== undefined) state.isRegistered = parsed.isRegistered;
+      if (parsed.user) Object.assign(state.user, parsed.user);
+      if (parsed.weightHistory) state.weightHistory = parsed.weightHistory;
       if (parsed.stats) Object.assign(state.stats, parsed.stats);
-      if (parsed.programId) state.programId = parsed.programId;
+      if (parsed.programId && PROGRAMS[parsed.programId]) state.programId = parsed.programId;
+      if (parsed.level) state.level = parsed.level;
       if (typeof parsed.selectedDayIdx === "number") state.selectedDayIdx = parsed.selectedDayIdx;
     }
   } catch (e) {}
+
+  // Синхронизация актуального веса со статистикой
+  if (state.user.weight) {
+    state.stats.weight = state.user.weight;
+  }
+  if (state.user.split && PROGRAMS[state.user.split]) {
+    state.programId = state.user.split;
+  }
+
+  // Защита от выхода индекса дня за границы выбранной программы
+  const prog = PROGRAMS[state.programId] || PROGRAMS.upper_lower_gym_4;
+  if (state.selectedDayIdx >= prog.days.length || state.selectedDayIdx < 0) {
+    state.selectedDayIdx = 0;
+  }
 }
 
 function saveState() {
   try {
-    localStorage.setItem("onlyfits_data_v2", JSON.stringify({
+    localStorage.setItem("onlyfits_state_v3", JSON.stringify({
+      isRegistered: state.isRegistered,
+      user: state.user,
+      weightHistory: state.weightHistory,
       stats: state.stats,
       programId: state.programId,
+      level: state.level || "expert",
       selectedDayIdx: state.selectedDayIdx
     }));
   } catch (e) {}
 }
 
 // ==========================================
-// 5. Event Binding
+// 6. Registration & Onboarding Engine
+// ==========================================
+function checkRegistration() {
+  if (!state.isRegistered) {
+    openRegistrationModal();
+  }
+}
+
+function openRegistrationModal() {
+  state.regCurrentStep = 1;
+  const modal = document.getElementById("registrationModal");
+  if (!modal) return;
+
+  // Инициализация полей шага 1
+  const nameInput = document.getElementById("regName");
+  if (nameInput) {
+    nameInput.value = state.user.name || state.regDraft.name || "";
+  }
+  document.getElementById("regAge").value = state.user.age || 25;
+  document.getElementById("regHeight").value = state.user.height || 178;
+  document.getElementById("regInitialWeight").value = state.user.initialWeight || 75.0;
+
+  updateRegStepUI();
+  modal.classList.remove("hidden");
+  lucide.createIcons();
+}
+
+function updateRegStepUI() {
+  const step = state.regCurrentStep;
+  document.getElementById("regStepIndicator").textContent = `Шаг ${step} из 3`;
+
+  const s1 = document.getElementById("regStep1");
+  const s2 = document.getElementById("regStep2");
+  const s3 = document.getElementById("regStep3");
+
+  s1.classList.toggle("hidden", step !== 1);
+  s2.classList.toggle("hidden", step !== 2);
+  s3.classList.toggle("hidden", step !== 3);
+
+  const backBtn = document.getElementById("regBackBtn");
+  const nextBtn = document.getElementById("regNextBtn");
+
+  if (step === 1) {
+    backBtn.classList.add("hidden");
+    document.getElementById("regStepTitle").textContent = "Параметры тела";
+    document.getElementById("regStepSubtitle").textContent = "Укажите начальный вес, рост и возраст";
+    nextBtn.innerHTML = `<span>Выбрать программу</span> <i data-lucide="chevron-right" class="w-4 h-4"></i>`;
+  } else if (step === 2) {
+    backBtn.classList.remove("hidden");
+    document.getElementById("regStepTitle").textContent = "Программа тренировок";
+    document.getElementById("regStepSubtitle").textContent = "Выберите программу и главную цель";
+    nextBtn.innerHTML = `<span>Рассчитать план</span> <i data-lucide="chevron-right" class="w-4 h-4"></i>`;
+  } else if (step === 3) {
+    backBtn.classList.remove("hidden");
+    document.getElementById("regStepTitle").textContent = "Персональный план";
+    document.getElementById("regStepSubtitle").textContent = "Все готово к первой тренировке!";
+    nextBtn.innerHTML = `<span>Начать тренировки 🚀</span>`;
+  }
+  lucide.createIcons();
+}
+
+function handleRegNext() {
+  if (state.regCurrentStep === 1) {
+    // Валидация шага 1
+    const name = document.getElementById("regName").value.trim() || "Спортсмен";
+    const age = parseInt(document.getElementById("regAge").value, 10);
+    const height = parseFloat(document.getElementById("regHeight").value);
+    const initialWeight = parseFloat(document.getElementById("regInitialWeight").value);
+
+    if (isNaN(age) || age < 12 || age > 99) {
+      showToast("Пожалуйста, укажите реальный возраст (от 12 до 99)");
+      return;
+    }
+    if (isNaN(height) || height < 100 || height > 250) {
+      showToast("Пожалуйста, укажите рост в см (от 100 до 250)");
+      return;
+    }
+    if (isNaN(initialWeight) || initialWeight < 30 || initialWeight > 250) {
+      showToast("Пожалуйста, укажите начальный вес в кг (от 30 до 250)");
+      return;
+    }
+
+    state.regDraft.name = name;
+    state.regDraft.age = age;
+    state.regDraft.height = height;
+    state.regDraft.initialWeight = Math.round(initialWeight * 10) / 10;
+
+    state.regCurrentStep = 2;
+    updateRegStepUI();
+    triggerHaptic("light");
+  } else if (state.regCurrentStep === 2) {
+    // Переход к шагу 3 с расчетом BMR & TDEE (Миффлин-Сан Жеор)
+    const w = state.regDraft.initialWeight;
+    const h = state.regDraft.height;
+    const a = state.regDraft.age;
+    const isMale = state.regDraft.gender === "male";
+
+    // BMR
+    const bmr = (10 * w) + (6.25 * h) - (5 * a) + (isMale ? 5 : -161);
+    const tdee = Math.round(bmr * 1.375); // умеренная активность
+
+    let targetCal = tdee;
+    if (state.regDraft.goal === "weight_loss") {
+      targetCal = Math.round(tdee - 450);
+    } else if (state.regDraft.goal === "muscle_gain") {
+      targetCal = Math.round(tdee + 350);
+    }
+
+    document.getElementById("regSummaryInitialWeight").textContent = `${w.toFixed(1)} кг`;
+    document.getElementById("regSummaryCalories").textContent = `${targetCal} ккал`;
+
+    const prog = PROGRAMS[state.regDraft.split] || PROGRAMS.upper_lower_gym_4;
+    document.getElementById("regSummaryProgram").textContent = `${prog.title} (${prog.daysPerWeek} дня)`;
+
+    state.regCurrentStep = 3;
+    updateRegStepUI();
+    triggerHaptic("light");
+  } else if (state.regCurrentStep === 3) {
+    completeRegistration();
+  }
+}
+
+function completeRegistration() {
+  state.isRegistered = true;
+  state.user.name = state.regDraft.name;
+  state.user.gender = state.regDraft.gender;
+  state.user.age = state.regDraft.age;
+  state.user.height = state.regDraft.height;
+  state.user.initialWeight = state.regDraft.initialWeight;
+  state.user.weight = state.regDraft.initialWeight;
+  state.user.goal = state.regDraft.goal;
+  state.user.split = state.regDraft.split;
+  state.programId = state.regDraft.split;
+  state.stats.weight = state.regDraft.initialWeight;
+  state.selectedDayIdx = 0;
+
+  const todayStr = getTodayFormatted();
+  state.user.registeredAt = todayStr;
+
+  // Инициализируем историю веса начальной точкой
+  state.weightHistory = [
+    {
+      date: todayStr,
+      weight: state.regDraft.initialWeight,
+      diff_prev: 0.0,
+      diff_initial: 0.0,
+      is_sunday: isSundayToday(),
+      note: "Начальный вес при регистрации"
+    }
+  ];
+
+  if (isSundayToday()) {
+    state.user.lastSundayWeighed = todayStr;
+  }
+
+  saveState();
+
+  // Синхронизация с сервером Flask
+  syncRegistrationWithServer();
+
+  document.getElementById("registrationModal").classList.add("hidden");
+  renderAll();
+  triggerHaptic("success");
+  showToast(`Добро пожаловать, ${state.user.name}! Программа настроена.`);
+}
+
+function syncRegistrationWithServer() {
+  const payload = {
+    user_id: state.user.id || `web_${Date.now()}`,
+    first_name: state.user.name,
+    initial_weight: state.user.initialWeight,
+    weight: state.user.weight,
+    height: state.user.height,
+    age: state.user.age,
+    gender: state.user.gender,
+    split: state.user.split,
+    goal: state.user.goal,
+    days_per_week: PROGRAMS[state.user.split]?.daysPerWeek || 4
+  };
+
+  fetch("/api/user/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).catch(e => console.log("[Sync Register] Offline mode:", e));
+}
+
+// ==========================================
+// 7. Sunday Weigh-In Engine (Воскресный замер)
+// ==========================================
+function openSundayModal() {
+  const modal = document.getElementById("sundayWeightModal");
+  if (!modal) return;
+
+  const initWeight = state.user.initialWeight || state.user.weight || 75.0;
+  const currentWeight = state.user.weight || initWeight;
+
+  document.getElementById("sundayInitialWeightVal").textContent = `${initWeight.toFixed(1)} кг`;
+
+  // Предыдущий замер из истории
+  let prevWeight = initWeight;
+  let prevDate = "старт";
+  if (state.weightHistory && state.weightHistory.length > 0) {
+    const lastItem = state.weightHistory[state.weightHistory.length - 1];
+    prevWeight = lastItem.weight;
+    prevDate = formatDateRu(lastItem.date);
+  }
+  document.getElementById("sundayPrevWeightVal").textContent = `${prevWeight.toFixed(1)} кг`;
+  document.getElementById("sundayPrevDateVal").textContent = prevDate;
+
+  // Инпут текущего веса
+  const input = document.getElementById("sundayWeightInput");
+  input.value = currentWeight.toFixed(1);
+
+  // Обновление даты в шапке модалки
+  const dateLabel = document.getElementById("sundayModalDateLabel");
+  if (isSundayToday()) {
+    dateLabel.textContent = "Сегодня воскресенье — контрольный замер!";
+  } else {
+    dateLabel.textContent = `Замер за неделю (Вс: ${getNextSundayFormatted()})`;
+  }
+
+  updateSundayLiveDiff();
+  modal.classList.remove("hidden");
+  triggerHaptic("light");
+  lucide.createIcons();
+}
+
+function updateSundayLiveDiff() {
+  const inputVal = parseFloat(document.getElementById("sundayWeightInput").value);
+  if (isNaN(inputVal)) return;
+
+  const initWeight = state.user.initialWeight || inputVal;
+
+  let prevWeight = initWeight;
+  if (state.weightHistory && state.weightHistory.length > 0) {
+    prevWeight = state.weightHistory[state.weightHistory.length - 1].weight;
+  }
+
+  const diffWeek = roundNum(inputVal - prevWeight, 2);
+  const diffTotal = roundNum(inputVal - initWeight, 2);
+
+  const weekEl = document.getElementById("sundayLiveWeekDiff");
+  const totalEl = document.getElementById("sundayLiveTotalDiff");
+
+  const formatBadge = (val) => {
+    const sign = val > 0 ? "+" : "";
+    return `${sign}${val.toFixed(2)} кг`;
+  };
+
+  weekEl.textContent = formatBadge(diffWeek);
+  totalEl.textContent = formatBadge(diffTotal);
+
+  weekEl.className = diffWeek <= 0 ? "font-black text-emerald-400" : "font-black text-orange-400";
+  totalEl.className = diffTotal <= 0 ? "font-black text-emerald-400" : "font-black text-orange-400";
+}
+
+function saveSundayWeight() {
+  const inputVal = parseFloat(document.getElementById("sundayWeightInput").value);
+  if (isNaN(inputVal) || inputVal < 30 || inputVal > 250) {
+    showToast("Пожалуйста, введите корректный вес от 30 до 250 кг");
+    return;
+  }
+
+  const weight = Math.round(inputVal * 10) / 10;
+  const note = document.getElementById("sundayWeightNote")?.value.trim() || "";
+  const todayStr = getTodayFormatted();
+  const isSunday = isSundayToday();
+
+  const initWeight = state.user.initialWeight || weight;
+  let prevWeight = state.user.weight || initWeight;
+  if (state.weightHistory && state.weightHistory.length > 0) {
+    prevWeight = state.weightHistory[state.weightHistory.length - 1].weight;
+  }
+
+  const diffPrev = roundNum(weight - prevWeight, 2);
+  const diffInitial = roundNum(weight - initWeight, 2);
+
+  const entry = {
+    date: todayStr,
+    weight: weight,
+    diff_prev: diffPrev,
+    diff_initial: diffInitial,
+    is_sunday: isSunday,
+    note: note || (isSunday ? "Воскресный замер веса" : "Замер веса")
+  };
+
+  state.weightHistory.push(entry);
+  state.user.weight = weight;
+  state.stats.weight = weight;
+
+  if (isSunday) {
+    state.user.lastSundayWeighed = todayStr;
+  }
+
+  saveState();
+
+  // Синхронизация с бэкендом
+  if (state.user.id) {
+    fetch(`/api/user/${state.user.id}/sunday_weight`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ weight: weight, note: entry.note, date: todayStr })
+    }).catch(e => console.log("[Sync Weight] Offline:", e));
+  }
+
+  document.getElementById("sundayWeightModal").classList.add("hidden");
+  renderAll();
+  triggerHaptic("success");
+
+  const sign = diffInitial > 0 ? "+" : "";
+  showToast(`Воскресный вес зафиксирован: ${weight} кг (${sign}${diffInitial.toFixed(1)} кг от старта)!`);
+}
+
+function roundNum(num, dec = 2) {
+  const factor = Math.pow(10, dec);
+  return Math.round(num * factor) / factor;
+}
+
+// ==========================================
+// 8. Event Binding
 // ==========================================
 function initEvents() {
   // Bottom Tab Navigation
@@ -869,44 +1479,117 @@ function initEvents() {
     });
   }
 
+  // Sunday notice banner on Home
+  document.getElementById("sundayNoticeBanner")?.addEventListener("click", () => {
+    openSundayModal();
+  });
+  document.getElementById("openSundayModalFromHomeBtn")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openSundayModal();
+  });
+
+  // Stats tab Sunday weigh-in CTA
+  document.getElementById("statsOpenSundayModalBtn")?.addEventListener("click", () => {
+    openSundayModal();
+  });
+  document.getElementById("addMeasurementBtn")?.addEventListener("click", () => {
+    openSundayModal();
+  });
+
+  // Sunday modal controls
+  document.getElementById("closeSundayModalBtn")?.addEventListener("click", () => {
+    document.getElementById("sundayWeightModal").classList.add("hidden");
+  });
+  document.getElementById("saveSundayWeightBtn")?.addEventListener("click", () => {
+    saveSundayWeight();
+  });
+
+  document.getElementById("sundayWeightMinusBtn")?.addEventListener("click", () => {
+    const input = document.getElementById("sundayWeightInput");
+    const val = parseFloat(input.value) || 75.0;
+    input.value = Math.max(30, roundNum(val - 0.1, 1)).toFixed(1);
+    updateSundayLiveDiff();
+    triggerHaptic("light");
+  });
+
+  document.getElementById("sundayWeightPlusBtn")?.addEventListener("click", () => {
+    const input = document.getElementById("sundayWeightInput");
+    const val = parseFloat(input.value) || 75.0;
+    input.value = Math.min(250, roundNum(val + 0.1, 1)).toFixed(1);
+    updateSundayLiveDiff();
+    triggerHaptic("light");
+  });
+
+  document.getElementById("sundayWeightInput")?.addEventListener("input", () => {
+    updateSundayLiveDiff();
+  });
+
+  // Registration modal controls
+  document.getElementById("regNextBtn")?.addEventListener("click", () => {
+    handleRegNext();
+  });
+
+  document.getElementById("regBackBtn")?.addEventListener("click", () => {
+    if (state.regCurrentStep > 1) {
+      state.regCurrentStep--;
+      updateRegStepUI();
+      triggerHaptic("light");
+    }
+  });
+
+  // Gender buttons in Registration
+  document.querySelectorAll(".reg-gender-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".reg-gender-btn").forEach(b => {
+        b.className = "reg-gender-btn p-2.5 rounded-xl border border-of-border bg-of-subcard text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+      });
+      btn.className = "reg-gender-btn active p-2.5 rounded-xl border border-of-blue bg-of-blue/15 text-of-blue font-bold flex items-center justify-center gap-1.5 transition";
+      state.regDraft.gender = btn.getAttribute("data-gender");
+      triggerHaptic("light");
+    });
+  });
+
+  // Goal buttons in Registration
+  document.querySelectorAll(".reg-goal-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".reg-goal-btn").forEach(b => {
+        b.className = "reg-goal-btn p-2.5 rounded-xl border border-of-border bg-of-subcard text-slate-400 font-bold text-center transition";
+      });
+      btn.className = "reg-goal-btn active p-2.5 rounded-xl border border-of-blue bg-of-blue/15 text-of-blue font-bold text-center transition";
+      state.regDraft.goal = btn.getAttribute("data-goal");
+      triggerHaptic("light");
+    });
+  });
+
+  // Program selection cards in Registration
+  document.querySelectorAll(".reg-program-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".reg-program-card").forEach(c => {
+        c.className = "reg-program-card p-3 rounded-2xl border border-of-border bg-of-subcard cursor-pointer hover:border-slate-500 transition";
+      });
+      card.className = "reg-program-card active p-3 rounded-2xl border border-of-blue bg-of-blue/10 cursor-pointer transition";
+      state.regDraft.split = card.getAttribute("data-program");
+      triggerHaptic("light");
+    });
+  });
+
   // Top header icons
   document.getElementById("topTimerBtn")?.addEventListener("click", () => {
     if (state.activeWorkout) {
       document.getElementById("activeWorkoutModal").classList.remove("hidden");
     } else {
-      showToast("3 тренировки запланировано на этой неделе");
+      showToast(`${PROGRAMS[state.programId]?.daysPerWeek || 4} тренировки в вашей программе`);
     }
     triggerHaptic("light");
   });
 
   document.getElementById("topCalendarBtn")?.addEventListener("click", () => {
-    showToast(`Неделя ${state.stats.weekNumber} · Октябрь`);
-    triggerHaptic("light");
+    openSundayModal();
   });
 
   document.getElementById("topMenuBtn")?.addEventListener("click", () => {
     openSettingsModal();
     triggerHaptic("light");
-  });
-
-  // Customize home screen button
-  document.getElementById("customizeHomeBtn")?.addEventListener("click", () => {
-    showToast("Главный экран настроен по умолчанию");
-    triggerHaptic("light");
-  });
-
-  // Start workout primary CTA
-  document.getElementById("startWorkoutPrimaryBtn")?.addEventListener("click", () => {
-    startActiveWorkoutSession();
-  });
-
-  // Workout carousel dots
-  document.querySelectorAll("#workoutCarouselDots button").forEach(dot => {
-    dot.addEventListener("click", () => {
-      const idx = parseInt(dot.getAttribute("data-idx"), 10);
-      selectWorkoutDay(idx);
-      triggerHaptic("light");
-    });
   });
 
   // Switch program button
@@ -923,9 +1606,9 @@ function initEvents() {
     document.getElementById("catalogModal").classList.add("hidden");
   });
 
-  // Floating Add Button (+)
+  // Floating Add Button (+) -> opens quick weight or sunday weigh-in
   document.getElementById("floatingAddBtn")?.addEventListener("click", () => {
-    openQuickLogModal();
+    openSundayModal();
     triggerHaptic("light");
   });
 
@@ -979,10 +1662,86 @@ function initEvents() {
       triggerHaptic("light");
     });
   });
+
+  // Custom Program Modal triggers
+  document.getElementById("homeImportProgramBtn")?.addEventListener("click", () => {
+    openCustomProgramModal();
+  });
+
+  document.getElementById("openCustomProgramBannerBtn")?.addEventListener("click", () => {
+    openCustomProgramModal();
+  });
+
+  document.getElementById("closeCustomProgramModalBtn")?.addEventListener("click", () => {
+    closeCustomProgramModal();
+  });
+
+  // Custom Program Mode switchers (Screenshot vs Text)
+  document.getElementById("importModeScreenshotBtn")?.addEventListener("click", () => {
+    setCustomImportMode("screenshot");
+  });
+
+  document.getElementById("importModeTextBtn")?.addEventListener("click", () => {
+    setCustomImportMode("text");
+  });
+
+  // Screenshot upload dropzone & input
+  const dropZone = document.getElementById("dropScreenshotZone");
+  const fileInput = document.getElementById("workoutScreenshotFileInput");
+
+  dropZone?.addEventListener("click", () => {
+    fileInput?.click();
+  });
+
+  fileInput?.addEventListener("change", (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleScreenshotUpload(e.target.files[0]);
+    }
+  });
+
+  // Drag & drop support for screenshot
+  dropZone?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("border-of-blue");
+  });
+  dropZone?.addEventListener("dragleave", () => {
+    dropZone.classList.remove("border-of-blue");
+  });
+  dropZone?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("border-of-blue");
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleScreenshotUpload(e.dataTransfer.files[0]);
+    }
+  });
+
+  // Remove screenshot button
+  document.getElementById("removeScreenshotBtn")?.addEventListener("click", () => {
+    resetScreenshotUpload();
+  });
+
+  // Templates
+  document.getElementById("insertTemplate4Btn")?.addEventListener("click", () => {
+    loadWorkoutTemplate(4);
+  });
+
+  document.getElementById("insertTemplate3Btn")?.addEventListener("click", () => {
+    loadWorkoutTemplate(3);
+  });
+
+  // Trigger parse button
+  document.getElementById("triggerParseBtn")?.addEventListener("click", () => {
+    triggerParseWorkoutAction();
+  });
+
+  // Save custom program button
+  document.getElementById("saveCustomProgramBtn")?.addEventListener("click", () => {
+    saveCustomProgram();
+  });
 }
 
 // ==========================================
-// 6. Tab Navigation Logic
+// 9. Tab Navigation Logic
 // ==========================================
 function switchTab(tabId) {
   state.currentTab = tabId;
@@ -1008,13 +1767,50 @@ function switchTab(tabId) {
 }
 
 // ==========================================
-// 7. Rendering Engine
+// 10. Rendering Engine
 // ==========================================
 function renderAll() {
+  renderSundayBanner();
   renderHomeWeekdays();
   renderWorkoutProgramDetails();
   renderStatsScreen();
   lucide.createIcons();
+}
+
+// Render Sunday Banner on Home Tab
+function renderSundayBanner() {
+  const banner = document.getElementById("sundayNoticeBanner");
+  if (!banner) return;
+
+  const badge = document.getElementById("sundayStatusBadge");
+  const desc = document.getElementById("sundayStatusDesc");
+  const btn = document.getElementById("openSundayModalFromHomeBtn");
+
+  const isSunday = isSundayToday();
+  const todayStr = getTodayFormatted();
+  const weighedToday = state.user.lastSundayWeighed === todayStr;
+
+  if (isSunday) {
+    if (weighedToday) {
+      badge.textContent = "✓ Выполнен";
+      badge.className = "text-[9px] bg-emerald-500 text-dark-950 font-bold px-1.5 py-0.5 rounded-full";
+      desc.textContent = `Актуальный вес зафиксирован: ${state.user.weight} кг`;
+      btn.textContent = "Изменить";
+      btn.className = "px-3.5 py-2 rounded-xl bg-of-subcard border border-of-border text-slate-300 font-bold text-xs hover:text-white transition shrink-0 active:scale-95";
+    } else {
+      badge.textContent = "Сегодня!";
+      badge.className = "text-[9px] bg-orange-500 text-white font-black px-1.5 py-0.5 rounded-full animate-pulse";
+      desc.textContent = "Пора обновить вес на актуальный для этой недели!";
+      btn.textContent = "Внести вес";
+      btn.className = "px-3.5 py-2 rounded-xl bg-orange-500 text-white font-black text-xs hover:bg-orange-400 transition shrink-0 active:scale-95 shadow-md shadow-orange-500/20";
+    }
+  } else {
+    badge.textContent = `Вс, ${getNextSundayFormatted()}`;
+    badge.className = "text-[9px] bg-of-subcard text-slate-300 font-bold px-1.5 py-0.5 rounded-full border border-of-border";
+    desc.textContent = `Текущий вес: ${state.user.weight || 75} кг (следующий замер в воскресенье)`;
+    btn.textContent = "Замер";
+    btn.className = "px-3.5 py-2 rounded-xl bg-of-subcard hover:bg-of-card text-of-blue font-bold text-xs border border-of-border transition shrink-0 active:scale-95";
+  }
 }
 
 // Render Weekdays row (пн, вт, ср, чт, пт, сб, вс) on Home & Workouts
@@ -1025,7 +1821,6 @@ function renderHomeWeekdays() {
   const buildHtml = () => {
     return state.weekDays.map(item => {
       if (item.status === "workout") {
-        // Dumbbell icon for completed workout day
         return `
           <div class="flex flex-col items-center gap-1">
             <span class="text-[10px] text-slate-400">${item.day}</span>
@@ -1035,7 +1830,6 @@ function renderHomeWeekdays() {
           </div>
         `;
       } else if (item.status === "rest") {
-        // Sleeping face emoji / zzz for rest day
         return `
           <div class="flex flex-col items-center gap-1">
             <span class="text-[10px] text-slate-400">${item.day}</span>
@@ -1045,7 +1839,6 @@ function renderHomeWeekdays() {
           </div>
         `;
       } else if (item.status === "today") {
-        // Today highlighted circle
         return `
           <div class="flex flex-col items-center gap-1">
             <span class="text-[10px] text-white font-bold">${item.day}</span>
@@ -1054,8 +1847,17 @@ function renderHomeWeekdays() {
             </div>
           </div>
         `;
+      } else if (item.day === "вс") {
+        // Воскресенье выделено весами (день взвешивания)
+        return `
+          <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openSundayModal()">
+            <span class="text-[10px] text-orange-400 font-bold">${item.day}</span>
+            <div class="w-7 h-7 rounded-full border border-orange-500/50 bg-orange-500/10 flex items-center justify-center text-[10px]" title="Воскресный замер веса">
+              ⚖️
+            </div>
+          </div>
+        `;
       } else {
-        // Future scheduled circle
         return `
           <div class="flex flex-col items-center gap-1">
             <span class="text-[10px] text-slate-500">${item.day}</span>
@@ -1083,15 +1885,45 @@ function selectWorkoutDay(index) {
 // Render Workout Screen details & Muscle Radar
 function renderWorkoutProgramDetails() {
   const prog = PROGRAMS[state.programId] || PROGRAMS.upper_lower_gym_4;
+  if (state.selectedDayIdx >= prog.days.length || state.selectedDayIdx < 0) {
+    state.selectedDayIdx = 0;
+  }
   const day = prog.days[state.selectedDayIdx] || prog.days[0];
 
   // Title
-  document.getElementById("programDetailTitle").textContent = prog.title;
-  document.getElementById("homeProgramTitle").textContent = prog.title;
-  document.getElementById("dayWorkoutTitle").textContent = day.title;
+  const detailTitleEl = document.getElementById("programDetailTitle");
+  if (detailTitleEl) detailTitleEl.textContent = prog.title;
+  const homeTitleEl = document.getElementById("homeProgramTitle");
+  if (homeTitleEl) homeTitleEl.textContent = prog.title;
+  const dayTitleEl = document.getElementById("dayWorkoutTitle");
+  if (dayTitleEl) dayTitleEl.textContent = day.title;
+
+  // Badges update
+  const homeDaysBadge = document.getElementById("homeDaysBadge");
+  if (homeDaysBadge) homeDaysBadge.textContent = prog.daysPerWeek || prog.days.length;
+  const progDaysBadge = document.getElementById("programDaysBadge");
+  if (progDaysBadge) progDaysBadge.textContent = prog.daysPerWeek || prog.days.length;
+
+  const homeCategoryBadge = document.getElementById("homeCategoryBadge");
+  if (homeCategoryBadge) homeCategoryBadge.textContent = prog.categoryTitle || "Равномерно";
+  const progCategoryBadge = document.getElementById("programCategoryBadge");
+  if (progCategoryBadge) progCategoryBadge.textContent = prog.categoryTitle || "Равномерно";
+
+  const levelRu = state.level === "beginner" ? "Начинающий" : state.level === "intermediate" ? "Средний" : "Эксперт";
+  const levelIcon = state.level === "beginner" ? "🌱" : state.level === "intermediate" ? "⚡️" : "🦅";
+
+  const homeLevelBadge = document.getElementById("homeLevelBadge");
+  if (homeLevelBadge) homeLevelBadge.textContent = levelRu;
+  const progLevelBadge = document.getElementById("programLevelBadge");
+  if (progLevelBadge) progLevelBadge.textContent = levelRu;
+
+  const homeLevelIcon = document.getElementById("homeLevelIcon");
+  if (homeLevelIcon) homeLevelIcon.textContent = levelIcon;
+  const progLevelIcon = document.getElementById("programLevelIcon");
+  if (progLevelIcon) progLevelIcon.textContent = levelIcon;
 
   // Stat Pills
-  const duration = day.durationMin || 70;
+  const duration = day.durationMin || 65;
   const exCount = day.exercises.length;
   let totalSets = 0;
 
@@ -1113,12 +1945,12 @@ function renderWorkoutProgramDetails() {
   document.getElementById("workoutSetsCountPill").textContent = `${totalSets} сетов`;
 
   // Update Radar Badges
-  document.getElementById("radarBackSets").textContent = muscleSets.back;
-  document.getElementById("radarChestSets").textContent = muscleSets.chest;
-  document.getElementById("radarArmsSets").textContent = muscleSets.arms;
-  document.getElementById("radarShouldersSets").textContent = muscleSets.shoulders;
-  document.getElementById("radarLegsSets").textContent = muscleSets.legs;
-  document.getElementById("radarCoreSets").textContent = muscleSets.core;
+  if (document.getElementById("radarBackSets")) document.getElementById("radarBackSets").textContent = muscleSets.back;
+  if (document.getElementById("radarChestSets")) document.getElementById("radarChestSets").textContent = muscleSets.chest;
+  if (document.getElementById("radarArmsSets")) document.getElementById("radarArmsSets").textContent = muscleSets.arms;
+  if (document.getElementById("radarShouldersSets")) document.getElementById("radarShouldersSets").textContent = muscleSets.shoulders;
+  if (document.getElementById("radarLegsSets")) document.getElementById("radarLegsSets").textContent = muscleSets.legs;
+  if (document.getElementById("radarCoreSets")) document.getElementById("radarCoreSets").textContent = muscleSets.core;
 
   // Carousel Pagination Dots
   const dotsContainer = document.getElementById("workoutCarouselDots");
@@ -1175,18 +2007,88 @@ function renderDayExercisesList(day) {
   }).join("");
 }
 
-// Render Stats Screen from state (Screenshots 1, 2, 3)
+// Render Stats Screen & Sunday Weight Section
 function renderStatsScreen() {
   document.getElementById("statsGymMetricCount").textContent = state.stats.gymSets;
   document.getElementById("stepsTodayCount").textContent = state.stats.stepsToday.toLocaleString("ru-RU");
   document.getElementById("sleepScoreNumber").textContent = state.stats.sleepScore;
   document.getElementById("avgSleepDurationDisplay").textContent = `${state.stats.sleepHours} ч ${state.stats.sleepMinutes} мин`;
-  document.getElementById("statsWeightDisplay").textContent = state.stats.weight.toFixed(1).replace(".", ",");
-  document.getElementById("statsFatDisplay").textContent = state.stats.bodyFat.toFixed(1).replace(".", ",");
+
+  // Вес и Воскресный прогресс
+  const initWeight = state.user.initialWeight || 75.0;
+  const currentWeight = state.user.weight || initWeight;
+  const diffTotal = roundNum(currentWeight - initWeight, 2);
+
+  document.getElementById("statsInitialWeightDisplay").textContent = initWeight.toFixed(1).replace(".", ",");
+  document.getElementById("statsWeightDisplay").textContent = currentWeight.toFixed(1).replace(".", ",");
+
+  const diffEl = document.getElementById("statsWeightDiffDisplay");
+  if (diffEl) {
+    const sign = diffTotal > 0 ? "+" : "";
+    diffEl.textContent = `${sign}${diffTotal.toFixed(1).replace(".", ",")} кг`;
+    diffEl.className = diffTotal <= 0 ? "text-base font-black text-emerald-400 mt-0.5" : "text-base font-black text-orange-400 mt-0.5";
+  }
+
+  // Воскресный статус
+  const nextDateEl = document.getElementById("statsSundayNextDate");
+  if (nextDateEl) {
+    if (isSundayToday()) {
+      nextDateEl.textContent = "Сегодня контрольный день взвешивания!";
+    } else {
+      nextDateEl.textContent = `Следующий замер: Воскресенье (${getNextSundayFormatted()})`;
+    }
+  }
+
+  // История воскресных замеров
+  renderWeightHistoryList();
+}
+
+function renderWeightHistoryList() {
+  const container = document.getElementById("statsWeightHistoryList");
+  if (!container) return;
+
+  if (!state.weightHistory || state.weightHistory.length === 0) {
+    container.innerHTML = `
+      <div class="p-3 rounded-xl bg-of-subcard text-slate-400 text-center text-xs">
+        Пока нет замеров. Первое взвешивание запланировано на воскресенье!
+      </div>
+    `;
+    return;
+  }
+
+  // Рендерим от новых к старым
+  const reversed = [...state.weightHistory].reverse();
+  container.innerHTML = reversed.map((item, idx) => {
+    const diff = item.diff_prev || 0;
+    const sign = diff > 0 ? "+" : "";
+    const badgeColor = diff <= 0 ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : "text-orange-400 bg-orange-500/10 border-orange-500/20";
+
+    return `
+      <div class="p-2.5 rounded-2xl bg-of-subcard border border-of-border/60 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-sm">📅</span>
+          <div>
+            <div class="font-bold text-white text-xs">${formatDateRu(item.date)}</div>
+            <div class="text-[10px] text-slate-400">${item.note || (item.is_sunday ? "Воскресный замер" : "Замер")}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-black text-white text-sm">${item.weight.toFixed(1)} кг</div>
+          ${idx < reversed.length - 1 ? `
+            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border inline-block ${badgeColor}">
+              ${sign}${diff.toFixed(1)} кг
+            </div>
+          ` : `
+            <div class="text-[9px] text-slate-500">Старт</div>
+          `}
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 // ==========================================
-// 8. Active Workout Mode (Sets, Tonnage, Timer)
+// 11. Active Workout Mode (Sets, Tonnage, Timer)
 // ==========================================
 function startActiveWorkoutSession() {
   const prog = PROGRAMS[state.programId] || PROGRAMS.upper_lower_gym_4;
@@ -1197,10 +2099,10 @@ function startActiveWorkoutSession() {
     startTime: Date.now(),
     exercises: day.exercises.map(exId => {
       const ex = EXERCISES_DB.find(e => e.id === exId);
-      const setsCount = ex.targetSets || 3;
+      const setsCount = (ex && ex.targetSets) ? ex.targetSets : 3;
       return {
-        id: ex.id,
-        name: ex.name,
+        id: ex ? ex.id : exId,
+        name: ex ? ex.name : "Упражнение",
         sets: Array.from({ length: setsCount }, (_, i) => ({
           setNum: i + 1,
           weight: 60,
@@ -1385,7 +2287,7 @@ function finishActiveWorkoutSession() {
 }
 
 // ==========================================
-// 9. Exercise Technique Modal (2-Phase Player)
+// 12. Exercise Technique Modal (2-Phase Player)
 // ==========================================
 function openExerciseVideoModal(exerciseId) {
   const ex = EXERCISES_DB.find(e => e.id === exerciseId);
@@ -1395,12 +2297,10 @@ function openExerciseVideoModal(exerciseId) {
   document.getElementById("videoExerciseMuscle").textContent = ex.muscle_ru;
   document.getElementById("videoEquipmentTag").textContent = ex.equipment;
 
-  // GitHub Exercise DB Images (Guaranteed 200 OK from Raw CDN)
   const ghId = ex.github_id || "Barbell_Bench_Press_-_Medium_Grip";
   const img0 = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ghId}/0.jpg`;
   const img1 = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${ghId}/1.jpg`;
 
-  // Preload
   const p0 = new Image(); p0.src = img0;
   const p1 = new Image(); p1.src = img1;
 
@@ -1445,19 +2345,15 @@ function openExerciseVideoModal(exerciseId) {
     triggerHaptic("light");
   };
 
-  // Direct YouTube Tutorial
   const ytQuery = encodeURIComponent(`техника выполнения ${ex.name}`);
   document.getElementById("youtubeVideoLink").href = `https://www.youtube.com/results?search_query=${ytQuery}`;
 
-  // Steps
   const stepsList = document.getElementById("exerciseStepsList");
   stepsList.innerHTML = (ex.steps || []).map(step => `<li>${step}</li>`).join("");
 
-  // Mistakes
   const mistakesList = document.getElementById("exerciseMistakesList");
   mistakesList.innerHTML = (ex.mistakes || []).map(mistake => `<li>${mistake}</li>`).join("");
 
-  // Anatomy & Breathing
   document.getElementById("targetMusclesLabel").textContent = ex.primary || ex.muscle_ru;
   document.getElementById("synergistMusclesLabel").textContent = ex.secondary || "Мышцы-стабилизаторы";
   document.getElementById("breathingLabel").textContent = ex.breathing || "Вдох на опускании, выдох на усилии";
@@ -1476,7 +2372,7 @@ function closeExerciseVideoModal() {
 }
 
 // ==========================================
-// 10. Quick Log Modal (+)
+// 13. Quick Log Modal (+)
 // ==========================================
 function openQuickLogModal() {
   document.getElementById("quickInputWeight").value = state.stats.weight;
@@ -1492,7 +2388,10 @@ function saveQuickLog() {
   const sh = parseInt(document.getElementById("quickInputSleepHours").value, 10);
   const sm = parseInt(document.getElementById("quickInputSleepMinutes").value, 10);
 
-  if (!isNaN(w) && w > 0) state.stats.weight = w;
+  if (!isNaN(w) && w > 0) {
+    state.stats.weight = w;
+    state.user.weight = w;
+  }
   if (!isNaN(steps) && steps >= 0) state.stats.stepsToday = steps;
   if (!isNaN(sh) && sh >= 0) state.stats.sleepHours = sh;
   if (!isNaN(sm) && sm >= 0) state.stats.sleepMinutes = sm;
@@ -1505,7 +2404,7 @@ function saveQuickLog() {
 }
 
 // ==========================================
-// 11. Exercise Library / Catalog Modal
+// 14. Exercise Library / Catalog Modal
 // ==========================================
 function openCatalogModal() {
   document.getElementById("catalogModal").classList.remove("hidden");
@@ -1541,19 +2440,47 @@ function renderCatalogList(filterCategory = "all") {
 }
 
 // ==========================================
-// 12. Settings / Program Modal
+// 15. Settings / Program Modal
 // ==========================================
 function openSettingsModal() {
-  document.getElementById("userSplitSelect").value = state.programId;
+  const splitSelect = document.getElementById("userSplitSelect");
+  if (splitSelect) {
+    // Populate custom programs group if any exist
+    let customGroup = document.getElementById("customProgramsOptgroup");
+    const customProgKeys = Object.keys(PROGRAMS).filter(k => PROGRAMS[k].isCustom || k.startsWith("custom_"));
+    if (customProgKeys.length > 0) {
+      if (!customGroup) {
+        customGroup = document.createElement("optgroup");
+        customGroup.id = "customProgramsOptgroup";
+        customGroup.label = "⭐️ Ваши программы";
+        splitSelect.insertBefore(customGroup, splitSelect.firstChild);
+      }
+      customGroup.innerHTML = customProgKeys.map(k => {
+        const p = PROGRAMS[k];
+        return `<option value="${p.id}">${p.fullTitle || p.title}</option>`;
+      }).join("");
+    } else if (customGroup) {
+      customGroup.remove();
+    }
+    splitSelect.value = state.programId;
+  }
+
+  const levelSelect = document.getElementById("userLevelSelect");
+  if (levelSelect && state.level) levelSelect.value = state.level;
   document.getElementById("settingsModal").classList.remove("hidden");
   triggerHaptic("light");
 }
 
 function saveSettings() {
-  const chosenProgram = document.getElementById("userSplitSelect").value;
+  const chosenProgram = document.getElementById("userSplitSelect")?.value;
+  const chosenLevel = document.getElementById("userLevelSelect")?.value;
   if (PROGRAMS[chosenProgram]) {
     state.programId = chosenProgram;
+    state.user.split = chosenProgram;
     state.selectedDayIdx = 0;
+  }
+  if (chosenLevel) {
+    state.level = chosenLevel;
   }
   document.getElementById("settingsModal").classList.add("hidden");
   saveState();
@@ -1561,3 +2488,833 @@ function saveSettings() {
   triggerHaptic("success");
   showToast("Программа тренировок изменена!");
 }
+
+// ==========================================
+// 16. Custom Program Engine (OCR & Text Import)
+// ==========================================
+
+let customDraft = {
+  title: "Моя программа",
+  days: []
+};
+
+// 1. Storage Helpers for Custom Exercises & Programs
+function loadCustomExercises() {
+  try {
+    const raw = localStorage.getItem("onlyfits_custom_exercises");
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) {
+        list.forEach(ex => {
+          if (!EXERCISES_DB.some(e => e.id === ex.id)) {
+            EXERCISES_DB.push(ex);
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.error("Error loading custom exercises:", e);
+  }
+}
+
+function saveCustomExercisesStorage() {
+  try {
+    const customs = EXERCISES_DB.filter(e => e.id && e.id.startsWith("ex_custom_"));
+    localStorage.setItem("onlyfits_custom_exercises", JSON.stringify(customs));
+  } catch (e) {
+    console.error("Error saving custom exercises:", e);
+  }
+}
+
+function loadCustomPrograms() {
+  try {
+    const raw = localStorage.getItem("onlyfits_custom_programs");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      Object.keys(parsed).forEach(id => {
+        PROGRAMS[id] = parsed[id];
+      });
+      return parsed;
+    }
+  } catch (e) {
+    console.error("Error loading custom programs:", e);
+  }
+  return {};
+}
+
+function saveCustomProgramToStorage(program) {
+  try {
+    const raw = localStorage.getItem("onlyfits_custom_programs");
+    const existing = raw ? JSON.parse(raw) : {};
+    existing[program.id] = program;
+    localStorage.setItem("onlyfits_custom_programs", JSON.stringify(existing));
+    PROGRAMS[program.id] = program;
+  } catch (e) {
+    console.error("Error saving custom program:", e);
+  }
+}
+
+// 2. Modal Controls & Mode Switching
+function openCustomProgramModal() {
+  const modal = document.getElementById("customProgramModal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  setCustomImportMode("screenshot");
+  triggerHaptic("light");
+  lucide.createIcons();
+}
+
+function closeCustomProgramModal() {
+  const modal = document.getElementById("customProgramModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function setCustomImportMode(mode) {
+  const screenshotBtn = document.getElementById("importModeScreenshotBtn");
+  const textBtn = document.getElementById("importModeTextBtn");
+  const screenshotSection = document.getElementById("screenshotUploadSection");
+  const textSection = document.getElementById("textInputSection");
+
+  if (mode === "screenshot") {
+    if (screenshotBtn) {
+      screenshotBtn.className = "flex-1 py-2 rounded-xl bg-of-blue text-of-bg font-extrabold flex items-center justify-center gap-1.5 transition";
+    }
+    if (textBtn) {
+      textBtn.className = "flex-1 py-2 rounded-xl text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+    }
+    if (screenshotSection) screenshotSection.classList.remove("hidden");
+    if (textSection) textSection.classList.add("hidden");
+  } else {
+    if (textBtn) {
+      textBtn.className = "flex-1 py-2 rounded-xl bg-of-blue text-of-bg font-extrabold flex items-center justify-center gap-1.5 transition";
+    }
+    if (screenshotBtn) {
+      screenshotBtn.className = "flex-1 py-2 rounded-xl text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
+    }
+    if (textSection) textSection.classList.remove("hidden");
+    if (screenshotSection) screenshotSection.classList.add("hidden");
+  }
+  lucide.createIcons();
+}
+
+// 3. Screenshot Upload & OCR runner
+function handleScreenshotUpload(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    showToast("Пожалуйста, загрузите изображение (PNG, JPG, HEIC)");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+
+    const previewWrapper = document.getElementById("screenshotPreviewWrapper");
+    const previewImg = document.getElementById("screenshotPreviewImg");
+    const dropZone = document.getElementById("dropScreenshotZone");
+    const ocrStatus = document.getElementById("ocrProgressStatus");
+    const ocrDetails = document.getElementById("ocrProgressDetails");
+
+    if (previewImg) previewImg.src = dataUrl;
+    if (previewWrapper) previewWrapper.classList.remove("hidden");
+    if (dropZone) dropZone.classList.add("hidden");
+    if (ocrStatus) ocrStatus.classList.remove("hidden");
+    if (ocrDetails) ocrDetails.textContent = "Анализ скриншота...";
+
+    // Step A: Attempt server-side Gemini Vision OCR
+    let serverSuccess = false;
+    try {
+      const resp = await fetch("/api/parse-workout-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_b64: dataUrl })
+      });
+      const data = await resp.json();
+      if (data && data.status === "ok" && data.program && Array.isArray(data.program.days) && data.program.days.length > 0) {
+        serverSuccess = true;
+        applyStructuredProgram(data.program);
+        if (ocrStatus) ocrStatus.classList.add("hidden");
+        showToast("Программа успешно распознана через ИИ!");
+        return;
+      }
+    } catch (err) {
+      console.log("[Backend parse error, fallback to Tesseract]:", err);
+    }
+
+    // Step B: Client-side Tesseract.js OCR
+    if (window.Tesseract) {
+      try {
+        if (ocrDetails) ocrDetails.textContent = "Локальное оптическое считывание (OCR)...";
+        const worker = await Tesseract.createWorker("rus+eng", 1, {
+          logger: m => {
+            if (m.status === "recognizing text") {
+              const pct = Math.round((m.progress || 0) * 100);
+              if (ocrDetails) ocrDetails.textContent = `Сканирование текста: ${pct}%`;
+            }
+          }
+        });
+        const ret = await worker.recognize(dataUrl);
+        await worker.terminate();
+
+        const recognizedText = ret.data.text || "";
+        const textarea = document.getElementById("customProgramTextarea");
+        if (textarea) textarea.value = recognizedText;
+
+        const parsed = parseWorkoutTextToProgram(recognizedText);
+        applyStructuredProgram(parsed);
+        showToast(`Распознано: ${parsed.days.length} дн.`);
+      } catch (ocrErr) {
+        console.error("[Tesseract OCR Error]:", ocrErr);
+        showToast("Не удалось оптически прочесть текст. Попробуйте вкладку «Текстом»!");
+      } finally {
+        if (ocrStatus) ocrStatus.classList.add("hidden");
+      }
+    } else {
+      if (ocrStatus) ocrStatus.classList.add("hidden");
+      showToast("Модуль OCR недоступен. Переключитесь на вкладку «Текстом».");
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetScreenshotUpload() {
+  const fileInput = document.getElementById("workoutScreenshotFileInput");
+  if (fileInput) fileInput.value = "";
+  const previewWrapper = document.getElementById("screenshotPreviewWrapper");
+  const dropZone = document.getElementById("dropScreenshotZone");
+  const previewImg = document.getElementById("screenshotPreviewImg");
+  const ocrStatus = document.getElementById("ocrProgressStatus");
+
+  if (previewImg) previewImg.src = "";
+  if (previewWrapper) previewWrapper.classList.add("hidden");
+  if (dropZone) dropZone.classList.remove("hidden");
+  if (ocrStatus) ocrStatus.classList.add("hidden");
+}
+
+// 4. Workout Templates (Upper/Lower 4 days & Push/Pull/Legs 3 days)
+const WORKOUT_TEMPLATES = {
+  template_4: `День 1: Верх тела (Грудь, Спина, Руки)
+Жим штанги лежа 4х8-10
+Тяга штанги в наклоне 4х10
+Жим гантелей наклонный 3х12
+Тяга верхнего блока 3х12
+Подъем штанги на бицепс 3х12
+Французский жим со штангой 3х12
+
+День 2: Низ тела (Квадрицепс, Бицепс бедра, Пресс)
+Приседания со штангой 4х8-10
+Жим ногами в тренажере 3х12
+Румынская становая тяга 3х10-12
+Сгибания ног лежа 3х15
+Подъем на носки стоя 4х15
+Скручивания на пресс 3х20
+
+День 3: Верх тела (Плечи и Спина)
+Армейский жим штанги стоя 4х10
+Подтягивания широким хватом 4х8
+Сведение рук в кроссовере 3х12
+Махи гантелями в стороны 4х15
+Тяга на заднюю дельту Face Pulls 3х15
+Молотки с гантелями на бицепс 3х12
+
+День 4: Низ тела и Кор
+Становая тяга 4х8
+Выпады с гантелями 3х12
+Разгибания ног в тренажере 3х15
+Сгибания ног сидя 3х15
+Планка на локтях 3х60`,
+
+  template_3: `День 1: Толкай (Грудь, Плечи, Трицепс)
+Жим штанги лежа 4х8-10
+Жим гантелей на наклонной скамье 3х10-12
+Отжимания на брусьях 3х10
+Армейский жим гантелей сидя 3х10
+Махи гантелями в стороны 4х15
+Разгибание на блоке с канатом 3х12
+
+День 2: Тяни (Спина, Задняя дельта, Бицепс)
+Подтягивания широким хватом 4х8
+Тяга штанги в наклоне к поясу 4х10
+Тяга горизонтального блока 3х12
+Тяга на заднюю дельту Face Pulls 3х15
+Подъем штанги на бицепс 3х10
+Молотки с гантелями 3х12
+
+День 3: Ноги и Пресс
+Приседания со штангой 4х8-10
+Жим платформы ногами 3х12
+Румынская тяга 3х10
+Сгибания ног в тренажере 3х15
+Подъем на носки 4х15
+Подъем ног в висе на перекладине 3х15`
+};
+
+function loadWorkoutTemplate(days) {
+  const textarea = document.getElementById("customProgramTextarea");
+  const tpl = days === 3 ? WORKOUT_TEMPLATES.template_3 : WORKOUT_TEMPLATES.template_4;
+  if (textarea) textarea.value = tpl;
+  setCustomImportMode("text");
+
+  const parsed = parseWorkoutTextToProgram(tpl);
+  parsed.title = days === 3 ? "Тяни / Толкай / Ноги" : "Верх / Низ (4 дня)";
+  applyStructuredProgram(parsed);
+  triggerHaptic("light");
+  showToast(`Загружен шаблон на ${days} дня!`);
+}
+
+function triggerParseWorkoutAction() {
+  const textarea = document.getElementById("customProgramTextarea");
+  const text = (textarea ? textarea.value : "").trim();
+  if (!text) {
+    showToast("Введите список упражнений или выберите готовый пример!");
+    return;
+  }
+
+  const parsed = parseWorkoutTextToProgram(text);
+  applyStructuredProgram(parsed);
+  triggerHaptic("light");
+  showToast(`Собрано ${parsed.days.length} тренировочных дня!`);
+}
+
+// 5. Intelligent Workout Parser & Muscle Classifier
+function parseWorkoutTextToProgram(rawText) {
+  const lines = rawText.split("\n").map(l => l.trim()).filter(Boolean);
+  
+  const dayHeaderRegex = /^(?:день|day|тренировка|workout)\s*(\d+|[ivx]+|[a-d])|\b(?:понедельник|вторник|среда|четверг|пятница|суббота|воскресенье|пн|вт|ср|чт|пт|сб|вс)\b|^(?:верх|низ|толкай|тяни|ноги|грудь|спина|плечи|руки|push|pull|legs|upper|lower)\b/i;
+  const setsRepsRegex = /(\d+)\s*[xх*×]\s*(\d+(?:-\d+)?)(?:\s*(?:повторений|повтора|повторов|раз|сек|минут|reps))?|\b(\d+)\s*(?:подхода|подходов|сета|сетов)\s*(?:по\s*)?(\d+(?:-\d+)?)(?:\s*(?:повторений|повтора|повторов|раз|сек|минут|reps))?|(\d+)\s*по\s*(\d+(?:-\d+)?)(?:\s*(?:повторений|повтора|повторов|раз|сек|минут|reps))?/i;
+
+  const days = [];
+  let currentDay = null;
+
+  for (const line of lines) {
+    if (dayHeaderRegex.test(line)) {
+      currentDay = {
+        title: line.replace(/^[-–—#*\s]+/, "").trim(),
+        exercises: []
+      };
+      days.push(currentDay);
+    } else {
+      if (!currentDay) {
+        currentDay = {
+          title: "День 1: Основная тренировка",
+          exercises: []
+        };
+        days.push(currentDay);
+      }
+
+      // Strip numbering like "1.", "1)", "- ", "• "
+      let exLine = line.replace(/^\d+[\.\)]\s*|^[-•*#]\s*/, "").trim();
+
+      // Extract sets & reps
+      let sets = 3;
+      let reps = "10-12";
+      const match = setsRepsRegex.exec(exLine);
+      if (match) {
+        if (match[1] && match[2]) {
+          sets = parseInt(match[1], 10);
+          reps = match[2];
+        } else if (match[3] && match[4]) {
+          sets = parseInt(match[3], 10);
+          reps = match[4];
+        } else if (match[5] && match[6]) {
+          sets = parseInt(match[5], 10);
+          reps = match[6];
+        }
+        exLine = exLine.replace(setsRepsRegex, "").trim();
+      }
+
+      // Clean remaining punctuation
+      exLine = exLine.replace(/[-–—:()]+$/, "").trim();
+
+      if (exLine.length >= 2) {
+        const classified = matchOrClassifyExercise(exLine);
+        classified.targetSets = Math.min(6, Math.max(1, sets));
+        classified.targetReps = reps || "10-12";
+        currentDay.exercises.push(classified);
+      }
+    }
+  }
+
+  // Fallback: if user supplied multiple exercises without day markers, split into 3 or 4 days
+  if (days.length === 1 && days[0].exercises.length >= 8) {
+    const total = days[0].exercises;
+    const daysCount = total.length >= 14 ? 4 : 3;
+    const perDay = Math.ceil(total.length / daysCount);
+    const newDays = [];
+    for (let i = 0; i < daysCount; i++) {
+      const slice = total.slice(i * perDay, (i + 1) * perDay);
+      if (slice.length > 0) {
+        newDays.push({
+          title: `День ${i + 1}`,
+          exercises: slice
+        });
+      }
+    }
+    return {
+      title: "Моя программа",
+      days: newDays
+    };
+  }
+
+  return {
+    title: "Моя программа",
+    days: days.length > 0 ? days : [
+      {
+        title: "День 1: Верх тела",
+        exercises: [
+          matchOrClassifyExercise("Жим штанги лежа"),
+          matchOrClassifyExercise("Тяга в наклоне")
+        ]
+      }
+    ]
+  };
+}
+
+function matchOrClassifyExercise(rawName) {
+  const lower = rawName.toLowerCase();
+
+  // 1. Exact or substring match in standard catalog
+  for (const dbEx of EXERCISES_DB) {
+    const dbLower = dbEx.name.toLowerCase();
+    if (dbLower.includes(lower) || (lower.length > 5 && dbLower.includes(lower.slice(0, 8)))) {
+      return {
+        id: dbEx.id,
+        name: rawName,
+        muscle: dbEx.muscle,
+        muscle_ru: dbEx.muscle_ru,
+        equipment: dbEx.equipment,
+        github_id: dbEx.github_id
+      };
+    }
+  }
+
+  // 2. Keyword mapping table
+  const KEYWORD_MAP = [
+    { keys: ["жим лежа", "жим штанги лежа", "горизонтальн", "bench press"], id: "ex_chest_1" },
+    { keys: ["наклон", "жим гантелей наклон", "incline dumbbell"], id: "ex_chest_2" },
+    { keys: ["брусья", "отжимания на брусьях", "dips"], id: "ex_chest_3" },
+    { keys: ["кроссовер", "сведение", "бабочка", "crossover"], id: "ex_chest_4" },
+    { keys: ["подтягиван", "турник", "pullups", "chin"], id: "ex_back_1" },
+    { keys: ["тяга в наклоне", "тяга штанги в", "bent over"], id: "ex_back_2" },
+    { keys: ["тяга верхнего", "тяга блока к груди", "lat pulldown"], id: "ex_back_3" },
+    { keys: ["тяга горизонтального", "тяга к поясу", "cable row"], id: "ex_back_4" },
+    { keys: ["армейский", "жим стоя", "жим сидя", "overhead"], id: "ex_shoulders_1" },
+    { keys: ["махи", "разведение гантелей", "lateral raise"], id: "ex_shoulders_2" },
+    { keys: ["задняя дельта", "face pull", "задние дельты"], id: "ex_shoulders_3" },
+    { keys: ["присед", "приседания", "squat"], id: "ex_legs_1" },
+    { keys: ["жим ногами", "leg press"], id: "ex_legs_2" },
+    { keys: ["румынская", "мертвая", "становая", "deadlift", "rdl"], id: "ex_legs_3" },
+    { keys: ["выпады", "lunge"], id: "ex_legs_4" },
+    { keys: ["сгибание ног", "бицепс бедра", "leg curl"], id: "ex_legs_5" },
+    { keys: ["разгибание ног", "квадрицепс", "leg extension"], id: "ex_legs_6" },
+    { keys: ["икры", "носки", "голень", "calf"], id: "ex_legs_7" },
+    { keys: ["бицепс со штангой", "подъем на бицепс", "bicep curl"], id: "ex_arms_1" },
+    { keys: ["французский", "skull crusher"], id: "ex_arms_2" },
+    { keys: ["молот", "молотки", "hammer"], id: "ex_arms_3" },
+    { keys: ["разгибание на блоке", "трицепс блок", "pushdown"], id: "ex_arms_4" },
+    { keys: ["скручиван", "пресс", "crunches"], id: "ex_core_1" },
+    { keys: ["планка", "plank"], id: "ex_core_2" },
+    { keys: ["подъем ног", "висе", "leg raise"], id: "ex_core_3" }
+  ];
+
+  for (const item of KEYWORD_MAP) {
+    for (const k of item.keys) {
+      if (lower.includes(k)) {
+        const found = EXERCISES_DB.find(e => e.id === item.id);
+        if (found) {
+          return {
+            id: found.id,
+            name: rawName,
+            muscle: found.muscle,
+            muscle_ru: found.muscle_ru,
+            equipment: found.equipment,
+            github_id: found.github_id
+          };
+        }
+      }
+    }
+  }
+
+  // 3. Fallback: Auto-classify muscle group and equipment
+  let muscle = "chest";
+  let muscle_ru = "Грудь";
+  let github_id = "Barbell_Bench_Press_-_Medium_Grip";
+
+  if (lower.includes("спин") || lower.includes("тяг") || lower.includes("широч") || lower.includes("блок") || lower.includes("подтяг")) {
+    muscle = "back";
+    muscle_ru = "Спина";
+    github_id = "Pullups";
+  } else if (lower.includes("ног") || lower.includes("присед") || lower.includes("бедр") || lower.includes("икр") || lower.includes("выпад") || lower.includes("квадр") || lower.includes("ягодиц")) {
+    muscle = "legs";
+    muscle_ru = "Ноги";
+    github_id = "Barbell_Squat";
+  } else if (lower.includes("плеч") || lower.includes("дельт") || lower.includes("мах") || lower.includes("армей")) {
+    muscle = "shoulders";
+    muscle_ru = "Плечи";
+    github_id = "Dumbbell_Shoulder_Press";
+  } else if (lower.includes("бицепс") || lower.includes("трицепс") || lower.includes("рук") || lower.includes("молот") || lower.includes("француз")) {
+    muscle = "arms";
+    muscle_ru = "Руки";
+    github_id = "Barbell_Curl";
+  } else if (lower.includes("пресс") || lower.includes("кор") || lower.includes("скручив") || lower.includes("планк")) {
+    muscle = "core";
+    muscle_ru = "Пресс";
+    github_id = "Crunches";
+  }
+
+  let equipment = "Тренажер";
+  if (lower.includes("штанги") || lower.includes("штанга")) equipment = "Штанга";
+  else if (lower.includes("гантел")) equipment = "Гантели";
+  else if (lower.includes("брусья") || lower.includes("турник") || lower.includes("свой вес")) equipment = "Свой вес";
+  else if (lower.includes("блок") || lower.includes("кроссовер") || lower.includes("смитт")) equipment = "Тренажер";
+
+  return {
+    id: "ex_custom_" + Math.random().toString(36).substr(2, 9),
+    name: rawName,
+    muscle,
+    muscle_ru,
+    equipment,
+    github_id,
+    targetSets: 3,
+    targetReps: "10-12",
+    steps: [
+      "Примите правильное исходное положение, сохраняя естественные изгибы позвоночника.",
+      "Выполняйте движение подконтрольно в полной амплитуде без рывков.",
+      "Фокусируйтесь на работе целевой мышечной группы и ровном дыхании."
+    ],
+    mistakes: [
+      "Резкие движения и потеря контроля в негативной фазе.",
+      "Задержка дыхания при пиковом усилии."
+    ],
+    primary: muscle_ru,
+    secondary: "Мышцы-стабилизаторы",
+    breathing: "Вдох на опускании/растяжении, выдох на сокращении"
+  };
+}
+
+function applyStructuredProgram(parsedProg) {
+  customDraft = {
+    title: parsedProg.title || "Моя программа",
+    days: (parsedProg.days || []).map((d, i) => {
+      return {
+        dayNum: i + 1,
+        title: d.title || `День ${i + 1}`,
+        exercises: (d.exercises || []).map(ex => {
+          if (typeof ex === "string") {
+            const mapped = matchOrClassifyExercise(ex);
+            mapped.targetSets = 3;
+            mapped.targetReps = "10-12";
+            return mapped;
+          }
+          const base = matchOrClassifyExercise(ex.name || "Упражнение");
+          base.targetSets = ex.sets || ex.targetSets || 3;
+          base.targetReps = ex.reps || ex.targetReps || "10-12";
+          return base;
+        })
+      };
+    })
+  };
+
+  renderParsedProgramPreview(customDraft);
+}
+
+// 6. Interactive Preview & Day Editor
+function renderParsedProgramPreview(draft) {
+  const previewSection = document.getElementById("parsedProgramPreviewSection");
+  const daysBadge = document.getElementById("parsedDaysBadge");
+  const titleInput = document.getElementById("parsedProgramTitleInput");
+  const daysList = document.getElementById("parsedDaysList");
+
+  if (!previewSection || !daysList) return;
+
+  previewSection.classList.remove("hidden");
+  if (daysBadge) daysBadge.textContent = `${draft.days.length} ${draft.days.length === 1 ? 'день' : draft.days.length < 5 ? 'дня' : 'дней'}`;
+  if (titleInput) titleInput.value = draft.title || "Моя программа";
+
+  const muscleBadgeColors = {
+    chest: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+    back: "bg-sky-500/20 text-sky-300 border-sky-500/40",
+    legs: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    shoulders: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
+    arms: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    core: "bg-purple-500/20 text-purple-300 border-purple-500/40"
+  };
+
+  daysList.innerHTML = draft.days.map((day, dayIdx) => {
+    return `
+      <div class="bg-of-subcard rounded-2xl border border-of-border p-3 space-y-2.5">
+        
+        <!-- Day Card Header -->
+        <div class="flex items-center justify-between gap-2 border-b border-of-border/60 pb-2">
+          <div class="flex items-center gap-2 flex-1">
+            <span class="w-6 h-6 rounded-lg bg-of-blue/15 text-of-blue font-black flex items-center justify-center text-[11px] shrink-0">
+              0${dayIdx + 1}
+            </span>
+            <input type="text" value="${day.title}" onchange="updateDraftDayTitle(${dayIdx}, this.value)" class="bg-transparent text-white font-bold text-xs w-full outline-none focus:text-of-blue" placeholder="Название дня">
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[10px] text-slate-400 font-semibold">${day.exercises.length} упр.</span>
+            ${draft.days.length > 1 ? `
+              <button onclick="removeDraftDay(${dayIdx})" class="w-6 h-6 rounded-lg bg-of-card text-slate-400 hover:text-red-400 flex items-center justify-center transition" title="Удалить день">
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+              </button>
+            ` : ""}
+          </div>
+        </div>
+
+        <!-- Exercises in this day -->
+        <div class="space-y-1.5">
+          ${day.exercises.map((ex, exIdx) => {
+            const badgeClass = muscleBadgeColors[ex.muscle] || "bg-slate-700 text-slate-300 border-slate-600";
+            return `
+              <div class="bg-of-card p-2 rounded-xl border border-of-border flex items-center justify-between gap-2 text-xs">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border ${badgeClass}">
+                      ${ex.muscle_ru || ex.muscle}
+                    </span>
+                    <select onchange="updateDraftExerciseMuscle(${dayIdx}, ${exIdx}, this.value)" class="text-[9px] bg-of-subcard border border-of-border rounded px-1 py-0.5 text-slate-300 outline-none">
+                      <option value="chest" ${ex.muscle === "chest" ? "selected" : ""}>Грудь</option>
+                      <option value="back" ${ex.muscle === "back" ? "selected" : ""}>Спина</option>
+                      <option value="legs" ${ex.muscle === "legs" ? "selected" : ""}>Ноги</option>
+                      <option value="shoulders" ${ex.muscle === "shoulders" ? "selected" : ""}>Плечи</option>
+                      <option value="arms" ${ex.muscle === "arms" ? "selected" : ""}>Руки</option>
+                      <option value="core" ${ex.muscle === "core" ? "selected" : ""}>Пресс</option>
+                    </select>
+                  </div>
+                  <input type="text" value="${ex.name}" onchange="updateDraftExerciseName(${dayIdx}, ${exIdx}, this.value)" class="bg-transparent text-white font-semibold text-[11px] w-full outline-none focus:text-of-blue truncate" placeholder="Название упражнения">
+                </div>
+
+                <!-- Sets & Reps Inputs -->
+                <div class="flex items-center gap-1 shrink-0">
+                  <div class="flex items-center bg-of-subcard border border-of-border rounded-lg px-1.5 py-1 text-[10px]">
+                    <span class="text-slate-400 mr-1">Сеты:</span>
+                    <input type="number" min="1" max="10" value="${ex.targetSets || 3}" onchange="updateDraftExerciseSets(${dayIdx}, ${exIdx}, this.value)" class="w-6 bg-transparent text-white font-bold text-center outline-none">
+                  </div>
+
+                  <div class="flex items-center bg-of-subcard border border-of-border rounded-lg px-1.5 py-1 text-[10px]">
+                    <span class="text-slate-400 mr-1">Повт:</span>
+                    <input type="text" value="${ex.targetReps || '10-12'}" onchange="updateDraftExerciseReps(${dayIdx}, ${exIdx}, this.value)" class="w-11 bg-transparent text-white font-bold text-center outline-none">
+                  </div>
+
+                  <button onclick="removeDraftExercise(${dayIdx}, ${exIdx})" class="w-6 h-6 rounded-lg text-slate-500 hover:text-red-400 flex items-center justify-center transition">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+
+        <!-- Add Exercise Button -->
+        <button onclick="addDraftExercise(${dayIdx})" class="w-full py-1.5 rounded-xl border border-dashed border-of-border hover:border-of-blue text-slate-400 hover:text-of-blue text-[11px] font-bold flex items-center justify-center gap-1 transition">
+          <i data-lucide="plus" class="w-3 h-3"></i>
+          <span>Добавить упражнение</span>
+        </button>
+
+      </div>
+    `;
+  }).join("");
+
+  // Append "Add Day" button if less than 7 days
+  if (draft.days.length < 7) {
+    daysList.insertAdjacentHTML("beforeend", `
+      <button onclick="addDraftDay()" class="w-full py-2.5 rounded-2xl bg-of-subcard border border-of-border hover:border-of-blue text-slate-300 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition">
+        <i data-lucide="plus-circle" class="w-4 h-4 text-of-blue"></i>
+        <span>Добавить еще один день (День 0${draft.days.length + 1})</span>
+      </button>
+    `);
+  }
+
+  lucide.createIcons();
+
+  // Smooth scroll down to preview
+  setTimeout(() => {
+    previewSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 100);
+}
+
+// 7. Draft Mutation Functions
+function updateDraftDayTitle(dayIdx, value) {
+  if (customDraft.days[dayIdx]) {
+    customDraft.days[dayIdx].title = value.trim() || `День ${dayIdx + 1}`;
+  }
+}
+
+function updateDraftExerciseName(dayIdx, exIdx, value) {
+  if (customDraft.days[dayIdx]?.exercises[exIdx]) {
+    customDraft.days[dayIdx].exercises[exIdx].name = value.trim() || "Упражнение";
+  }
+}
+
+function updateDraftExerciseSets(dayIdx, exIdx, value) {
+  const num = parseInt(value, 10);
+  if (customDraft.days[dayIdx]?.exercises[exIdx] && !isNaN(num)) {
+    customDraft.days[dayIdx].exercises[exIdx].targetSets = Math.max(1, Math.min(10, num));
+  }
+}
+
+function updateDraftExerciseReps(dayIdx, exIdx, value) {
+  if (customDraft.days[dayIdx]?.exercises[exIdx]) {
+    customDraft.days[dayIdx].exercises[exIdx].targetReps = value.trim() || "10-12";
+  }
+}
+
+function updateDraftExerciseMuscle(dayIdx, exIdx, muscleKey) {
+  const muscleRuMap = {
+    chest: "Грудь",
+    back: "Спина",
+    legs: "Ноги",
+    shoulders: "Плечи",
+    arms: "Руки",
+    core: "Пресс"
+  };
+  if (customDraft.days[dayIdx]?.exercises[exIdx]) {
+    customDraft.days[dayIdx].exercises[exIdx].muscle = muscleKey;
+    customDraft.days[dayIdx].exercises[exIdx].muscle_ru = muscleRuMap[muscleKey] || "Грудь";
+    renderParsedProgramPreview(customDraft);
+  }
+}
+
+function removeDraftExercise(dayIdx, exIdx) {
+  if (customDraft.days[dayIdx]?.exercises) {
+    customDraft.days[dayIdx].exercises.splice(exIdx, 1);
+    renderParsedProgramPreview(customDraft);
+    triggerHaptic("light");
+  }
+}
+
+function addDraftExercise(dayIdx) {
+  if (customDraft.days[dayIdx]) {
+    const newEx = matchOrClassifyExercise("Новое упражнение");
+    newEx.targetSets = 3;
+    newEx.targetReps = "10-12";
+    customDraft.days[dayIdx].exercises.push(newEx);
+    renderParsedProgramPreview(customDraft);
+    triggerHaptic("light");
+  }
+}
+
+function removeDraftDay(dayIdx) {
+  if (customDraft.days.length > 1) {
+    customDraft.days.splice(dayIdx, 1);
+    // Renumber days
+    customDraft.days.forEach((d, i) => {
+      d.dayNum = i + 1;
+    });
+    renderParsedProgramPreview(customDraft);
+    triggerHaptic("light");
+  }
+}
+
+function addDraftDay() {
+  const nextNum = customDraft.days.length + 1;
+  const newEx = matchOrClassifyExercise("Жим штанги лежа");
+  newEx.targetSets = 4;
+  newEx.targetReps = "10";
+
+  customDraft.days.push({
+    dayNum: nextNum,
+    title: `День ${nextNum}`,
+    exercises: [newEx]
+  });
+  renderParsedProgramPreview(customDraft);
+  triggerHaptic("light");
+}
+
+// 8. Final Save and Activation
+function saveCustomProgram() {
+  const titleInput = document.getElementById("parsedProgramTitleInput");
+  const progTitle = (titleInput ? titleInput.value.trim() : "") || customDraft.title || "Моя программа";
+
+  // Validate
+  if (!customDraft.days || customDraft.days.length === 0) {
+    showToast("В программе должен быть хотя бы 1 день!");
+    return;
+  }
+
+  let totalEx = 0;
+  customDraft.days.forEach(d => {
+    totalEx += d.exercises.length;
+  });
+
+  if (totalEx === 0) {
+    showToast("Добавьте хотя бы одно упражнение!");
+    return;
+  }
+
+  // Register all exercises into EXERCISES_DB if not already present
+  customDraft.days.forEach(d => {
+    d.exercises.forEach(ex => {
+      let existing = EXERCISES_DB.find(e => e.id === ex.id);
+      if (!existing) {
+        EXERCISES_DB.push({
+          id: ex.id,
+          name: ex.name,
+          muscle: ex.muscle || "chest",
+          muscle_ru: ex.muscle_ru || "Грудь",
+          equipment: ex.equipment || "Тренажер",
+          github_id: ex.github_id || "Barbell_Bench_Press_-_Medium_Grip",
+          targetSets: ex.targetSets || 3,
+          targetReps: ex.targetReps || "10-12",
+          steps: ex.steps || [
+            "Примите правильное исходное положение.",
+            "Выполняйте движение подконтрольно в полной амплитуде.",
+            "Держите темп и ровное дыхание."
+          ],
+          mistakes: ex.mistakes || ["Инерция и рывки."],
+          primary: ex.muscle_ru || "Целевая мышца",
+          secondary: "Мышцы-стабилизаторы",
+          breathing: "Вдох в негативной фазе, выдох на усилии"
+        });
+      } else {
+        // Update sets & reps
+        existing.targetSets = ex.targetSets || existing.targetSets || 3;
+        existing.targetReps = ex.targetReps || existing.targetReps || "10-12";
+      }
+    });
+  });
+
+  saveCustomExercisesStorage();
+
+  // Create program object
+  const progId = "custom_split_" + Date.now();
+  const daysCount = customDraft.days.length;
+
+  const newProgram = {
+    id: progId,
+    type: "custom",
+    isCustom: true,
+    categoryTitle: "⭐️ Своя программа",
+    title: progTitle,
+    fullTitle: `${progTitle} (${daysCount} ${daysCount === 1 ? 'день' : daysCount < 5 ? 'дня' : 'дней'})`,
+    daysPerWeek: daysCount,
+    days: customDraft.days.map((d, i) => {
+      return {
+        dayNum: i + 1,
+        title: d.title || `День ${i + 1}`,
+        subtitle: `Индивидуальный комплекс (${d.exercises.length} упр.)`,
+        durationMin: Math.max(45, d.exercises.length * 10 + 15),
+        exercises: d.exercises.map(ex => ex.id)
+      };
+    })
+  };
+
+  saveCustomProgramToStorage(newProgram);
+
+  // Activate custom program in user state
+  state.programId = progId;
+  state.user.split = progId;
+  state.selectedDayIdx = 0;
+  saveState();
+
+  // Close modal
+  closeCustomProgramModal();
+
+  // Update UI and navigate to Workouts tab
+  renderAll();
+  switchTab("tab-workouts");
+  triggerHaptic("success");
+  showToast(`Программа «${progTitle}» сохранена и активирована! 🚀`);
+}
+
+

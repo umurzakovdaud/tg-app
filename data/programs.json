@@ -1,0 +1,514 @@
+{
+  "classic_split_3": {
+    "id": "classic_split_3",
+    "type": "split",
+    "categoryTitle": "Сплит",
+    "title": "Сплит",
+    "fullTitle": "Классический сплит (3 дня)",
+    "description": "Золотой стандарт бодибилдинга: разделение по мышцам-синергистам (Грудь/Трицепс, Спина/Бицепс, Ноги/Плечи). Максимальный акцент на рост мышечной массы и восстановление.",
+    "daysPerWeek": 3,
+    "level": "intermediate",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Грудь и Трицепс",
+        "subtitle": "Жимовая группа мышц, верх груди и трицепс",
+        "durationMin": 65,
+        "exercises": [
+          "ex_chest_1",
+          "ex_chest_2",
+          "ex_chest_4",
+          "ex_arms_2",
+          "ex_arms_4",
+          "ex_core_1"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Спина и Бицепс",
+        "subtitle": "Широчайшие, толщина спины и двуглавая мышца",
+        "durationMin": 65,
+        "exercises": [
+          "ex_back_1",
+          "ex_back_2",
+          "ex_back_3",
+          "ex_arms_1",
+          "ex_arms_3",
+          "ex_core_3"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Ноги и Плечи",
+        "subtitle": "Базовые приседания, квадрицепс, дельты и икры",
+        "durationMin": 70,
+        "exercises": [
+          "ex_legs_1",
+          "ex_legs_2",
+          "ex_legs_3",
+          "ex_shoulders_1",
+          "ex_shoulders_2",
+          "ex_legs_7"
+        ]
+      }
+    ]
+  },
+  "classic_split_4": {
+    "id": "classic_split_4",
+    "type": "split",
+    "categoryTitle": "Сплит",
+    "title": "Сплит 4D",
+    "fullTitle": "Сплит по мышечным группам (4 дня)",
+    "description": "Прицельная изоляция крупных и мелких мышечных групп для опытных атлетов. Высокий тренировочный объем на каждую группу мышц.",
+    "daysPerWeek": 4,
+    "level": "expert",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Грудь и Пресс",
+        "subtitle": "Горизонтальный и наклонный жим, брусья, сведение",
+        "durationMin": 60,
+        "exercises": [
+          "ex_chest_1",
+          "ex_chest_2",
+          "ex_chest_3",
+          "ex_chest_4",
+          "ex_core_1",
+          "ex_core_2"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Спина и Задняя дельта",
+        "subtitle": "Подтягивания, тяга штанги к поясу, тяга блока, Face Pulls",
+        "durationMin": 65,
+        "exercises": [
+          "ex_back_1",
+          "ex_back_2",
+          "ex_back_3",
+          "ex_back_4",
+          "ex_shoulders_3",
+          "ex_core_3"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Плечи и Руки",
+        "subtitle": "Жим на плечи, махи в стороны, суперсет на бицепс и трицепс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_shoulders_1",
+          "ex_shoulders_2",
+          "ex_arms_1",
+          "ex_arms_2",
+          "ex_arms_3",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 4,
+        "title": "Ноги и Икры",
+        "subtitle": "Приседания со штангой, жим платформы, румынская тяга, икры",
+        "durationMin": 65,
+        "exercises": [
+          "ex_legs_1",
+          "ex_legs_2",
+          "ex_legs_3",
+          "ex_legs_5",
+          "ex_legs_6",
+          "ex_legs_7"
+        ]
+      }
+    ]
+  },
+  "push_pull_legs": {
+    "id": "push_pull_legs",
+    "type": "push_pull",
+    "categoryTitle": "Тяни/Толкай",
+    "title": "Тяни/толкай",
+    "fullTitle": "Тяни / Толкай / Ноги (3 дня)",
+    "description": "Эффективная система деления тренировок по биомеханическим паттернам: жимовые движения (Push), тяговые движения (Pull) и проработка ног (Legs).",
+    "daysPerWeek": 3,
+    "level": "intermediate",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Толкай (Push)",
+        "subtitle": "Грудь, передняя и средняя дельта, трицепс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_chest_1",
+          "ex_chest_2",
+          "ex_shoulders_1",
+          "ex_shoulders_2",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Тяни (Pull)",
+        "subtitle": "Широчайшие, трапеции, задняя дельта, бицепс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_back_1",
+          "ex_back_2",
+          "ex_back_3",
+          "ex_shoulders_3",
+          "ex_arms_1",
+          "ex_arms_3"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Ноги (Legs)",
+        "subtitle": "Квадрицепсы, бицепс бедра, голень, кор",
+        "durationMin": 65,
+        "exercises": [
+          "ex_legs_1",
+          "ex_legs_2",
+          "ex_legs_3",
+          "ex_legs_5",
+          "ex_legs_7",
+          "ex_core_1"
+        ]
+      }
+    ]
+  },
+  "push_pull_4": {
+    "id": "push_pull_4",
+    "type": "push_pull",
+    "categoryTitle": "Тяни/Толкай",
+    "title": "Тяни/толкай 4D",
+    "fullTitle": "Тяни / Толкай (4 дня)",
+    "description": "Продвинутый 4-дневный протокол Push/Pull: два жимовых и два тяговых дня в неделю с чередованием силовой и объемной нагрузки.",
+    "daysPerWeek": 4,
+    "level": "expert",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Толкай A (Силовой жим)",
+        "subtitle": "Тяжелый жим лежа, брусья, плечи и трицепс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_chest_1",
+          "ex_chest_3",
+          "ex_shoulders_1",
+          "ex_arms_2",
+          "ex_core_1"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Тяни A (Силовая тяга)",
+        "subtitle": "Тяжелые подтягивания, тяга штанги, бицепс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_back_1",
+          "ex_back_2",
+          "ex_shoulders_3",
+          "ex_arms_1",
+          "ex_core_3"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Толкай B (Объем & Дельты)",
+        "subtitle": "Наклонный жим гантелей, кроссовер, махи, блок",
+        "durationMin": 65,
+        "exercises": [
+          "ex_chest_2",
+          "ex_chest_4",
+          "ex_shoulders_2",
+          "ex_arms_4",
+          "ex_core_2"
+        ]
+      },
+      {
+        "dayNum": 4,
+        "title": "Тяни B (Широчайшие & Ноги)",
+        "subtitle": "Верхний блок, румынская тяга, сгибания ног, бицепс",
+        "durationMin": 65,
+        "exercises": [
+          "ex_back_3",
+          "ex_back_4",
+          "ex_legs_3",
+          "ex_arms_3",
+          "ex_legs_5"
+        ]
+      }
+    ]
+  },
+  "upper_lower_gym_4": {
+    "id": "upper_lower_gym_4",
+    "type": "upper_lower",
+    "categoryTitle": "Верх/Низ",
+    "title": "Верх/низ",
+    "fullTitle": "Верх / Низ (4 дня, Зал)",
+    "description": "Фирменная флагманская программа Onlyfits: 4 тренировки в неделю с чередованием верха и низа тела. Идеальная частота стимуляции мышц дважды в неделю.",
+    "daysPerWeek": 4,
+    "level": "expert",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Верх A",
+        "subtitle": "Грудь, спина, плечи, руки",
+        "durationMin": 65,
+        "exercises": [
+          "ex_chest_1",
+          "ex_back_2",
+          "ex_chest_2",
+          "ex_back_3",
+          "ex_arms_1",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Низ A",
+        "subtitle": "Квадрицепс, бицепс бедра, пресс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_legs_1",
+          "ex_legs_3",
+          "ex_legs_2",
+          "ex_legs_5",
+          "ex_legs_7",
+          "ex_core_1"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Верх B",
+        "subtitle": "Ширина спины, дельты, руки",
+        "durationMin": 70,
+        "exercises": [
+          "ex_back_1",
+          "ex_shoulders_1",
+          "ex_chest_3",
+          "ex_back_4",
+          "ex_shoulders_2",
+          "ex_arms_3",
+          "ex_core_1",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 4,
+        "title": "Низ B",
+        "subtitle": "Выпады, разгибания, кор, пресс",
+        "durationMin": 65,
+        "exercises": [
+          "ex_legs_4",
+          "ex_legs_3",
+          "ex_legs_6",
+          "ex_legs_5",
+          "ex_core_3",
+          "ex_core_2"
+        ]
+      }
+    ]
+  },
+  "upper_lower_gym_3": {
+    "id": "upper_lower_gym_3",
+    "type": "upper_lower",
+    "categoryTitle": "Верх/Низ",
+    "title": "Верх/низ 3D",
+    "fullTitle": "Верх / Низ (3 дня, Зал)",
+    "description": "Сбалансированная программа для тех, кто тренируется 3 раза в неделю (Верх A / Низ / Верх B). Полноценное восстановление между тренировочными днями.",
+    "daysPerWeek": 3,
+    "level": "intermediate",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Верх A",
+        "subtitle": "Грудь, спина, плечи, руки",
+        "durationMin": 65,
+        "exercises": [
+          "ex_chest_1",
+          "ex_back_2",
+          "ex_chest_2",
+          "ex_back_3",
+          "ex_arms_1",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Низ",
+        "subtitle": "Приседания, румынская тяга, икры, пресс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_legs_1",
+          "ex_legs_3",
+          "ex_legs_2",
+          "ex_legs_5",
+          "ex_legs_7",
+          "ex_core_1"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Верх B",
+        "subtitle": "Ширина спины, дельты, руки",
+        "durationMin": 70,
+        "exercises": [
+          "ex_back_1",
+          "ex_shoulders_1",
+          "ex_chest_3",
+          "ex_back_4",
+          "ex_shoulders_2",
+          "ex_arms_3"
+        ]
+      }
+    ]
+  },
+  "upper_lower_home_3": {
+    "id": "upper_lower_home_3",
+    "type": "upper_lower",
+    "categoryTitle": "Верх/Низ",
+    "title": "Верх/низ Дом",
+    "fullTitle": "Верх / Низ (3 дня, Дома)",
+    "description": "Эффективные домашние тренировки с гантелями, турником и весом тела для поддержания формы и тонуса мышц без спортзала.",
+    "daysPerWeek": 3,
+    "level": "intermediate",
+    "location": "home",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Верх тела (Дом)",
+        "subtitle": "Отжимания, тяги с гантелями, дельты",
+        "durationMin": 55,
+        "exercises": [
+          "ex_chest_2",
+          "ex_back_2",
+          "ex_shoulders_1",
+          "ex_arms_1",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Низ тела (Дом)",
+        "subtitle": "Приседания, выпады, пресс",
+        "durationMin": 50,
+        "exercises": [
+          "ex_legs_1",
+          "ex_legs_4",
+          "ex_legs_3",
+          "ex_core_1",
+          "ex_core_2"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Верх B (Дом)",
+        "subtitle": "Плечи, спина, отжимания на брусьях",
+        "durationMin": 55,
+        "exercises": [
+          "ex_chest_3",
+          "ex_shoulders_2",
+          "ex_back_1",
+          "ex_arms_3"
+        ]
+      }
+    ]
+  },
+  "full_body": {
+    "id": "full_body",
+    "type": "full_body",
+    "categoryTitle": "Фуллбоди",
+    "title": "Фуллбоди",
+    "fullTitle": "Фуллбоди (3 дня, Все тело)",
+    "description": "Проработка всех основных мышечных групп на каждой тренировке трижды в неделю. Высокий расход калорий и максимальная частота нейромышечной адаптации.",
+    "daysPerWeek": 3,
+    "level": "intermediate",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Full Body A",
+        "subtitle": "Приседания, жим штанги, тяга в наклоне, плечи",
+        "durationMin": 65,
+        "exercises": [
+          "ex_legs_1",
+          "ex_chest_1",
+          "ex_back_2",
+          "ex_shoulders_2",
+          "ex_arms_1"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Full Body B",
+        "subtitle": "Бицепс бедра, наклонный жим, верхний блок, трицепс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_legs_3",
+          "ex_chest_2",
+          "ex_back_3",
+          "ex_shoulders_1",
+          "ex_arms_4"
+        ]
+      },
+      {
+        "dayNum": 3,
+        "title": "Full Body C",
+        "subtitle": "Выпады, подтягивания, брусья, молотки, пресс",
+        "durationMin": 60,
+        "exercises": [
+          "ex_legs_4",
+          "ex_chest_3",
+          "ex_back_1",
+          "ex_arms_3",
+          "ex_core_1"
+        ]
+      }
+    ]
+  },
+  "full_body_start_2": {
+    "id": "full_body_start_2",
+    "type": "full_body",
+    "categoryTitle": "Фуллбоди",
+    "title": "Фуллбоди Экспресс",
+    "fullTitle": "Фуллбоди Экспресс (2 дня)",
+    "description": "Компактная двухдневная программа для начинающих или при плотном графике. Охватывает все тело за минимальное время.",
+    "daysPerWeek": 2,
+    "level": "beginner",
+    "location": "gym",
+    "days": [
+      {
+        "dayNum": 1,
+        "title": "Full Body 1 (Сила)",
+        "subtitle": "Приседания, жим лежа, тяга в наклоне, пресс",
+        "durationMin": 50,
+        "exercises": [
+          "ex_legs_1",
+          "ex_chest_1",
+          "ex_back_2",
+          "ex_shoulders_1",
+          "ex_core_1"
+        ]
+      },
+      {
+        "dayNum": 2,
+        "title": "Full Body 2 (Тонус)",
+        "subtitle": "Жим ногами, наклонный жим, подтягивания, руки",
+        "durationMin": 50,
+        "exercises": [
+          "ex_legs_2",
+          "ex_chest_2",
+          "ex_back_1",
+          "ex_arms_1",
+          "ex_arms_4",
+          "ex_core_2"
+        ]
+      }
+    ]
+  }
+}
