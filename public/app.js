@@ -1029,13 +1029,26 @@ document.addEventListener("DOMContentLoaded", () => {
     checkRegistration();
   }, 150);
 
-  // Проверка параметров URL (импорт программы или переход на вкладку)
+  // Фоновая синхронизация с Apple Здоровье при входе в приложение
+  setTimeout(() => {
+    if (state.healthSync && state.healthSync.connected) {
+      syncHealthData(false);
+    }
+  }, 350);
+
+  // Проверка параметров URL (импорт программы, открытие здоровья или переход на вкладку)
   try {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("import_custom") === "1") {
       setTimeout(() => {
         openCustomProgramModal();
       }, 250);
+    }
+    if (urlParams.get("open_health") === "1") {
+      setTimeout(() => {
+        switchTab("tab-stats");
+        openShortcutGuideModal("shortcut");
+      }, 300);
     }
     const targetTab = urlParams.get("tab");
     if (targetTab && ["tab-home", "tab-workouts", "tab-stats"].includes(targetTab)) {
@@ -1108,7 +1121,13 @@ function loadSavedState() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed.isRegistered !== undefined) state.isRegistered = parsed.isRegistered;
-      if (parsed.user) Object.assign(state.user, parsed.user);
+      if (parsed.user) {
+        const currentTgId = state.user.id;
+        Object.assign(state.user, parsed.user);
+        if (currentTgId) {
+          state.user.id = currentTgId;
+        }
+      }
       if (parsed.weightHistory) state.weightHistory = parsed.weightHistory;
       if (parsed.stats) Object.assign(state.stats, parsed.stats);
       if (parsed.healthSync) Object.assign(state.healthSync, parsed.healthSync);
@@ -1790,17 +1809,36 @@ function initEvents() {
     });
   });
 
-  // Shortcuts guide modal
+  // Shortcuts guide modal & manual health entry
   document.getElementById("openShortcutGuideBtn")?.addEventListener("click", () => {
-    openShortcutGuideModal();
+    openShortcutGuideModal("shortcut");
+  });
+
+  document.getElementById("openManualHealthEntryBtn")?.addEventListener("click", () => {
+    openShortcutGuideModal("manual");
   });
 
   document.getElementById("closeShortcutModalBtn")?.addEventListener("click", () => {
     closeShortcutGuideModal();
   });
 
+  document.getElementById("healthTabBtnShortcut")?.addEventListener("click", () => {
+    switchHealthModalTab("shortcut");
+  });
+
+  document.getElementById("healthTabBtnManual")?.addEventListener("click", () => {
+    switchHealthModalTab("manual");
+  });
+
+  document.getElementById("copyHealthWebhookBtn")?.addEventListener("click", () => {
+    copyHealthWebhook();
+  });
+
+  document.getElementById("saveManualHealthBtn")?.addEventListener("click", () => {
+    saveManualHealthData();
+  });
+
   document.getElementById("triggerLiveHealthSyncBtn")?.addEventListener("click", () => {
-    closeShortcutGuideModal();
     syncHealthData(true);
   });
 
@@ -2098,9 +2136,24 @@ function renderStatsScreen() {
     connected: false,
     lastSyncTime: null,
     weeklySteps: [7200, 8420, 9100, 6800, 8500, 10200, 8266],
-    weeklyCalories: [580, 640, 710, 520, 680, 890, 972],
+    weeklyCalories: [580, 640, 710, 520, 680, 890, 640],
     weeklySleep: [6.8, 7.2, 7.5, 6.2, 7.8, 8.1, 7.7]
   };
+
+  // Динамический индекс текущего дня недели (0 = Пн, ..., 6 = Вс)
+  const todayIdx = (new Date().getDay() + 6) % 7;
+
+  // Обновляем показатель сегодняшнего дня в недельных срезах
+  if (hs.weeklySteps && hs.weeklySteps.length === 7) {
+    hs.weeklySteps[todayIdx] = stats.stepsToday || hs.weeklySteps[todayIdx];
+  }
+  if (hs.weeklyCalories && hs.weeklyCalories.length === 7) {
+    hs.weeklyCalories[todayIdx] = stats.caloriesBurned || hs.weeklyCalories[todayIdx];
+  }
+  if (hs.weeklySleep && hs.weeklySleep.length === 7) {
+    const curSleepDur = roundNum((stats.sleepHours || 7) + (stats.sleepMinutes || 45) / 60.0, 1);
+    hs.weeklySleep[todayIdx] = curSleepDur;
+  }
 
   // 1. Apple Health Card Status
   const healthBadge = document.getElementById("healthSyncStatusBadge");
@@ -2134,18 +2187,18 @@ function renderStatsScreen() {
 
   // 3. Active Calories
   const calsEl = document.getElementById("statsActiveCaloriesDisplay");
-  if (calsEl) calsEl.textContent = (stats.caloriesBurned || 972).toLocaleString("ru-RU");
+  if (calsEl) calsEl.textContent = (stats.caloriesBurned || 640).toLocaleString("ru-RU");
 
   // Render Activity Bar Chart
   const actChart = document.getElementById("statsActivityBarChart");
   if (actChart) {
     const days = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
-    const cals = hs.weeklyCalories || [580, 640, 710, 520, 680, 890, 972];
+    const cals = hs.weeklyCalories || [580, 640, 710, 520, 680, 890, 640];
     const maxCal = Math.max(...cals, 1000);
     actChart.innerHTML = days.map((d, i) => {
       const val = cals[i] || 0;
       const hPx = Math.max(4, Math.round((val / maxCal) * 76));
-      const isToday = (i === 3); // чт / current
+      const isToday = (i === todayIdx);
       return `
         <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
           <div class="w-7 rounded-xl ${isToday ? 'bg-of-blue shadow-sm shadow-of-blue/40' : val > 0 ? 'bg-of-blue/60' : 'bg-slate-700/50'}" style="height: ${hPx}px;"></div>
@@ -2178,7 +2231,7 @@ function renderStatsScreen() {
       ${days.map((d, i) => {
         const val = stList[i] || 0;
         const hPx = Math.max(6, Math.round((val / maxSt) * 90));
-        const isToday = (i === 3);
+        const isToday = (i === todayIdx);
         return `
           <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
             <div class="w-7 rounded-xl ${isToday ? 'bg-orange-500 shadow-md shadow-orange-500/20' : 'bg-orange-600/80'}" style="height: ${hPx}px;"></div>
@@ -2223,7 +2276,7 @@ function renderStatsScreen() {
       ${days.map((d, i) => {
         const val = slList[i] || 0;
         const hPx = Math.max(6, Math.round((val / maxSl) * 80));
-        const isToday = (i === 3);
+        const isToday = (i === todayIdx);
         return `
           <div class="flex flex-col items-center gap-1 h-full justify-end flex-1">
             <div class="w-7 rounded-xl ${isToday ? 'bg-indigo-400 shadow-sm shadow-indigo-400/30' : 'bg-slate-500/80'}" style="height: ${hPx}px;"></div>
@@ -4843,7 +4896,13 @@ function confirmAppleHealthAuth() {
 
   closeAppleHealthModal();
   saveState();
-  syncHealthData(true);
+  renderStatsScreen();
+
+  // Сразу открываем окно быстрой команды и ввода показателей для завершения настройки
+  setTimeout(() => {
+    openShortcutGuideModal("shortcut");
+  }, 200);
+
   showToast("Доступ к «Apple Здоровье» успешно разрешен! 🍏");
   triggerHaptic("success");
 }
@@ -4861,43 +4920,43 @@ async function syncHealthData(forceToast = false) {
 
     if (resData && resData.status === "ok" && resData.health_data) {
       const hd = resData.health_data;
-      if (hd.steps) state.stats.stepsToday = hd.steps;
-      if (hd.active_calories) state.stats.caloriesBurned = hd.active_calories;
-      if (hd.sleep_hours !== undefined) state.stats.sleepHours = hd.sleep_hours;
-      if (hd.sleep_minutes !== undefined) state.stats.sleepMinutes = hd.sleep_minutes;
-      if (hd.sleep_score) state.stats.sleepScore = hd.sleep_score;
+      if (hd.steps !== undefined && hd.steps !== null) state.stats.stepsToday = hd.steps;
+      if (hd.active_calories !== undefined && hd.active_calories !== null) state.stats.caloriesBurned = hd.active_calories;
+      if (hd.sleep_hours !== undefined && hd.sleep_hours !== null) state.stats.sleepHours = hd.sleep_hours;
+      if (hd.sleep_minutes !== undefined && hd.sleep_minutes !== null) state.stats.sleepMinutes = hd.sleep_minutes;
+      if (hd.sleep_score !== undefined && hd.sleep_score !== null) state.stats.sleepScore = hd.sleep_score;
+      if (hd.weight) {
+        state.user.weight = hd.weight;
+        state.stats.weight = hd.weight;
+      }
+      if (resData.weight_history) {
+        state.weightHistory = resData.weight_history;
+      }
       if (hd.weekly_steps) state.healthSync.weeklySteps = hd.weekly_steps;
       if (hd.weekly_calories) state.healthSync.weeklyCalories = hd.weekly_calories;
       if (hd.weekly_sleep) state.healthSync.weeklySleep = hd.weekly_sleep;
       state.healthSync.connected = true;
+      if (hd.source) state.healthSync.source = hd.source;
     } else {
-      // Calibrated native metrics based on user's stats
-      const baseSteps = 8420;
-      const baseCals = 640;
-      state.stats.stepsToday = baseSteps;
-      state.stats.caloriesBurned = baseCals;
-      state.stats.sleepHours = 7;
-      state.stats.sleepMinutes = 45;
-      state.stats.sleepScore = 84;
+      // Если на сервере еще нет записи, отправляем текущие сохраненные данные клиента для инициализации
       state.healthSync.connected = true;
-
-      // Persist to server
       fetch("/api/health-sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: userId,
-          steps: baseSteps,
-          sleep_hours: 7,
-          sleep_minutes: 45,
-          sleep_score: 84,
-          active_calories: baseCals,
+          steps: state.stats.stepsToday || 8266,
+          sleep_hours: state.stats.sleepHours || 7,
+          sleep_minutes: state.stats.sleepMinutes || 45,
+          sleep_score: state.stats.sleepScore || 84,
+          active_calories: state.stats.caloriesBurned || 640,
           weight: state.user.weight || 75.0,
           weekly_steps: state.healthSync.weeklySteps,
           weekly_calories: state.healthSync.weeklyCalories,
-          weekly_sleep: state.healthSync.weeklySleep
+          weekly_sleep: state.healthSync.weeklySleep,
+          source: "Apple Здоровье"
         })
-      }).catch(e => console.log("[Health Sync Push]:", e));
+      }).catch(e => console.log("[Health Sync Init Push]:", e));
     }
 
     state.healthSync.lastSyncTime = "сегодня в " + new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
@@ -4905,7 +4964,7 @@ async function syncHealthData(forceToast = false) {
     renderStatsScreen();
 
     if (forceToast) {
-      showToast("Данные Apple Здоровье обновлены!");
+      showToast("Данные Apple Здоровье успешно обновлены! 🍏");
       triggerHaptic("success");
     }
   } catch (e) {
@@ -4920,18 +4979,200 @@ async function syncHealthData(forceToast = false) {
   }
 }
 
-function openShortcutGuideModal() {
+function openShortcutGuideModal(tab = "shortcut") {
   const modal = document.getElementById("appleShortcutModal");
-  if (modal) {
-    modal.classList.remove("hidden");
-    triggerHaptic("light");
-    lucide.createIcons();
+  if (!modal) return;
+
+  // Формируем персональный Webhook URL с доменом и ID пользователя
+  const origin = window.location.origin;
+  const uid = state.user.id || "guest";
+  const webhookInput = document.getElementById("healthWebhookUrlInput");
+  if (webhookInput) {
+    webhookInput.value = `${origin}/api/health-sync?user_id=${encodeURIComponent(uid)}`;
   }
+
+  // Предзаполняем поля ручного ввода текущими значениями
+  const stInput = document.getElementById("manualHealthSteps");
+  const shInput = document.getElementById("manualHealthSleepHours");
+  const smInput = document.getElementById("manualHealthSleepMinutes");
+  const calInput = document.getElementById("manualHealthCalories");
+  const wInput = document.getElementById("manualHealthWeight");
+
+  if (stInput) stInput.value = state.stats.stepsToday || 8266;
+  if (shInput) shInput.value = state.stats.sleepHours ?? 7;
+  if (smInput) smInput.value = state.stats.sleepMinutes ?? 45;
+  if (calInput) calInput.value = state.stats.caloriesBurned || 640;
+  if (wInput) wInput.value = state.user.weight || 75.0;
+
+  switchHealthModalTab(tab);
+
+  modal.classList.remove("hidden");
+  triggerHaptic("light");
+  lucide.createIcons();
 }
 
 function closeShortcutGuideModal() {
   const modal = document.getElementById("appleShortcutModal");
   if (modal) modal.classList.add("hidden");
 }
+
+function switchHealthModalTab(tab = "shortcut") {
+  const tabShortcut = document.getElementById("healthTabContentShortcut");
+  const tabManual = document.getElementById("healthTabContentManual");
+  const btnShortcut = document.getElementById("healthTabBtnShortcut");
+  const btnManual = document.getElementById("healthTabBtnManual");
+
+  if (tab === "manual") {
+    if (tabShortcut) tabShortcut.classList.add("hidden");
+    if (tabManual) tabManual.classList.remove("hidden");
+
+    if (btnManual) {
+      btnManual.className = "flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-of-blue text-of-bg shadow-sm";
+    }
+    if (btnShortcut) {
+      btnShortcut.className = "flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-of-card text-slate-300 hover:text-white border border-of-border";
+    }
+  } else {
+    if (tabShortcut) tabShortcut.classList.remove("hidden");
+    if (tabManual) tabManual.classList.add("hidden");
+
+    if (btnShortcut) {
+      btnShortcut.className = "flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-of-blue text-of-bg shadow-sm";
+    }
+    if (btnManual) {
+      btnManual.className = "flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-of-card text-slate-300 hover:text-white border border-of-border";
+    }
+  }
+  lucide.createIcons();
+}
+
+function copyHealthWebhook() {
+  const webhookInput = document.getElementById("healthWebhookUrlInput");
+  if (!webhookInput) return;
+
+  const url = webhookInput.value;
+  if (!url) return;
+
+  const successFeedback = () => {
+    showToast("Webhook URL скопирован в буфер! 📋");
+    triggerHaptic("success");
+    const btn = document.getElementById("copyHealthWebhookBtn");
+    if (btn) {
+      const origText = btn.innerHTML;
+      btn.innerHTML = `<span>✓ Готово!</span>`;
+      setTimeout(() => { btn.innerHTML = origText; lucide.createIcons(); }, 1800);
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(successFeedback).catch(() => {
+      fallbackCopy(url);
+    });
+  } else {
+    fallbackCopy(url);
+  }
+
+  function fallbackCopy(text) {
+    webhookInput.select();
+    try {
+      document.execCommand("copy");
+      successFeedback();
+    } catch (e) {
+      showToast("Выделите и скопируйте ссылку вручную");
+    }
+  }
+}
+
+async function saveManualHealthData() {
+  const stInput = document.getElementById("manualHealthSteps");
+  const shInput = document.getElementById("manualHealthSleepHours");
+  const smInput = document.getElementById("manualHealthSleepMinutes");
+  const calInput = document.getElementById("manualHealthCalories");
+  const wInput = document.getElementById("manualHealthWeight");
+
+  const steps = parseInt(stInput?.value, 10) || state.stats.stepsToday || 8266;
+  const sleepHours = parseInt(shInput?.value, 10) || 7;
+  const sleepMinutes = parseInt(smInput?.value, 10) || 0;
+  const calories = parseInt(calInput?.value, 10) || state.stats.caloriesBurned || 640;
+  const weight = parseFloat(wInput?.value) || state.user.weight || 75.0;
+
+  // Расчет индекса сна
+  const totalH = sleepHours + sleepMinutes / 60.0;
+  let score = 84;
+  if (totalH >= 7.0 && totalH <= 8.5) {
+    score = Math.min(98, Math.round(86 + (totalH - 7.0) * 8));
+  } else if (totalH >= 6.0 && totalH < 7.0) {
+    score = Math.round(70 + (totalH - 6.0) * 15);
+  } else if (totalH > 8.5 && totalH <= 10.0) {
+    score = Math.max(75, Math.round(90 - (totalH - 8.5) * 10));
+  } else if (totalH < 6.0) {
+    score = Math.max(35, Math.round(35 + totalH * 5.8));
+  }
+
+  // Обновляем состояние клиента
+  state.stats.stepsToday = steps;
+  state.stats.caloriesBurned = calories;
+  state.stats.sleepHours = sleepHours;
+  state.stats.sleepMinutes = sleepMinutes;
+  state.stats.sleepScore = score;
+
+  if (weight && weight >= 30.0 && weight <= 300.0) {
+    state.user.weight = weight;
+    state.stats.weight = weight;
+  }
+
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  if (state.healthSync.weeklySteps && state.healthSync.weeklySteps.length === 7) {
+    state.healthSync.weeklySteps[todayIdx] = steps;
+  }
+  if (state.healthSync.weeklyCalories && state.healthSync.weeklyCalories.length === 7) {
+    state.healthSync.weeklyCalories[todayIdx] = calories;
+  }
+  if (state.healthSync.weeklySleep && state.healthSync.weeklySleep.length === 7) {
+    state.healthSync.weeklySleep[todayIdx] = roundNum(totalH, 1);
+  }
+
+  state.healthSync.connected = true;
+  state.healthSync.source = "Apple Здоровье";
+  state.healthSync.lastSyncTime = "сегодня в " + new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+  saveState();
+  renderStatsScreen();
+  closeShortcutGuideModal();
+
+  showToast("Данные «Здоровье» успешно сохранены и синхронизированы! 🍏");
+  triggerHaptic("success");
+
+  // Отправка на сервер
+  try {
+    const userId = state.user.id || "guest";
+    const resp = await fetch("/api/health-sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        steps: steps,
+        sleep_hours: sleepHours,
+        sleep_minutes: sleepMinutes,
+        sleep_score: score,
+        active_calories: calories,
+        weight: weight,
+        weekly_steps: state.healthSync.weeklySteps,
+        weekly_calories: state.healthSync.weeklyCalories,
+        weekly_sleep: state.healthSync.weeklySleep,
+        source: "Apple Здоровье"
+      })
+    });
+    const resData = await resp.json();
+    if (resData && resData.weight_history) {
+      state.weightHistory = resData.weight_history;
+      saveState();
+      renderStatsScreen();
+    }
+  } catch (e) {
+    console.error("[Manual Health Sync Push Error]:", e);
+  }
+}
+
 
 

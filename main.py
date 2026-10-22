@@ -379,65 +379,212 @@ def api_parse_workout_photo():
     })
 
 
+def safe_float(val, default=None):
+    if val is None or val == "":
+        return default
+    try:
+        if isinstance(val, (int, float)):
+            return float(val)
+        cleaned = str(val).replace(" ", "").replace(",", ".").replace("кг", "").replace("kg", "").replace("kcal", "").replace("ккал", "").strip()
+        return float(cleaned)
+    except (ValueError, TypeError):
+        return default
+
+
+def safe_int(val, default=None):
+    flt = safe_float(val, None)
+    if flt is not None:
+        return int(round(flt))
+    return default
+
+
+def parse_sleep_data(data, default_hours=7, default_minutes=45):
+    """
+    Интеллектуальный парсер данных сна:
+    Поддерживает форматы:
+    - sleep_hours: 7, sleep_minutes: 45
+    - sleep: 7.5 (часы как float)
+    - sleep: 465 (минуты)
+    - sleep: "7:45" или "7ч 45м"
+    """
+    sh = data.get("sleep_hours") if "sleep_hours" in data else (data.get("sleepHours") or data.get("сон_часы"))
+    sm = data.get("sleep_minutes") if "sleep_minutes" in data else (data.get("sleepMinutes") or data.get("сон_минуты"))
+
+    if sh is not None or sm is not None:
+        hours = safe_int(sh, default_hours)
+        minutes = safe_int(sm, 0 if sh is not None else default_minutes)
+        return hours, minutes
+
+    raw = data.get("sleep") or data.get("sleep_duration") or data.get("sleep_time") or data.get("сон")
+    if raw is None or raw == "":
+        return default_hours, default_minutes
+
+    if isinstance(raw, (int, float)):
+        val = float(raw)
+        if val > 24:
+            return int(val // 60), int(round(val % 60))
+        h = int(val)
+        m = int(round((val - h) * 60))
+        return h, m
+
+    raw_str = str(raw).strip().lower().replace(" ", "")
+    import re
+    m_colon = re.match(r"^(\d{1,2}):(\d{1,2})$", raw_str)
+    if m_colon:
+        return int(m_colon.group(1)), int(m_colon.group(2))
+    m_hm = re.match(r"^(\d{1,2})[чh](\d{1,2})?[мm]?$", raw_str)
+    if m_hm:
+        h = int(m_hm.group(1))
+        m = int(m_hm.group(2) or 0)
+        return h, m
+    flt = safe_float(raw_str)
+    if flt is not None:
+        if flt > 24:
+            return int(flt // 60), int(round(flt % 60))
+        h = int(flt)
+        m = int(round((flt - h) * 60))
+        return h, m
+
+    return default_hours, default_minutes
+
+
+def calculate_sleep_score(hours, minutes):
+    """Вычисление индекса качества сна (0-100)"""
+    total_h = hours + minutes / 60.0
+    if 7.0 <= total_h <= 8.5:
+        return min(98, int(86 + (total_h - 7.0) * 8))
+    elif 6.0 <= total_h < 7.0:
+        return int(70 + (total_h - 6.0) * 15)
+    elif 8.5 < total_h <= 10.0:
+        return max(75, int(90 - (total_h - 8.5) * 10))
+    elif total_h < 6.0:
+        return max(35, int(35 + total_h * 5.8))
+    else:
+        return 70
+
+
 @app.route("/api/health-sync", methods=["GET", "POST"])
 def api_health_sync():
     """
     Синхронизация данных из Apple Здоровье (Apple HealthKit / Shortcuts).
     Принимает и сохраняет количество шагов, фазы сна, активные калории и актуальный вес.
+    Поддерживает:
+    - POST (JSON, Form-Data, URL-encoded)
+    - GET (чтение или обновление через query parameters)
     """
-    if request.method == "POST":
-        data = request.get_json() or {}
-        user_id = str(data.get("user_id") or "guest")
+    json_data = request.get_json(silent=True, force=True) or {}
+    form_data = request.form.to_dict() if request.form else {}
+    query_data = request.args.to_dict() if request.args else {}
 
-        steps = int(data.get("steps") or 8266)
-        sleep_hours = int(data.get("sleep_hours") or 7)
-        sleep_minutes = int(data.get("sleep_minutes") or 45)
-        sleep_score = int(data.get("sleep_score") or 84)
-        active_calories = int(data.get("active_calories") or 640)
-        weight = float(data.get("weight")) if data.get("weight") else None
+    data = {}
+    data.update(query_data)
+    data.update(form_data)
+    data.update(json_data)
 
-        weekly_steps = data.get("weekly_steps") or [7200, 8420, 9100, 6800, 8500, 10200, steps]
-        weekly_sleep = data.get("weekly_sleep") or [6.8, 7.2, 7.5, 6.2, 7.8, 8.1, round(sleep_hours + sleep_minutes / 60.0, 1)]
-        weekly_calories = data.get("weekly_calories") or [580, 640, 710, 520, 680, 890, active_calories]
+    user_id = str(data.get("user_id") or request.headers.get("X-User-Id") or "guest").strip()
 
-        now_iso = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Проверяем, есть ли передача метрик для сохранения
+    metric_keys = [
+        "steps", "step_count", "stepCount", "today_steps", "шаги",
+        "active_calories", "calories", "active_energy", "activeEnergy", "cals", "калории",
+        "sleep", "sleep_hours", "sleepHours", "sleep_minutes", "sleepMinutes", "сон",
+        "weight", "body_mass", "bodyMass", "вес"
+    ]
+    has_metrics = any(k in data for k in metric_keys) or request.method == "POST"
 
-        health_payload = {
-            "synced_at": now_iso,
-            "connected": True,
-            "source": "Apple Здоровье (HealthKit)",
-            "steps": steps,
-            "sleep_hours": sleep_hours,
-            "sleep_minutes": sleep_minutes,
-            "sleep_score": sleep_score,
-            "active_calories": active_calories,
-            "weekly_steps": weekly_steps,
-            "weekly_sleep": weekly_sleep,
-            "weekly_calories": weekly_calories
-        }
+    user = get_user(user_id) or {}
+    existing_hd = user.get("health_data") or {}
 
-        if weight:
-            health_payload["weight"] = weight
-            add_weight_entry(user_id, weight, note="Синхронизация из Apple Здоровье")
-
-        upsert_user(user_id, {
-            "health_data": health_payload,
-            "last_health_sync": now_iso
-        })
-
+    if not has_metrics and request.method == "GET":
         return jsonify({
             "status": "ok",
-            "message": "Данные успешно синхронизированы с Apple Здоровье",
-            "health_data": health_payload
+            "health_data": existing_hd if existing_hd.get("connected") else existing_hd or None,
+            "current_weight": user.get("current_weight"),
+            "weight_history": user.get("weight_history", [])
         })
-    else:
-        user_id = str(request.args.get("user_id") or "guest")
+
+    # Парсинг шагов
+    raw_steps = (data.get("steps") if "steps" in data else
+                 data.get("step_count") or data.get("stepCount") or data.get("today_steps") or data.get("шаги"))
+    default_steps = existing_hd.get("steps", 8266)
+    steps = safe_int(raw_steps, default_steps)
+
+    # Парсинг активных калорий
+    raw_cals = (data.get("active_calories") if "active_calories" in data else
+                data.get("calories") or data.get("active_energy") or data.get("activeEnergy") or data.get("cals") or data.get("калории"))
+    default_cals = existing_hd.get("active_calories", 640)
+    active_calories = safe_int(raw_cals, default_cals)
+
+    # Парсинг сна
+    default_sh = existing_hd.get("sleep_hours", 7)
+    default_sm = existing_hd.get("sleep_minutes", 45)
+    sleep_hours, sleep_minutes = parse_sleep_data(data, default_sh, default_sm)
+
+    # Парсинг sleep_score
+    raw_score = data.get("sleep_score") or data.get("sleepScore") or data.get("score")
+    sleep_score = safe_int(raw_score, None)
+    if sleep_score is None:
+        sleep_score = calculate_sleep_score(sleep_hours, sleep_minutes)
+
+    # Парсинг веса
+    raw_weight = data.get("weight") or data.get("body_mass") or data.get("bodyMass") or data.get("вес")
+    weight = safe_float(raw_weight)
+    if weight is not None and (weight < 30.0 or weight > 300.0):
+        weight = None
+
+    # Недельные тренды с динамической привязкой к текущему дню недели
+    now_dt = datetime.datetime.now()
+    today_idx = now_dt.weekday()  # 0 = Понедельник, ..., 6 = Воскресенье
+
+    base_weekly_steps = [7200, 8420, 9100, 6800, 8500, 10200, 8266]
+    weekly_steps = data.get("weekly_steps") or existing_hd.get("weekly_steps") or base_weekly_steps
+    if isinstance(weekly_steps, list) and len(weekly_steps) == 7:
+        weekly_steps[today_idx] = steps
+
+    base_weekly_cals = [580, 640, 710, 520, 680, 890, 640]
+    weekly_calories = data.get("weekly_calories") or existing_hd.get("weekly_calories") or base_weekly_cals
+    if isinstance(weekly_calories, list) and len(weekly_calories) == 7:
+        weekly_calories[today_idx] = active_calories
+
+    base_weekly_sleep = [6.8, 7.2, 7.5, 6.2, 7.8, 8.1, 7.7]
+    weekly_sleep = data.get("weekly_sleep") or existing_hd.get("weekly_sleep") or base_weekly_sleep
+    if isinstance(weekly_sleep, list) and len(weekly_sleep) == 7:
+        weekly_sleep[today_idx] = round(sleep_hours + sleep_minutes / 60.0, 1)
+
+    now_iso = now_dt.strftime("%Y-%m-%d %H:%M:%S")
+    source = data.get("source") or existing_hd.get("source") or "Apple Здоровье (HealthKit)"
+
+    health_payload = {
+        "synced_at": now_iso,
+        "connected": True,
+        "source": source,
+        "steps": steps,
+        "sleep_hours": sleep_hours,
+        "sleep_minutes": sleep_minutes,
+        "sleep_score": sleep_score,
+        "active_calories": active_calories,
+        "weekly_steps": weekly_steps,
+        "weekly_sleep": weekly_sleep,
+        "weekly_calories": weekly_calories
+    }
+
+    if weight:
+        health_payload["weight"] = weight
+        add_weight_entry(user_id, weight, note="Синхронизация из Apple Здоровье")
         user = get_user(user_id) or {}
-        health_data = user.get("health_data")
-        return jsonify({
-            "status": "ok",
-            "health_data": health_data
-        })
+
+    upsert_user(user_id, {
+        "health_data": health_payload,
+        "last_health_sync": now_iso
+    })
+
+    return jsonify({
+        "status": "ok",
+        "message": "Данные успешно синхронизированы с Apple Здоровье",
+        "health_data": health_payload,
+        "current_weight": user.get("current_weight") or (weight if weight else None),
+        "weight_history": user.get("weight_history", [])
+    })
 
 
 @app.route("/api/health-shortcut", methods=["GET"])
@@ -446,11 +593,20 @@ def api_health_shortcut():
     Конфигурация и метаданные для быстрого подключения через Apple Shortcuts.
     """
     active_url = os.environ.get("WEBAPP_URL", "").strip() or os.environ.get("RENDER_EXTERNAL_URL", "").strip() or WEBAPP_URL
+    user_id = str(request.args.get("user_id") or "guest").strip()
     return jsonify({
         "shortcut_name": "OnlyFits Health Sync",
         "description": "Автоматическая синхронизация Apple Здоровье в OnlyFits",
-        "webhook_url": f"{active_url}/api/health-sync",
-        "supported_metrics": ["steps", "sleep_analysis", "active_energy", "body_mass"]
+        "webhook_url": f"{active_url}/api/health-sync?user_id={user_id}",
+        "supported_metrics": ["steps", "sleep_analysis", "active_energy", "body_mass"],
+        "example_payload": {
+            "user_id": user_id,
+            "steps": 10500,
+            "active_calories": 650,
+            "sleep_hours": 7,
+            "sleep_minutes": 45,
+            "weight": 75.0
+        }
     })
 
 
@@ -756,6 +912,120 @@ def handle_bot_message(msg):
         })
         return
 
+    # Быстрые команды ввода показателей Здоровья из чата: /steps, /шаги, /sleep, /сон, /calories, /калории
+    cleaned_lower = text.strip().lower()
+    is_step_cmd = any(cleaned_lower.startswith(p) for p in ["/steps", "/шаги", "шаги:", "шаги "])
+    is_sleep_cmd = any(cleaned_lower.startswith(p) for p in ["/sleep", "/сон", "сон:", "сон "])
+    is_cals_cmd = any(cleaned_lower.startswith(p) for p in ["/calories", "/калории", "калории:", "калории "])
+
+    if is_step_cmd:
+        sub_text = cleaned_lower
+        for p in ["/steps", "/шаги", "шаги:", "шаги"]:
+            if sub_text.startswith(p):
+                sub_text = sub_text[len(p):].strip()
+                break
+        s_val = safe_int(sub_text)
+        if s_val is not None and s_val >= 0:
+            now_dt = datetime.datetime.now()
+            today_idx = now_dt.weekday()
+            hd = (user.get("health_data") or {}) if user else {}
+            w_steps = hd.get("weekly_steps") or [7200, 8420, 9100, 6800, 8500, 10200, 8266]
+            if len(w_steps) == 7:
+                w_steps[today_idx] = s_val
+            hd.update({
+                "steps": s_val,
+                "weekly_steps": w_steps,
+                "connected": True,
+                "synced_at": now_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                "source": "Telegram / Здоровье"
+            })
+            upsert_user(uid, {"health_data": hd})
+            percent = min(100, int((s_val / 10000) * 100))
+            reply = (
+                f"🚶‍♂️ <b>Шаги за сегодня обновлены: {s_val:,}</b>\n\n".replace(",", " ") +
+                f"🎯 Прогресс к цели (10 000): <b>{percent}%</b>\n"
+                "📊 График шагов и статистика в приложении обновлены!"
+            )
+            markup = {
+                "inline_keyboard": [[
+                    {"text": "📊 Посмотреть в приложении", "web_app": {"url": f"{active_url}?tab=tab-stats"}}
+                ]]
+            }
+            call_telegram("sendMessage", {"chat_id": chat_id, "text": reply, "parse_mode": "HTML", "reply_markup": markup})
+            return
+
+    if is_sleep_cmd:
+        sub_text = cleaned_lower
+        for p in ["/sleep", "/сон", "сон:", "сон"]:
+            if sub_text.startswith(p):
+                sub_text = sub_text[len(p):].strip()
+                break
+        sh, sm = parse_sleep_data({"sleep": sub_text}, 7, 45)
+        score = calculate_sleep_score(sh, sm)
+        now_dt = datetime.datetime.now()
+        today_idx = now_dt.weekday()
+        hd = (user.get("health_data") or {}) if user else {}
+        w_sleep = hd.get("weekly_sleep") or [6.8, 7.2, 7.5, 6.2, 7.8, 8.1, 7.7]
+        if len(w_sleep) == 7:
+            w_sleep[today_idx] = round(sh + sm / 60.0, 1)
+        hd.update({
+            "sleep_hours": sh,
+            "sleep_minutes": sm,
+            "sleep_score": score,
+            "weekly_sleep": w_sleep,
+            "connected": True,
+            "synced_at": now_dt.strftime("%Y-%m-%d %H:%M:%S"),
+            "source": "Telegram / Здоровье"
+        })
+        upsert_user(uid, {"health_data": hd})
+        quality = "Отличный сон 🔥" if score >= 80 else ("Нормальный сон 👍" if score >= 65 else "Недосып ⚠️")
+        reply = (
+            f"😴 <b>Сон за сегодня обновлен: {sh} ч {sm} мин</b>\n\n"
+            f"✨ Оценка восстановления: <b>{score}/100 ({quality})</b>\n"
+            "📊 График сна в приложении обновлен!"
+        )
+        markup = {
+            "inline_keyboard": [[
+                {"text": "📊 Посмотреть в приложении", "web_app": {"url": f"{active_url}?tab=tab-stats"}}
+            ]]
+        }
+        call_telegram("sendMessage", {"chat_id": chat_id, "text": reply, "parse_mode": "HTML", "reply_markup": markup})
+        return
+
+    if is_cals_cmd:
+        sub_text = cleaned_lower
+        for p in ["/calories", "/калории", "калории:", "калории"]:
+            if sub_text.startswith(p):
+                sub_text = sub_text[len(p):].strip()
+                break
+        c_val = safe_int(sub_text)
+        if c_val is not None and c_val >= 0:
+            now_dt = datetime.datetime.now()
+            today_idx = now_dt.weekday()
+            hd = (user.get("health_data") or {}) if user else {}
+            w_cals = hd.get("weekly_calories") or [580, 640, 710, 520, 680, 890, 640]
+            if len(w_cals) == 7:
+                w_cals[today_idx] = c_val
+            hd.update({
+                "active_calories": c_val,
+                "weekly_calories": w_cals,
+                "connected": True,
+                "synced_at": now_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                "source": "Telegram / Здоровье"
+            })
+            upsert_user(uid, {"health_data": hd})
+            reply = (
+                f"🔥 <b>Активная энергия обновлена: {c_val} ккал</b>\n\n"
+                "💪 Кольцо активности и недельный тренд обновлены!"
+            )
+            markup = {
+                "inline_keyboard": [[
+                    {"text": "📊 Посмотреть в приложении", "web_app": {"url": f"{active_url}?tab=tab-stats"}}
+                ]]
+            }
+            call_telegram("sendMessage", {"chat_id": chat_id, "text": reply, "parse_mode": "HTML", "reply_markup": markup})
+            return
+
     elif text.startswith("/health") or text.startswith("/stats") or text.startswith("/здоровье"):
         health_data = user.get("health_data") if user else None
         if health_data and health_data.get("connected"):
@@ -764,13 +1034,17 @@ def handle_bot_message(msg):
             sleep_m = health_data.get("sleep_minutes", 45)
             cals = health_data.get("active_calories", 640)
             synced_at = health_data.get("synced_at", "сегодня")
+            source = health_data.get("source", "Apple Здоровье")
             msg_text = (
-                "🍏 <b>Статистика Apple Здоровье</b>\n\n"
+                f"🍏 <b>Статистика Здоровья ({source})</b>\n\n"
                 f"• 🚶‍♂️ Шаги за сегодня: <b>{steps:,}</b>\n".replace(",", " ") +
                 f"• 😴 Ночной сон: <b>{sleep_h} ч {sleep_m} мин</b>\n"
                 f"• 🔥 Активная энергия: <b>{cals} ккал</b>\n\n"
                 f"🕒 Последняя синхронизация: {synced_at}\n\n"
-                "Нажмите кнопку ниже, чтобы открыть подробные графики активности 👇"
+                "💡 <i>Вы можете быстро обновлять показатели прямо в чате:</i>\n"
+                "• <code>/шаги 10500</code>\n"
+                "• <code>/сон 7.5</code> или <code>/сон 7ч 45м</code>\n"
+                "• <code>/калории 650</code>"
             )
         else:
             msg_text = (
@@ -780,7 +1054,8 @@ def handle_bot_message(msg):
                 "• 😴 Продолжительность и фазы сна\n"
                 "• 🔥 Сожженные активные калории\n"
                 "• ⚖️ Вес из умных весов\n\n"
-                "Нажмите кнопку ниже, чтобы предоставить доступ к данным 👇"
+                "Вы можете настроить автоматическую 1-клик передачу через Apple Shortcuts или вносить показатели вручную.\n\n"
+                "💡 <i>Также можно отправлять показатели прямо в чат:</i> <code>/шаги 10000</code>, <code>/сон 8</code>, <code>/калории 600</code>"
             )
         markup = {
             "inline_keyboard": [
@@ -788,6 +1063,12 @@ def handle_bot_message(msg):
                     {
                         "text": "📊 Открыть статистику здоровья",
                         "web_app": {"url": f"{active_url}?tab=tab-stats"}
+                    }
+                ],
+                [
+                    {
+                        "text": "⚡️ Настроить Быструю команду Apple",
+                        "web_app": {"url": f"{active_url}?tab=tab-stats&open_health=1"}
                     }
                 ]
             ]

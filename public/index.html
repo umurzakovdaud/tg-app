@@ -495,6 +495,10 @@
             <span id="healthSyncLastTime">Синхронизировано сегодня</span>
           </div>
           <div class="flex items-center gap-2">
+            <button id="openManualHealthEntryBtn" class="text-white hover:text-of-blue font-bold text-[10px] flex items-center gap-1 bg-of-card px-2.5 py-1 rounded-xl border border-of-border transition active:scale-95" title="Внести показатели вручную">
+              <i data-lucide="edit-3" class="w-3 h-3 text-of-blue"></i>
+              <span>Ввести данные</span>
+            </button>
             <button id="openShortcutGuideBtn" class="text-of-blue hover:text-white font-bold text-[10px] flex items-center gap-1">
               <i data-lucide="zap" class="w-3 h-3"></i>
               <span>Быстрая команда</span>
@@ -1868,19 +1872,22 @@
 
 
   <!-- ======================================================== -->
-  <!-- APPLE SHORTCUTS AUTOMATION GUIDE MODAL                    -->
+  <!-- APPLE SHORTCUTS & HEALTH MANUAL SYNC MODAL                 -->
   <!-- ======================================================== -->
   <div id="appleShortcutModal" class="fixed inset-0 z-50 bg-of-bg/85 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-of-card w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-of-border overflow-hidden shadow-2xl animate-slide-up flex flex-col max-h-[92vh]">
       
-      <div class="p-5 border-b border-of-border flex items-center justify-between bg-of-card">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-of-border flex items-center justify-between bg-of-card">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-2xl bg-of-blue/15 text-of-blue flex items-center justify-center font-bold">
-            <i data-lucide="zap" class="w-5 h-5"></i>
+          <div class="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-red-500/10 shrink-0 border border-slate-100">
+            <svg class="w-6 h-6 text-red-500 fill-current" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
           </div>
           <div>
-            <h3 class="text-base font-extrabold text-white">Быстрая команда Apple</h3>
-            <p class="text-[10px] text-slate-400">Автоматическая передача данных из iPhone</p>
+            <h3 class="text-sm font-extrabold text-white">Синхронизация с «Здоровье»</h3>
+            <p class="text-[10px] text-slate-400">Apple HealthKit · Быстрые команды · Ввод данных</p>
           </div>
         </div>
         <button id="closeShortcutModalBtn" class="w-8 h-8 rounded-full bg-of-subcard border border-of-border flex items-center justify-center text-slate-400 hover:text-white transition">
@@ -1888,40 +1895,147 @@
         </button>
       </div>
 
-      <div class="p-5 overflow-y-auto space-y-4 text-xs">
-        <div class="p-3.5 rounded-2xl bg-of-subcard border border-of-border space-y-2">
-          <div class="font-bold text-white text-xs flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Как это работает на iOS:</span>
-          </div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">
-            Приложение Apple «Быстрые команды» (Shortcuts) считывает точные шаги, фазы сна и активные калории напрямую из системного HealthKit и передает их в OnlyFits раз в день или по нажатию виджета.
-          </p>
-        </div>
+      <!-- Mode Switcher Tabs -->
+      <div class="p-3 bg-of-subcard/60 border-b border-of-border flex gap-1.5">
+        <button id="healthTabBtnShortcut" class="flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-of-blue text-of-bg shadow-sm">
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          <span>Быстрая команда</span>
+        </button>
+        <button id="healthTabBtnManual" class="flex-1 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-of-card text-slate-300 hover:text-white border border-of-border">
+          <i data-lucide="edit-3" class="w-3.5 h-3.5 text-of-blue"></i>
+          <span>Ввести вручную</span>
+        </button>
+      </div>
 
-        <div class="space-y-2.5">
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-of-subcard/50 border border-of-border">
-            <span class="w-6 h-6 rounded-lg bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[11px] shrink-0">1</span>
-            <div class="text-[11px] text-slate-300">
-              <span class="font-bold text-white">Автоматическое чтение данных:</span>
-              Приложение периодически обновляет показатели активности за день.
+      <div class="p-4 overflow-y-auto space-y-4 text-xs">
+        
+        <!-- SECTION 1: APPLE SHORTCUTS AUTOMATION -->
+        <div id="healthTabContentShortcut" class="space-y-3.5">
+          <div class="p-3.5 rounded-2xl bg-of-subcard border border-of-border space-y-2">
+            <div class="font-bold text-white text-xs flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Автоматическая фоновая передача из iPhone</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              Штатное приложение <b>«Быстрые команды» (Apple Shortcuts)</b> на iOS считывает шаги, сон, активные калории и вес напрямую из Apple HealthKit и передает их по вашему персональному адресу.
+            </p>
+          </div>
+
+          <!-- Webhook URL Box -->
+          <div class="p-3.5 rounded-2xl bg-of-subcard/80 border border-of-border space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ваш персональный Webhook URL:</span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30">Активен</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="healthWebhookUrlInput" readonly class="w-full bg-of-card text-slate-200 text-xs px-3 py-2 rounded-xl border border-of-border font-mono select-all outline-none" value="">
+              <button id="copyHealthWebhookBtn" class="px-3 py-2 bg-of-blue hover:bg-white text-of-bg font-extrabold text-xs rounded-xl shrink-0 transition flex items-center gap-1 active:scale-95 shadow-md shadow-of-blue/15" title="Скопировать ссылку">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span>Копия</span>
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-400 leading-tight">
+              Shortcuts отправляет на этот адрес POST-запрос с JSON: <code class="text-slate-300">{"steps": 10500, "calories": 640, "sleep_hours": 7, "weight": 75}</code>
+            </p>
+          </div>
+
+          <!-- 3 Steps Visual Guide -->
+          <div class="space-y-2">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Как настроить за 30 секунд:</div>
+            
+            <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-of-subcard/40 border border-of-border">
+              <span class="w-5 h-5 rounded-md bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+              <div class="text-[11px] text-slate-300 leading-tight">
+                Откройте на iPhone приложение <b>«Команды»</b> и добавьте действие <i>«Найти образцы «Здоровье»</i> (Шаги, Активная энергия, Сон).
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-of-subcard/40 border border-of-border">
+              <span class="w-5 h-5 rounded-md bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+              <div class="text-[11px] text-slate-300 leading-tight">
+                Добавьте действие <i>«Получить содержимое URL»</i>: выберите Метод <b>POST</b>, Тело <b>JSON</b> и вставьте скопированный выше URL.
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-of-subcard/40 border border-of-border">
+              <span class="w-5 h-5 rounded-md bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+              <div class="text-[11px] text-slate-300 leading-tight">
+                В разделе <b>«Автоматизация»</b> поставьте расписание «Ежедневно в 21:00» или запускайте команду по виджету!
+              </div>
             </div>
           </div>
-          <div class="flex items-start gap-3 p-3 rounded-2xl bg-of-subcard/50 border border-of-border">
-            <span class="w-6 h-6 rounded-lg bg-of-blue/20 text-of-blue font-bold flex items-center justify-center text-[11px] shrink-0">2</span>
-            <div class="text-[11px] text-slate-300">
-              <span class="font-bold text-white">Фоновая синхронизация:</span>
-              Все ключевые графики и кольца активности заполняются актуальными данными из HealthKit.
-            </div>
+
+          <!-- Sync Now Button -->
+          <div class="pt-1">
+            <button id="triggerLiveHealthSyncBtn" class="w-full py-3 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-extrabold text-xs transition active:scale-98 flex items-center justify-center gap-2 shadow-lg shadow-of-blue/15">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              <span>Запросить актуальные данные с сервера</span>
+            </button>
           </div>
         </div>
 
-        <div class="pt-2 space-y-2">
-          <button id="triggerLiveHealthSyncBtn" class="w-full py-3.5 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-extrabold text-xs transition active:scale-98 flex items-center justify-center gap-2 shadow-lg shadow-of-blue/15">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            <span>Синхронизировать показатели прямо сейчас</span>
-          </button>
+        <!-- SECTION 2: MANUAL HEALTH DATA ENTRY -->
+        <div id="healthTabContentManual" class="hidden space-y-3.5">
+          <div class="p-3 rounded-2xl bg-of-subcard border border-of-border text-[11px] text-slate-300 leading-relaxed">
+            Внесите показатели активности за сегодня из системного приложения <b>«Здоровье»</b> или умных часов:
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Steps Input -->
+            <div class="p-3 rounded-2xl bg-of-subcard border border-of-border space-y-1.5">
+              <label class="text-xs font-bold text-white flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><span>🚶‍♂️</span><span>Шаги за сегодня (Steps)</span></span>
+                <span class="text-[10px] text-slate-400">Цель: 10 000</span>
+              </label>
+              <input type="number" id="manualHealthSteps" placeholder="Например: 10420" class="w-full bg-of-card text-white text-sm px-3.5 py-2.5 rounded-xl border border-of-border outline-none focus:border-of-blue font-bold">
+            </div>
+
+            <!-- Sleep Duration Input -->
+            <div class="p-3 rounded-2xl bg-of-subcard border border-of-border space-y-1.5">
+              <label class="text-xs font-bold text-white flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><span>😴</span><span>Ночной сон (Sleep)</span></span>
+                <span class="text-[10px] text-slate-400">Норма: 7-9 ч</span>
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center gap-2 bg-of-card px-3 py-2 rounded-xl border border-of-border">
+                  <input type="number" id="manualHealthSleepHours" placeholder="7" min="0" max="24" class="w-full bg-transparent text-white text-sm font-bold outline-none">
+                  <span class="text-xs text-slate-400 font-bold shrink-0">часов</span>
+                </div>
+                <div class="flex items-center gap-2 bg-of-card px-3 py-2 rounded-xl border border-of-border">
+                  <input type="number" id="manualHealthSleepMinutes" placeholder="45" min="0" max="59" class="w-full bg-transparent text-white text-sm font-bold outline-none">
+                  <span class="text-xs text-slate-400 font-bold shrink-0">минут</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Calories Input -->
+            <div class="p-3 rounded-2xl bg-of-subcard border border-of-border space-y-1.5">
+              <label class="text-xs font-bold text-white flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><span>🔥</span><span>Активная энергия (Active Calories)</span></span>
+                <span class="text-[10px] text-slate-400">ккал в движении</span>
+              </label>
+              <input type="number" id="manualHealthCalories" placeholder="Например: 640" class="w-full bg-of-card text-white text-sm px-3.5 py-2.5 rounded-xl border border-of-border outline-none focus:border-of-blue font-bold">
+            </div>
+
+            <!-- Weight Input -->
+            <div class="p-3 rounded-2xl bg-of-subcard border border-of-border space-y-1.5">
+              <label class="text-xs font-bold text-white flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><span>⚖️</span><span>Масса тела (Weight)</span></span>
+                <span class="text-[10px] text-slate-400">кг</span>
+              </label>
+              <input type="number" step="0.1" id="manualHealthWeight" placeholder="Например: 74.5" class="w-full bg-of-card text-white text-sm px-3.5 py-2.5 rounded-xl border border-of-border outline-none focus:border-of-blue font-bold">
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="pt-2">
+            <button id="saveManualHealthBtn" class="w-full py-3.5 rounded-2xl bg-of-blue hover:bg-white text-of-bg font-extrabold text-xs transition active:scale-98 flex items-center justify-center gap-2 shadow-lg shadow-of-blue/15">
+              <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+              <span>Сохранить и синхронизировать показатели</span>
+            </button>
+          </div>
         </div>
+
       </div>
 
     </div>
