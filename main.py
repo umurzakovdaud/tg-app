@@ -346,23 +346,30 @@ def api_parse_workout_photo():
                     }
                 })
 
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
-            payload = {
-                "contents": [{"parts": parts}],
-                "generationConfig": {"temperature": 0.2}
-            }
-            req = urllib.request.Request(
-                gemini_url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=35) as resp:
-                resp_json = json.loads(resp.read().decode("utf-8"))
-                text_out = resp_json["candidates"][0]["content"]["parts"][0]["text"].strip()
-                if text_out.startswith("```"):
-                    text_out = text_out.strip("`").replace("json", "", 1).strip()
-                parsed = json.loads(text_out)
-                return jsonify({"status": "ok", "program": parsed})
+            models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
+            parsed = None
+            for model_name in models_to_try:
+                try:
+                    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={gemini_key}"
+                    payload = {
+                        "contents": [{"parts": parts}],
+                        "generationConfig": {"temperature": 0.2}
+                    }
+                    req = urllib.request.Request(
+                        gemini_url,
+                        data=json.dumps(payload).encode("utf-8"),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=35) as resp:
+                        resp_json = json.loads(resp.read().decode("utf-8"))
+                        text_out = resp_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+                        if text_out.startswith("```"):
+                            text_out = text_out.strip("`").replace("json", "", 1).strip()
+                        parsed = json.loads(text_out)
+                        if parsed and "days" in parsed:
+                            return jsonify({"status": "ok", "program": parsed})
+                except Exception as m_err:
+                    print(f"[Gemini model {model_name} error]: {m_err}", file=sys.stderr)
         except Exception as e:
             print(f"[Gemini Vision OCR Error]: {e}", file=sys.stderr)
 

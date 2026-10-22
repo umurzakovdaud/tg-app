@@ -3679,6 +3679,119 @@ function removeScreenshotFile(idx) {
   }
 }
 
+// ==========================================
+// 4. Image Preprocessing for Accurate OCR (Canvas Inversion & Contrast)
+// ==========================================
+function preprocessImageForOCR(source) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) {
+          resolve(typeof source === "string" ? source : "");
+          return;
+        }
+
+        const srcW = img.naturalWidth || img.width;
+        const srcH = img.naturalHeight || img.height;
+
+        if (srcW === 0 || srcH === 0) {
+          resolve(typeof source === "string" ? source : "");
+          return;
+        }
+
+        // Detect mobile screenshot aspect ratio (tall portrait e.g. 19.5:9)
+        const isTall = (srcH / srcW) >= 1.5;
+        let cropTop = 0;
+        let cropBottom = 0;
+        if (isTall) {
+          // Top ~7.5% is status bar (clock, battery, notch, dynamic island)
+          // Bottom ~4.5% is home indicator bar
+          cropTop = Math.round(srcH * 0.075);
+          cropBottom = Math.round(srcH * 0.045);
+        }
+
+        const workW = srcW;
+        const workH = Math.max(100, srcH - cropTop - cropBottom);
+
+        // Optimal width for Tesseract OCR (between 1000px and 1400px)
+        const targetW = Math.min(1400, Math.max(900, workW));
+        const scale = targetW / workW;
+        const targetH = Math.round(workH * scale);
+
+        canvas.width = targetW;
+        canvas.height = targetH;
+
+        // Draw cropped and scaled image onto canvas
+        ctx.drawImage(img, 0, cropTop, workW, workH, 0, 0, targetW, targetH);
+
+        const imgData = ctx.getImageData(0, 0, targetW, targetH);
+        const data = imgData.data;
+        const len = data.length;
+
+        // 1. Calculate average luminance to detect Dark Mode
+        let totalLum = 0;
+        let samples = 0;
+        for (let i = 0; i < len; i += 16) {
+          totalLum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          samples++;
+        }
+        const avgLum = samples > 0 ? (totalLum / samples) : 128;
+        const isDarkMode = avgLum < 125;
+
+        // 2. Grayscale, Invert if Dark Mode, and High-Contrast Stretch
+        for (let i = 0; i < len; i += 4) {
+          let r = data[i];
+          let g = data[i + 1];
+          let b = data[i + 2];
+
+          let lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          if (isDarkMode) {
+            lum = 255 - lum; // Invert to crisp black on white
+          }
+
+          // Contrast stretch
+          let enhanced;
+          if (lum > 185) {
+            enhanced = 255;
+          } else if (lum < 95) {
+            enhanced = Math.max(0, Math.round(lum * 0.4));
+          } else {
+            enhanced = Math.round(((lum - 95) / 90) * 255);
+          }
+
+          data[i] = enhanced;
+          data[i + 1] = enhanced;
+          data[i + 2] = enhanced;
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      } catch (err) {
+        console.warn("[preprocessImageForOCR error, falling back]:", err);
+        resolve(typeof source === "string" ? source : "");
+      }
+    };
+
+    img.onerror = () => {
+      resolve(typeof source === "string" ? source : "");
+    };
+
+    if (typeof source === "string") {
+      img.src = source;
+    } else if (source instanceof Blob || source instanceof File) {
+      const reader = new FileReader();
+      reader.onload = (e) => { img.src = e.target.result; };
+      reader.readAsDataURL(source);
+    } else {
+      resolve("");
+    }
+  });
+}
+
 async function processAllScreenshots() {
   if (customScreenshotFiles.length === 0) return;
 
@@ -3695,7 +3808,7 @@ async function processAllScreenshots() {
   if (ocrPercent) ocrPercent.textContent = "10%";
 
   // Читаем все файлы в base64 dataURL
-  const dataUrls = await Promise.all(customScreenshotFiles.map(file => {
+  const rawDataUrls = await Promise.all(customScreenshotFiles.map(file => {
     return new Promise(resolve => {
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
@@ -3709,7 +3822,7 @@ async function processAllScreenshots() {
     const resp = await fetch("/api/parse-workout-photo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ images_b64: dataUrls })
+      body: JSON.stringify({ images_b64: rawDataUrls })
     });
     const data = await resp.json();
     if (data && data.status === "ok" && data.program && Array.isArray(data.program.days) && data.program.days.length > 0) {
@@ -3726,11 +3839,11 @@ async function processAllScreenshots() {
     console.log("[Backend parse error, falling back to local Tesseract]:", err);
   }
 
-  // Step B: Sequential local Tesseract.js OCR across all screenshots
+  // Step B: Sequential local Tesseract.js OCR with Canvas Preprocessing
   if (window.Tesseract) {
     try {
       let combinedText = "";
-      const total = dataUrls.length;
+      const total = rawDataUrls.length;
 
       const worker = await Tesseract.createWorker("rus+eng", 1, {
         logger: m => {}
@@ -3738,14 +3851,18 @@ async function processAllScreenshots() {
 
       for (let i = 0; i < total; i++) {
         const currentNum = i + 1;
-        if (ocrDetails) ocrDetails.textContent = `Сканирование скриншота ${currentNum} из ${total}...`;
+        if (ocrDetails) ocrDetails.textContent = `Оптимизация скриншота ${currentNum} из ${total} (Canvas, инверсия)...`;
         const pctBase = Math.round((i / total) * 100);
         if (ocrPercent) ocrPercent.textContent = `${pctBase}%`;
         if (ocrBar) ocrBar.style.width = `${Math.max(10, pctBase)}%`;
 
-        const ret = await worker.recognize(dataUrls[i]);
+        // Preprocess image on canvas: crop status bar, invert dark mode, sharpen contrast
+        const preprocessedDataUrl = await preprocessImageForOCR(rawDataUrls[i]);
+
+        if (ocrDetails) ocrDetails.textContent = `Сканирование текста скриншота ${currentNum} из ${total}...`;
+        const ret = await worker.recognize(preprocessedDataUrl || rawDataUrls[i]);
         const text = ret.data.text || "";
-        combinedText += `\n\n--- Скриншот ${currentNum} ---\n` + text;
+        combinedText += `\n\n=== Скриншот ${currentNum} ===\n` + text;
       }
 
       await worker.terminate();
@@ -3758,7 +3875,7 @@ async function processAllScreenshots() {
 
       const parsed = parseWorkoutTextToProgram(combinedText);
       applyStructuredProgram(parsed);
-      showToast(`Объединено ${parsed.days.length} дн. из ${total} скриншотов!`);
+      showToast(`Объединено ${parsed.days.length} дн. из ${total} скриншотов! ⚡️`);
     } catch (ocrErr) {
       console.error("[Tesseract Multi-OCR Error]:", ocrErr);
       showToast("Не удалось оптически прочесть текст скриншотов. Попробуйте вкладку «Текстом»!");
@@ -3873,155 +3990,268 @@ function triggerParseWorkoutAction() {
   showToast(`Собрано ${parsed.days.length} тренировочных дня!`);
 }
 
-// 5. Intelligent Workout Parser & Muscle Classifier
-function parseWorkoutTextToProgram(rawText) {
-  const lines = rawText.split("\n").map(l => l.trim()).filter(Boolean);
-  
-  const dayHeaderRegex = /^(?:день|day|тренировка|workout)\s*(\d+|[ivx]+|[a-d])|\b(?:понедельник|вторник|среда|четверг|пятница|суббота|воскресенье|пн|вт|ср|чт|пт|сб|вс)\b|^(?:верх|низ|толкай|тяни|ноги|грудь|спина|плечи|руки|push|pull|legs|upper|lower)\b/i;
-  const setsRepsRegex = /(\d+)\s*[xх*×]\s*(\d+(?:-\d+)?)(?:\s*(?:повторений|повтора|повторов|раз|сек|минут|reps))?|\b(\d+)\s*(?:подхода|подходов|сета|сетов)\s*(?:по\s*)?(\d+(?:-\d+)?)(?:\s*(?:повторений|повтора|повторов|раз|сек|минут|reps))?|(\d+)\s*по\s*(\d+(?:-\d+)?)(?:\s*(?:повторений|повтора|повторов|раз|сек|минут|reps))?/i;
+// ==========================================
+// 5. Intelligent Workout Parser, OCR De-noiser & Muscle Normalizer
+// ==========================================
+const GYM_KEYWORDS_LIST = [
+  "жим", "тяга", "присед", "подтягив", "отжиман", "блок", "гантел", "штанг",
+  "бицепс", "трицепс", "махи", "выпад", "становая", "румынск", "разгибан",
+  "сгибан", "брусь", "кроссовер", "пресс", "планк", "носк", "икр", "дельта",
+  "грудь", "спина", "плечи", "руки", "ноги", "кор", "bench", "press", "row",
+  "squat", "curl", "pull", "push", "deadlift", "lunge", "raise", "dips"
+];
 
-  const days = [];
-  let currentDay = null;
+function hasGymKeyword(str) {
+  if (!str) return false;
+  const lower = str.toLowerCase();
+  return GYM_KEYWORDS_LIST.some(k => lower.includes(k));
+}
 
-  for (const line of lines) {
-    if (dayHeaderRegex.test(line)) {
-      currentDay = {
-        title: line.replace(/^[-–—#*\s]+/, "").trim(),
-        exercises: []
-      };
-      days.push(currentDay);
-    } else {
-      if (!currentDay) {
-        currentDay = {
-          title: "День 1: Основная тренировка",
-          exercises: []
-        };
-        days.push(currentDay);
-      }
+const GYM_SYNONYMS = [
+  // Грудь (Chest)
+  {
+    matches: ["жим штанги", "жим лежа", "жим горизонт", "горизонтальн жим", "bench press", "жим на скамье", "жим штанги лежа"],
+    id: "ex_chest_1"
+  },
+  {
+    matches: ["жим гантел", "наклонн", "жим на наклон", "гантели наклон", "incline dumb", "жим гантелей наклон", "жим ганте"],
+    id: "ex_chest_2"
+  },
+  {
+    matches: ["брусь", "отжиман на брусь", "dips"],
+    id: "ex_chest_3"
+  },
+  {
+    matches: ["кроссовер", "сведен", "бабочк", "пек-дек", "сведение рук", "crossover"],
+    id: "ex_chest_4"
+  },
+  // Спина (Back)
+  {
+    matches: ["подтягиван", "турник", "гравитрон", "pullup", "chinup"],
+    id: "ex_back_1"
+  },
+  {
+    matches: ["тяга в наклон", "тяга штанги в наклон", "тяга к пояс", "штанга в наклон", "bent over"],
+    id: "ex_back_2"
+  },
+  {
+    matches: ["тяга верхнег", "тяга блока к груд", "верхний блок", "лат пулдаун", "lat pull", "тага верхнег"],
+    id: "ex_back_3"
+  },
+  {
+    matches: ["горизонтальн тяга", "тяга горизонт", "тяга нижнего блока", "cable row", "тяга к животу"],
+    id: "ex_back_4"
+  },
+  // Ноги (Legs)
+  {
+    matches: ["присед", "приседания", "squat", "приседы со штанг", "фронтальн присед"],
+    id: "ex_legs_1"
+  },
+  {
+    matches: ["жим ногами", "платформ", "leg press"],
+    id: "ex_legs_2"
+  },
+  {
+    matches: ["румынск", "мертвая тяга", "становая на прямых", "rdl", "romanian deadlift", "становая тяга", "становая"],
+    id: "ex_legs_3"
+  },
+  {
+    matches: ["выпад", "болгарск", "шагающие выпад", "lunge"],
+    id: "ex_legs_4"
+  },
+  {
+    matches: ["сгибан ног", "бицепс бедр", "лег керл", "leg curl", "сгибания ног"],
+    id: "ex_legs_5"
+  },
+  {
+    matches: ["разгибан ног", "квадрицепс в тренажере", "leg extension", "разгибания ног"],
+    id: "ex_legs_6"
+  },
+  {
+    matches: ["носк", "икр", "голен", "calf", "подъем на носки"],
+    id: "ex_legs_7"
+  },
+  // Плечи (Shoulders)
+  {
+    matches: ["жим гантелей сидя", "армейск", "жим над голов", "shoulder press", "жим стоя", "жим сидя"],
+    id: "ex_shoulders_1"
+  },
+  {
+    matches: ["мах", "разведен гантел", "средняя дельт", "lateral raise", "махи в стороны"],
+    id: "ex_shoulders_2"
+  },
+  {
+    matches: ["face pull", "канат к лицу", "задн дельт", "тяга каната к лицу", "фейс пул"],
+    id: "ex_shoulders_3"
+  },
+  // Руки (Arms)
+  {
+    matches: ["бицепс со штанг", "подъем на бицепс", "бицепс стоя", "bicep curl", "бицепс"],
+    id: "ex_arms_1"
+  },
+  {
+    matches: ["французск", "трицепс лежа", "skull crusher"],
+    id: "ex_arms_2"
+  },
+  {
+    matches: ["молот", "хаммер", "молотков", "hammer curl"],
+    id: "ex_arms_3"
+  },
+  {
+    matches: ["разгибан на блок", "трицепс канат", "pushdown", "трицепс блок"],
+    id: "ex_arms_4"
+  },
+  // Кор и Пресс (Core)
+  {
+    matches: ["скручиван", "пресс", "crunches", "пресс на коврике"],
+    id: "ex_core_1"
+  },
+  {
+    matches: ["планк", "plank"],
+    id: "ex_core_2"
+  },
+  {
+    matches: ["подъем ног", "ноги в висе", "hanging leg raise"],
+    id: "ex_core_3"
+  }
+];
 
-      // Strip numbering like "1.", "1)", "- ", "• "
-      let exLine = line.replace(/^\d+[\.\)]\s*|^[-•*#]\s*/, "").trim();
+const SETS_WORD_REGEX = /(\d+)\s*(?:а?сета|сетов|сетах?|подхода|подходов|сет|sets?)/i;
+const REPS_WORD_REGEX = /(?:по\s*)?(\d+(?:-\d+)?)\s*(?:повторен[а-я]*|повтор[а-я]*|повто[а-я]*|раз|reps?)/i;
+const MULTIPLY_REGEX = /(\d+)\s*[xх*×]\s*(\d+(?:-\d+)?)/i;
+const PO_REPS_REGEX = /(\d+)\s*по\s*(\d+(?:-\d+)?)/i;
 
-      // Extract sets & reps
-      let sets = 3;
-      let reps = "10-12";
-      const match = setsRepsRegex.exec(exLine);
-      if (match) {
-        if (match[1] && match[2]) {
-          sets = parseInt(match[1], 10);
-          reps = match[2];
-        } else if (match[3] && match[4]) {
-          sets = parseInt(match[3], 10);
-          reps = match[4];
-        } else if (match[5] && match[6]) {
-          sets = parseInt(match[5], 10);
-          reps = match[6];
-        }
-        exLine = exLine.replace(setsRepsRegex, "").trim();
-      }
+function extractSetsAndReps(line) {
+  let sets = null;
+  let reps = null;
 
-      // Clean remaining punctuation
-      exLine = exLine.replace(/[-–—:()]+$/, "").trim();
+  // 1. Explicit Russian terms "4 сета" or "3 подхода"
+  const mSets = SETS_WORD_REGEX.exec(line);
+  if (mSets) sets = parseInt(mSets[1], 10);
 
-      if (exLine.length >= 2) {
-        const classified = matchOrClassifyExercise(exLine);
-        classified.targetSets = Math.min(6, Math.max(1, sets));
-        classified.targetReps = reps || "10-12";
-        currentDay.exercises.push(classified);
-      }
+  // 2. Explicit Russian terms "8 повторений"
+  const mReps = REPS_WORD_REGEX.exec(line);
+  if (mReps) reps = mReps[1];
+
+  // 3. Multiplier format "4х10", "4x10", "4*10"
+  if (!sets || !reps) {
+    const mMult = MULTIPLY_REGEX.exec(line);
+    if (mMult) {
+      if (!sets) sets = parseInt(mMult[1], 10);
+      if (!reps) reps = mMult[2];
     }
   }
 
-  // Fallback: if user supplied multiple exercises without day markers, split into 3 or 4 days
-  if (days.length === 1 && days[0].exercises.length >= 8) {
-    const total = days[0].exercises;
-    const daysCount = total.length >= 14 ? 4 : 3;
-    const perDay = Math.ceil(total.length / daysCount);
-    const newDays = [];
-    for (let i = 0; i < daysCount; i++) {
-      const slice = total.slice(i * perDay, (i + 1) * perDay);
-      if (slice.length > 0) {
-        newDays.push({
-          title: `День ${i + 1}`,
-          exercises: slice
-        });
-      }
+  // 4. "3 по 12" format
+  if (!sets || !reps) {
+    const mPo = PO_REPS_REGEX.exec(line);
+    if (mPo) {
+      if (!sets) sets = parseInt(mPo[1], 10);
+      if (!reps) reps = mPo[2];
     }
+  }
+
+  if (sets || reps) {
     return {
-      title: "Моя программа",
-      days: newDays
+      sets: Math.min(6, Math.max(1, sets || 3)),
+      reps: reps || "10-12"
     };
   }
+  return null;
+}
 
-  return {
-    title: "Моя программа",
-    days: days.length > 0 ? days : [
-      {
-        title: "День 1: Верх тела",
-        exercises: [
-          matchOrClassifyExercise("Жим штанги лежа"),
-          matchOrClassifyExercise("Тяга в наклоне")
-        ]
-      }
-    ]
-  };
+function isPureSetsRepsLine(line) {
+  const hasSRMarker = SETS_WORD_REGEX.test(line) || REPS_WORD_REGEX.test(line) || MULTIPLY_REGEX.test(line) || PO_REPS_REGEX.test(line);
+  if (!hasSRMarker) return false;
+
+  // If the line also has an exercise keyword (e.g. "Жим 4х10"), it's NOT a pure sets/reps line
+  if (hasGymKeyword(line)) {
+    return false;
+  }
+
+  return true;
+}
+
+function cleanSetsAndRepsFromLine(line) {
+  return line
+    .replace(SETS_WORD_REGEX, "")
+    .replace(REPS_WORD_REGEX, "")
+    .replace(MULTIPLY_REGEX, "")
+    .replace(PO_REPS_REGEX, "")
+    .replace(/\b(?:подход[а-я]*|а?сета|сетов|сет|повторен[а-я]*|повтор[а-я]*|повто[а-я]*|раз|reps?|sets?)/gi, "")
+    .replace(/[-–—:()",.;]+$/, "")
+    .trim();
+}
+
+function isNoiseLine(line) {
+  if (!line || line.trim().length === 0) return true;
+  const trimmed = line.trim();
+
+  // 1. Pure sets/reps lines are NOT noise (they attach to previous exercise)
+  if (isPureSetsRepsLine(trimmed)) {
+    return false;
+  }
+
+  // 2. Multi-screenshot boundary marker
+  if (/^[—\-=_*#\s]*скриншот\s*\d+[—\-=_*#\s]*$/i.test(trimmed)) {
+    return false;
+  }
+
+  // 3. OCR character artifacts like "fil | \" or "| Lvs т \"
+  if ((trimmed.includes("|") || trimmed.includes("\\")) && !hasGymKeyword(trimmed)) {
+    return true;
+  }
+
+  // 4. Status bar noise (e.g. "15:43 ® ино 52 §", "09:41 LTE 100%")
+  if (/^\s*\d{1,2}:\d{2}\b/.test(trimmed)) {
+    return true;
+  }
+  if (/\b(?:\d{1,3}\s*%|lte|5g|4g|3g|wi-?fi|sim|vpn|volte)\b/i.test(trimmed) && !hasGymKeyword(trimmed)) {
+    return true;
+  }
+
+  // 5. Mobile App / Telegram UI noise
+  if (/\b(?:мини-приложение|test-app|onlyfits|заметки|notes|назад|готово|отмена|сохранить|изменить|поиск|закрыть|поделиться)\b/i.test(trimmed)) {
+    if (!hasGymKeyword(trimmed)) {
+      return true;
+    }
+  }
+
+  // 6. Letter count check (discard random non-exercise strings like "AE B", "г. 7")
+  const letters = (trimmed.match(/[a-zа-яё]/gi) || []).length;
+  if (letters < 5 && !hasGymKeyword(trimmed)) {
+    return true;
+  }
+
+  // 7. Non-space character ratio check
+  const nonSpace = trimmed.replace(/\s+/g, "").length;
+  if (nonSpace > 0 && (letters / nonSpace) < 0.45 && !hasGymKeyword(trimmed)) {
+    return true;
+  }
+
+  return false;
 }
 
 function matchOrClassifyExercise(rawName) {
-  const lower = rawName.toLowerCase();
+  // Strip initial OCR noise, bullets, numbers, stray single letters
+  let clean = rawName
+    .replace(/^[|\\\/\-–—•*#~»«"':;0-9.)\s]+/, "")
+    .replace(/^(?:соотв|упр|ex|№)\s*[\d\w.]*\s*/i, "")
+    .replace(/^[a-zа-яё]\s+/i, "")
+    .replace(/[-–—:()",.;]+$/, "")
+    .trim();
 
-  // 1. Exact or substring match in standard catalog
-  for (const dbEx of EXERCISES_DB) {
-    const dbLower = dbEx.name.toLowerCase();
-    if (dbLower.includes(lower) || (lower.length > 5 && dbLower.includes(lower.slice(0, 8)))) {
-      return {
-        id: dbEx.id,
-        name: rawName,
-        muscle: dbEx.muscle,
-        muscle_ru: dbEx.muscle_ru,
-        equipment: dbEx.equipment,
-        github_id: dbEx.github_id
-      };
-    }
-  }
+  const lower = clean.toLowerCase();
 
-  // 2. Keyword mapping table
-  const KEYWORD_MAP = [
-    { keys: ["жим лежа", "жим штанги лежа", "горизонтальн", "bench press"], id: "ex_chest_1" },
-    { keys: ["наклон", "жим гантелей наклон", "incline dumbbell"], id: "ex_chest_2" },
-    { keys: ["брусья", "отжимания на брусьях", "dips"], id: "ex_chest_3" },
-    { keys: ["кроссовер", "сведение", "бабочка", "crossover"], id: "ex_chest_4" },
-    { keys: ["подтягиван", "турник", "pullups", "chin"], id: "ex_back_1" },
-    { keys: ["тяга в наклоне", "тяга штанги в", "bent over"], id: "ex_back_2" },
-    { keys: ["тяга верхнего", "тяга блока к груди", "lat pulldown"], id: "ex_back_3" },
-    { keys: ["тяга горизонтального", "тяга к поясу", "cable row"], id: "ex_back_4" },
-    { keys: ["армейский", "жим стоя", "жим сидя", "overhead"], id: "ex_shoulders_1" },
-    { keys: ["махи", "разведение гантелей", "lateral raise"], id: "ex_shoulders_2" },
-    { keys: ["задняя дельта", "face pull", "задние дельты"], id: "ex_shoulders_3" },
-    { keys: ["присед", "приседания", "squat"], id: "ex_legs_1" },
-    { keys: ["жим ногами", "leg press"], id: "ex_legs_2" },
-    { keys: ["румынская", "мертвая", "становая", "deadlift", "rdl"], id: "ex_legs_3" },
-    { keys: ["выпады", "lunge"], id: "ex_legs_4" },
-    { keys: ["сгибание ног", "бицепс бедра", "leg curl"], id: "ex_legs_5" },
-    { keys: ["разгибание ног", "квадрицепс", "leg extension"], id: "ex_legs_6" },
-    { keys: ["икры", "носки", "голень", "calf"], id: "ex_legs_7" },
-    { keys: ["бицепс со штангой", "подъем на бицепс", "bicep curl"], id: "ex_arms_1" },
-    { keys: ["французский", "skull crusher"], id: "ex_arms_2" },
-    { keys: ["молот", "молотки", "hammer"], id: "ex_arms_3" },
-    { keys: ["разгибание на блоке", "трицепс блок", "pushdown"], id: "ex_arms_4" },
-    { keys: ["скручиван", "пресс", "crunches"], id: "ex_core_1" },
-    { keys: ["планка", "plank"], id: "ex_core_2" },
-    { keys: ["подъем ног", "висе", "leg raise"], id: "ex_core_3" }
-  ];
-
-  for (const item of KEYWORD_MAP) {
-    for (const k of item.keys) {
-      if (lower.includes(k)) {
+  // 1. Match against known gym synonyms and OCR phonetic variants
+  for (const item of GYM_SYNONYMS) {
+    for (const m of item.matches) {
+      if (lower.includes(m)) {
         const found = EXERCISES_DB.find(e => e.id === item.id);
         if (found) {
           return {
             id: found.id,
-            name: rawName,
+            name: found.name,
             muscle: found.muscle,
             muscle_ru: found.muscle_ru,
             equipment: found.equipment,
@@ -4029,6 +4259,21 @@ function matchOrClassifyExercise(rawName) {
           };
         }
       }
+    }
+  }
+
+  // 2. Direct or substring match in standard catalog
+  for (const dbEx of EXERCISES_DB) {
+    const dbLower = dbEx.name.toLowerCase();
+    if (dbLower.includes(lower) || (lower.length > 5 && dbLower.includes(lower.slice(0, 8)))) {
+      return {
+        id: dbEx.id,
+        name: dbEx.name,
+        muscle: dbEx.muscle,
+        muscle_ru: dbEx.muscle_ru,
+        equipment: dbEx.equipment,
+        github_id: dbEx.github_id
+      };
     }
   }
 
@@ -4065,9 +4310,11 @@ function matchOrClassifyExercise(rawName) {
   else if (lower.includes("брусья") || lower.includes("турник") || lower.includes("свой вес")) equipment = "Свой вес";
   else if (lower.includes("блок") || lower.includes("кроссовер") || lower.includes("смитт")) equipment = "Тренажер";
 
+  const formattedName = clean.charAt(0).toUpperCase() + clean.slice(1);
+
   return {
     id: "ex_custom_" + Math.random().toString(36).substr(2, 9),
-    name: rawName,
+    name: formattedName,
     muscle,
     muscle_ru,
     equipment,
@@ -4086,6 +4333,136 @@ function matchOrClassifyExercise(rawName) {
     primary: muscle_ru,
     secondary: "Мышцы-стабилизаторы",
     breathing: "Вдох на опускании/растяжении, выдох на сокращении"
+  };
+}
+
+function parseWorkoutTextToProgram(rawText) {
+  const lines = rawText.split("\n").map(l => l.trim()).filter(Boolean);
+  
+  const dayHeaderRegex = /^(?:день|day|тренировка|workout)\s*(\d+|[ivx]+|[a-d])|\b(?:понедельник|вторник|среда|четверг|пятница|суббота|воскресенье|пн|вт|ср|чт|пт|сб|вс)\b|^(?:верх|низ|толкай|тяни|ноги|грудь|спина|плечи|руки|push|pull|legs|upper|lower)\b/i;
+  const screenshotMarkerRegex = /^[—\-=_*#\s]*скриншот\s*(\d+)[—\-=_*#\s]*$/i;
+
+  const days = [];
+  let currentDay = null;
+
+  for (const line of lines) {
+    if (isNoiseLine(line)) {
+      continue;
+    }
+
+    // Check screenshot boundary from multi-screenshot OCR
+    const scMatch = screenshotMarkerRegex.exec(line);
+    if (scMatch) {
+      const scNum = scMatch[1];
+      currentDay = {
+        title: `День ${scNum}: Тренировка ${scNum}`,
+        exercises: []
+      };
+      days.push(currentDay);
+      continue;
+    }
+
+    // Check standard day header: "День 1", "Вторник", "Верх тела" etc.
+    if (dayHeaderRegex.test(line)) {
+      currentDay = {
+        title: line.replace(/^[-–—#*\s]+/, "").trim(),
+        exercises: []
+      };
+      days.push(currentDay);
+      continue;
+    }
+
+    // Ensure active day exists
+    if (!currentDay) {
+      currentDay = {
+        title: "День 1: Основная тренировка",
+        exercises: []
+      };
+      days.push(currentDay);
+    }
+
+    // Multi-line stitching: If line is solely sets & reps, attach to previous exercise
+    if (isPureSetsRepsLine(line)) {
+      if (currentDay.exercises.length > 0) {
+        const prevEx = currentDay.exercises[currentDay.exercises.length - 1];
+        const sr = extractSetsAndReps(line);
+        if (sr) {
+          prevEx.targetSets = sr.sets;
+          prevEx.targetReps = sr.reps;
+        }
+      }
+      continue;
+    }
+
+    // Process exercise line
+    let exLine = line.replace(/^\d+[\.\)]\s*|^[-•*#]\s*/, "").trim();
+
+    // Extract sets & reps if present on the same line
+    let sets = 3;
+    let reps = "10-12";
+    const sr = extractSetsAndReps(exLine);
+    if (sr) {
+      sets = sr.sets;
+      reps = sr.reps;
+      exLine = cleanSetsAndRepsFromLine(exLine);
+    }
+
+    exLine = exLine.replace(/[-–—:()",.;]+$/, "").trim();
+
+    if (exLine.length >= 2) {
+      const classified = matchOrClassifyExercise(exLine);
+      classified.targetSets = sets;
+      classified.targetReps = reps;
+      currentDay.exercises.push(classified);
+    }
+  }
+
+  // Filter out any accidentally empty days
+  const validDays = days.filter(d => d.exercises && d.exercises.length > 0);
+
+  // Logical Day Balancing:
+  // If user supplied a long list of exercises under a single day (7+ exercises),
+  // split logically across 2, 3, or 4 days to prevent 23 exercises in 1 day!
+  if (validDays.length === 1 && validDays[0].exercises.length >= 7) {
+    const total = validDays[0].exercises;
+    let daysCount = 3;
+    if (total.length >= 14) daysCount = 4;
+    else if (total.length <= 8) daysCount = 2;
+
+    const perDay = Math.ceil(total.length / daysCount);
+    const splitDays = [];
+    const titles3 = ["День 1: Толкай (Грудь, Плечи)", "День 2: Тяни (Спина, Бицепс)", "День 3: Ноги и Пресс"];
+    const titles4 = ["День 1: Верх тела (А)", "День 2: Низ тела (А)", "День 3: Верх тела (Б)", "День 4: Низ тела (Б)"];
+    const titles2 = ["День 1: Верх тела", "День 2: Низ тела"];
+
+    const chosenTitles = daysCount === 4 ? titles4 : (daysCount === 2 ? titles2 : titles3);
+
+    for (let i = 0; i < daysCount; i++) {
+      const slice = total.slice(i * perDay, (i + 1) * perDay);
+      if (slice.length > 0) {
+        splitDays.push({
+          title: chosenTitles[i] || `День ${i + 1}`,
+          exercises: slice
+        });
+      }
+    }
+    return {
+      title: "Моя программа",
+      days: splitDays
+    };
+  }
+
+  return {
+    title: "Моя программа",
+    days: validDays.length > 0 ? validDays : [
+      {
+        title: "День 1: Верх тела",
+        exercises: [
+          matchOrClassifyExercise("Жим штанги лежа"),
+          matchOrClassifyExercise("Тяга в наклоне")
+        ]
+      }
+    ]
   };
 }
 
