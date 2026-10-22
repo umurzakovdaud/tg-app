@@ -3812,103 +3812,59 @@ function removeScreenshotFile(idx) {
 }
 
 // ==========================================
-// 4. Image Preprocessing for Accurate OCR (Canvas Inversion & Contrast)
+// 4. Client-side Image Optimization & AI Vision Pipeline
 // ==========================================
-function preprocessImageForOCR(source) {
+let isProcessingScreenshots = false;
+
+/**
+ * Сжимает изображение на клиенте через Offscreen Canvas:
+ * Уменьшает масштаб до макс. 1280px и конвертирует в JPEG (качество 0.82).
+ * Снижает вес файла с 8-10 МБ до ~120-150 КБ без потери читаемости текста.
+ */
+function compressImageForUpload(source, maxDimension = 1280, quality = 0.82) {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
+
     img.onload = () => {
       try {
+        let width = img.naturalWidth || img.width || 1000;
+        let height = img.naturalHeight || img.height || 1400;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
           resolve(typeof source === "string" ? source : "");
           return;
         }
 
-        const srcW = img.naturalWidth || img.width;
-        const srcH = img.naturalHeight || img.height;
+        // Заливаем фон белым цветом, чтобы прозрачные PNG не чернели в JPEG
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
 
-        if (srcW === 0 || srcH === 0) {
-          resolve(typeof source === "string" ? source : "");
-          return;
-        }
-
-        // Detect mobile screenshot aspect ratio (tall portrait e.g. 19.5:9)
-        const isTall = (srcH / srcW) >= 1.5;
-        let cropTop = 0;
-        let cropBottom = 0;
-        if (isTall) {
-          // Top ~7.5% is status bar (clock, battery, notch, dynamic island)
-          // Bottom ~4.5% is home indicator bar
-          cropTop = Math.round(srcH * 0.075);
-          cropBottom = Math.round(srcH * 0.045);
-        }
-
-        const workW = srcW;
-        const workH = Math.max(100, srcH - cropTop - cropBottom);
-
-        // Optimal width for Tesseract OCR (between 1000px and 1400px)
-        const targetW = Math.min(1400, Math.max(900, workW));
-        const scale = targetW / workW;
-        const targetH = Math.round(workH * scale);
-
-        canvas.width = targetW;
-        canvas.height = targetH;
-
-        // Draw cropped and scaled image onto canvas
-        ctx.drawImage(img, 0, cropTop, workW, workH, 0, 0, targetW, targetH);
-
-        const imgData = ctx.getImageData(0, 0, targetW, targetH);
-        const data = imgData.data;
-        const len = data.length;
-
-        // 1. Calculate average luminance to detect Dark Mode
-        let totalLum = 0;
-        let samples = 0;
-        for (let i = 0; i < len; i += 16) {
-          totalLum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          samples++;
-        }
-        const avgLum = samples > 0 ? (totalLum / samples) : 128;
-        const isDarkMode = avgLum < 125;
-
-        // 2. Grayscale, Invert if Dark Mode, and High-Contrast Stretch
-        for (let i = 0; i < len; i += 4) {
-          let r = data[i];
-          let g = data[i + 1];
-          let b = data[i + 2];
-
-          let lum = 0.299 * r + 0.587 * g + 0.114 * b;
-          if (isDarkMode) {
-            lum = 255 - lum; // Invert to crisp black on white
-          }
-
-          // Contrast stretch
-          let enhanced;
-          if (lum > 185) {
-            enhanced = 255;
-          } else if (lum < 95) {
-            enhanced = Math.max(0, Math.round(lum * 0.4));
-          } else {
-            enhanced = Math.round(((lum - 95) / 90) * 255);
-          }
-
-          data[i] = enhanced;
-          data[i + 1] = enhanced;
-          data[i + 2] = enhanced;
-        }
-
-        ctx.putImageData(imgData, 0, 0);
-        resolve(canvas.toDataURL("image/png"));
+        const compressed = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressed);
       } catch (err) {
-        console.warn("[preprocessImageForOCR error, falling back]:", err);
+        console.warn("[compressImageForUpload error]:", err);
         resolve(typeof source === "string" ? source : "");
       }
     };
 
     img.onerror = () => {
+      console.warn("[compressImageForUpload load error]");
       resolve(typeof source === "string" ? source : "");
     };
 
@@ -3917,6 +3873,7 @@ function preprocessImageForOCR(source) {
     } else if (source instanceof Blob || source instanceof File) {
       const reader = new FileReader();
       reader.onload = (e) => { img.src = e.target.result; };
+      reader.onerror = () => resolve("");
       reader.readAsDataURL(source);
     } else {
       resolve("");
@@ -3924,9 +3881,7 @@ function preprocessImageForOCR(source) {
   });
 }
 
-async function processAllScreenshots() {
-  if (customScreenshotFiles.length === 0) return;
-
+function updateOcrProgressUI(percent, mainTitle, detailsText) {
   const ocrStatus = document.getElementById("ocrProgressStatus");
   const ocrTitle = document.getElementById("ocrProgressMainTitle");
   const ocrDetails = document.getElementById("ocrProgressDetails");
@@ -3934,118 +3889,148 @@ async function processAllScreenshots() {
   const ocrBar = document.getElementById("ocrProgressBarInner");
 
   if (ocrStatus) ocrStatus.classList.remove("hidden");
-  if (ocrTitle) ocrTitle.textContent = `ИИ обрабатывает ${customScreenshotFiles.length} скринш...`;
-  if (ocrDetails) ocrDetails.textContent = "Подготовка файлов...";
-  if (ocrBar) ocrBar.style.width = "10%";
-  if (ocrPercent) ocrPercent.textContent = "10%";
+  if (ocrBar) ocrBar.style.width = `${Math.min(100, Math.max(5, percent))}%`;
+  if (ocrPercent) ocrPercent.textContent = `${Math.min(100, Math.round(percent))}%`;
+  if (mainTitle && ocrTitle) ocrTitle.textContent = mainTitle;
+  if (detailsText && ocrDetails) ocrDetails.textContent = detailsText;
+}
 
-  // Читаем все файлы в base64 dataURL
-  const rawDataUrls = await Promise.all(customScreenshotFiles.map(file => {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
-  }));
+function setParseButtonLoading(isLoading) {
+  const btn = document.getElementById("triggerParseBtn");
+  if (!btn) return;
+  if (isLoading) {
+    btn.disabled = true;
+    btn.classList.add("opacity-60", "pointer-events-none");
+    btn.innerHTML = `
+      <div class="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+      <span>ИИ распознает программу...</span>
+    `;
+  } else {
+    btn.disabled = false;
+    btn.classList.remove("opacity-60", "pointer-events-none");
+    btn.innerHTML = `
+      <i data-lucide="sparkles" class="w-4 h-4"></i>
+      <span>Распознать и собрать дни</span>
+    `;
+    lucide.createIcons();
+  }
+}
 
-  // Step A: Attempt server-side Gemini Vision OCR with multiple images
-  let geminiSuccess = false;
-  const clientKey = localStorage.getItem("onlyfits_gemini_key") || "";
+async function processAllScreenshots() {
+  if (customScreenshotFiles.length === 0) return;
+  if (isProcessingScreenshots) return;
+
+  isProcessingScreenshots = true;
+  setParseButtonLoading(true);
+
+  const totalFiles = customScreenshotFiles.length;
+  updateOcrProgressUI(10, `ИИ обрабатывает ${totalFiles} скринш...`, "Сжатие и подготовка фото...");
+
+  let tickerInterval = null;
+
   try {
-    if (ocrDetails) ocrDetails.textContent = "Анализ скриншота через ИИ Vision...";
-    const resp = await fetch("/api/parse-workout-photo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ images_b64: rawDataUrls, api_key: clientKey })
-    });
-    const data = await resp.json();
+    // Шаг 1: Быстрое сжатие всех скриншотов на Canvas до 1280px JPEG (падение размера с 8MB до 120KB)
+    const compressedImages = [];
+    for (let i = 0; i < totalFiles; i++) {
+      const pct = 10 + Math.round(((i + 1) / totalFiles) * 20);
+      updateOcrProgressUI(pct, `ИИ обрабатывает ${totalFiles} скринш...`, `Оптимизация скриншота ${i + 1} из ${totalFiles}...`);
+      const b64 = await compressImageForUpload(customScreenshotFiles[i], 1280, 0.82);
+      if (b64) {
+        compressedImages.push(b64);
+      }
+    }
+
+    if (compressedImages.length === 0) {
+      throw new Error("Не удалось прочитать файлы скриншотов");
+    }
+
+    // Шаг 2: Запуск живого таймера прогресса (пользователь видит динамичный процесс 30% -> 85%)
+    let currentPct = 32;
+    updateOcrProgressUI(currentPct, "Анализ скриншота через ИИ Vision...", "Передача в Google Gemini 3.5...");
+
+    tickerInterval = setInterval(() => {
+      if (currentPct < 85) {
+        currentPct += 2;
+        let detail = "ИИ читает названия упражнений и подходы...";
+        if (currentPct > 52) detail = "Группировка упражнений по тренировочным дням...";
+        if (currentPct > 70) detail = "Сборка программы и проверка повторений...";
+        updateOcrProgressUI(currentPct, "Анализ скриншота через ИИ Vision...", detail);
+      }
+    }, 350);
+
+    // Шаг 3: Запрос к бэкенду с AbortController тайм-аутом 25 секунд
+    const controller = new AbortController();
+    const timeoutTimer = setTimeout(() => controller.abort(), 25000);
+
+    const clientKey = localStorage.getItem("onlyfits_gemini_key") || "";
+    let data = null;
+    let fetchError = null;
+
+    try {
+      const resp = await fetch("/api/parse-workout-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images_b64: compressedImages, api_key: clientKey }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutTimer);
+      if (resp.ok) {
+        data = await resp.json();
+      } else {
+        fetchError = new Error(`HTTP ${resp.status}`);
+      }
+    } catch (err) {
+      clearTimeout(timeoutTimer);
+      fetchError = err;
+      console.warn("[Backend parse error]:", err);
+    }
+
+    if (tickerInterval) {
+      clearInterval(tickerInterval);
+      tickerInterval = null;
+    }
+
+    // Шаг 4: Успешный разбор через Gemini Vision
     if (data && data.status === "ok" && data.program && Array.isArray(data.program.days) && data.program.days.length > 0) {
-      if (ocrBar) ocrBar.style.width = "100%";
-      if (ocrPercent) ocrPercent.textContent = "100%";
+      updateOcrProgressUI(100, "Готово! ⚡️", `Успешно распознано ${data.program.days.length} дн.!`);
+      triggerHaptic("success");
+
       setTimeout(() => {
         applyStructuredProgram(data.program);
+        const ocrStatus = document.getElementById("ocrProgressStatus");
         if (ocrStatus) ocrStatus.classList.add("hidden");
-        showToast(`Распознано через ИИ: ${data.program.days.length} дн. из ${customScreenshotFiles.length} скриншотов! ⚡️`);
-      }, 300);
-      geminiSuccess = true;
+        showToast(`Распознано через ИИ: ${data.program.days.length} дн. из ${totalFiles} фото! ⚡️`);
+
+        // Плавный скролл к блоку с распознанными упражнениями
+        const preview = document.getElementById("parsedProgramPreviewSection");
+        if (preview) {
+          preview.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 350);
       return;
     }
-  } catch (err) {
-    console.log("[Backend parse error, falling back to local OCR]:", err);
-  }
 
-  if (geminiSuccess) return;
-
-  // Step B: Sequential local Tesseract.js OCR with Canvas Preprocessing
-  if (window.Tesseract) {
-    try {
-      let combinedText = "";
-      const total = rawDataUrls.length;
-
-      if (ocrDetails) ocrDetails.textContent = "Загрузка языкового модуля OCR (рус+eng)...";
-      const worker = await Tesseract.createWorker("rus+eng", 1, {
-        logger: m => {
-          if (m.status === "loading tesseract core" || m.status === "initializing tesseract") {
-            if (ocrDetails) ocrDetails.textContent = "Инициализация движка OCR...";
-          }
-        }
-      });
-
-      // Set Tesseract parameters for better fitness app OCR
-      await worker.setParameters({
-        tessedit_pageseg_mode: "6",       // Assume uniform block of text
-        preserve_interword_spaces: "1",
-        tessedit_char_whitelist: ""        // Allow all chars
-      });
-
-      for (let i = 0; i < total; i++) {
-        const currentNum = i + 1;
-        if (ocrDetails) ocrDetails.textContent = `Оптимизация скриншота ${currentNum} из ${total}...`;
-        const pctBase = Math.round((i / total) * 100);
-        if (ocrPercent) ocrPercent.textContent = `${pctBase}%`;
-        if (ocrBar) ocrBar.style.width = `${Math.max(10, pctBase)}%`;
-
-        // Preprocess image on canvas: crop status bar, invert dark mode, sharpen contrast
-        const preprocessedDataUrl = await preprocessImageForOCR(rawDataUrls[i]);
-
-        if (ocrDetails) ocrDetails.textContent = `Сканирование текста скриншота ${currentNum} из ${total}...`;
-        const ret = await worker.recognize(preprocessedDataUrl || rawDataUrls[i]);
-        const text = ret.data.text || "";
-        combinedText += `\n\n=== Скриншот ${currentNum} ===\n` + text;
-      }
-
-      await worker.terminate();
-
-      if (ocrBar) ocrBar.style.width = "100%";
-      if (ocrPercent) ocrPercent.textContent = "100%";
-
-      const textarea = document.getElementById("customProgramTextarea");
-      if (textarea) textarea.value = combinedText.trim();
-
-      const parsed = parseWorkoutTextToProgram(combinedText);
-      applyStructuredProgram(parsed);
-
-      const exCount = parsed.days.reduce((s, d) => s + d.exercises.length, 0);
-      if (exCount < 2) {
-        // OCR produced too little - guide user to text mode
-        if (ocrStatus) ocrStatus.classList.add("hidden");
-        setCustomImportMode("text");
-        showToast("OCR не смог распознать упражнения. Введи программу текстом!");
-      } else {
-        showToast(`Объединено ${parsed.days.length} дн. из ${total} скриншотов! ⚡️`);
-      }
-    } catch (ocrErr) {
-      console.error("[Tesseract Multi-OCR Error]:", ocrErr);
-      if (ocrStatus) ocrStatus.classList.add("hidden");
-      setCustomImportMode("text");
-      showToast("Ошибка OCR. Введи программу текстом!");
-    } finally {
-      if (ocrStatus) ocrStatus.classList.add("hidden");
-    }
-  } else {
+    // Если ИИ не вернул готовые дни:
+    const ocrStatus = document.getElementById("ocrProgressStatus");
     if (ocrStatus) ocrStatus.classList.add("hidden");
+
+    if (fetchError && fetchError.name === "AbortError") {
+      showToast("Тайм-аут ожидания ИИ. Проверьте интернет или введите текстом");
+    } else {
+      showToast("ИИ не нашел упражнений на фото. Введи программу текстом или выбери шаблон!");
+    }
     setCustomImportMode("text");
-    showToast("💡 Введи список упражнений текстом!");
+
+  } catch (fatalErr) {
+    if (tickerInterval) clearInterval(tickerInterval);
+    console.error("[processAllScreenshots Fatal Error]:", fatalErr);
+    const ocrStatus = document.getElementById("ocrProgressStatus");
+    if (ocrStatus) ocrStatus.classList.add("hidden");
+    showToast("Ошибка при обработке скриншота. Попробуйте еще раз или введите текстом");
+  } finally {
+    if (tickerInterval) clearInterval(tickerInterval);
+    setParseButtonLoading(false);
+    isProcessingScreenshots = false;
   }
 }
 
